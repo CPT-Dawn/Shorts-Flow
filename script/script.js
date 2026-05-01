@@ -129,12 +129,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Update status immediately for better UX
       updateStatus(isEnabled);
 
-      // Check if on YouTube
+      // Check if on YouTube (safely handle missing URL permission)
       const tabs = await chrome.tabs.query({
         active: true,
         currentWindow: true,
       });
-      if (tabs[0] && !tabs[0].url.includes("youtube.com")) {
+      
+      const currentUrl = tabs[0]?.url || "";
+      if (currentUrl && !currentUrl.includes("youtube.com")) {
         showError("Extension only works on YouTube!");
         return;
       }
@@ -187,18 +189,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         currentWindow: true,
       });
       if (tabs[0]) {
-        const url = tabs[0].url;
+        const url = tabs[0].url || "";
         const isYouTube = url.includes("youtube.com");
         const isShorts = url.includes("/shorts");
 
-        if (!isYouTube) {
+        if (!isYouTube && url !== "") {
           updateStatus(
             false,
             "Not on YouTube",
             "Navigate to YouTube Shorts to use this extension",
             "warning"
           );
-        } else if (!isShorts && statusToggle.checked) {
+        } else if (isYouTube && !isShorts && statusToggle.checked) {
           updateStatus(
             true,
             "Ready for Shorts",
