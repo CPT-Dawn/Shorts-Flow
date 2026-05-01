@@ -24,6 +24,8 @@ let currentVideoElement = null;
 let applicationIsOn = false;
 let onScreenToggleButton = null;
 let scrollTimeout;
+let lastScrolledId = null;
+let lastVideoTime = 0;
 const MAX_RETRIES = 15;
 const RETRY_DELAY_MS = 500;
 // ------------------------------
@@ -34,6 +36,8 @@ function startAutoScrolling() {
     applicationIsOn = true;
     currentShortId = null;
     currentVideoElement = null;
+    lastScrolledId = null;
+    lastVideoTime = 0;
   }
   checkForNewShort();
   updateOnScreenButtonState();
@@ -42,7 +46,8 @@ function stopAutoScrolling() {
   applicationIsOn = false;
   if (currentVideoElement) {
     currentVideoElement.setAttribute("loop", "true");
-    currentVideoElement.removeEventListener("ended", shortEnded);
+    currentVideoElement.removeEventListener("ended", onVideoEnded);
+    currentVideoElement.removeEventListener("timeupdate", onTimeUpdate);
     currentVideoElement._hasEndEvent = false;
   }
   updateOnScreenButtonState();
@@ -59,11 +64,14 @@ async function checkForNewShort() {
     removeOnScreenToggleButton();
 
     if (currentVideoElement) {
-      currentVideoElement.removeEventListener("ended", shortEnded);
+      currentVideoElement.removeEventListener("ended", onVideoEnded);
+      currentVideoElement.removeEventListener("timeupdate", onTimeUpdate);
       currentVideoElement._hasEndEvent = false;
     }
 
     currentShortId = currentShort.id;
+    lastScrolledId = null; // Reset scroll lock for new short
+    lastVideoTime = 0; // Reset time tracking
     currentVideoElement = currentShort.querySelector("video");
 
     if (currentVideoElement == null) {
@@ -95,8 +103,15 @@ async function checkForNewShort() {
     }
 
     if (currentVideoElement) {
-      currentVideoElement.addEventListener("ended", shortEnded);
+      currentVideoElement.addEventListener("ended", onVideoEnded);
+      currentVideoElement.addEventListener("timeupdate", onTimeUpdate);
       currentVideoElement._hasEndEvent = true;
+
+      // Ensure loop is off immediately
+      if (applicationIsOn) {
+        currentVideoElement.loop = false;
+        currentVideoElement.removeAttribute("loop");
+      }
     }
 
     checkAndManageOnScreenButton();
@@ -104,18 +119,58 @@ async function checkForNewShort() {
 
   if (currentVideoElement?.hasAttribute("loop") && applicationIsOn) {
     currentVideoElement.removeAttribute("loop");
+    currentVideoElement.loop = false;
   }
 }
-function shortEnded(e) {
-  e.preventDefault();
+
+function onVideoEnded() {
   if (!applicationIsOn) return stopAutoScrolling();
+
+  // Prevent duplicate triggers for the same short
+  if (lastScrolledId === currentShortId) return;
+  lastScrolledId = currentShortId;
+
   scrollToNextShort(currentShortId);
 }
+
+function onTimeUpdate() {
+  if (!applicationIsOn || !currentVideoElement) return;
+
+  const video = currentVideoElement;
+  const currentTime = video.currentTime;
+  const duration = video.duration;
+
+  // YouTube sometimes re-enables loop on user interaction/seeking
+  if (video.loop || video.hasAttribute("loop")) {
+    video.loop = false;
+    video.removeAttribute("loop");
+  }
+
+  // If video is within 0.5s of end and playing, trigger scroll
+  const isNearEnd =
+    duration > 0 && duration - currentTime < 0.5 && !video.paused;
+
+  // Jump back check: if time suddenly decreases while we were near the end,
+  // it means the video looped back to the start.
+  const hasLoopedBack =
+    currentTime < lastVideoTime &&
+    lastVideoTime > duration - 2 &&
+    currentTime < 1;
+
+  if (isNearEnd || hasLoopedBack) {
+    onVideoEnded();
+  }
+
+  lastVideoTime = currentTime;
+}
+
 async function scrollToNextShort(
   prevShortId = null,
   useDelayAndCheckComments = true,
 ) {
   if (!applicationIsOn) return stopAutoScrolling();
+  if (prevShortId) lastScrolledId = prevShortId; // Prevent multiple triggers from the same short
+
   const comments = document.querySelector(COMMENTS_SELECTOR);
   const isCommentsOpen = () => {
     const visibilityOfComments = comments?.attributes["VISIBILITY"]?.value;
@@ -143,7 +198,8 @@ async function scrollToNextShort(
       return window.location.reload(); // If no next short is found, reload the page (Last resort)
     // If next short container is found, remove the current video element end event listener
     if (currentVideoElement) {
-      currentVideoElement.removeEventListener("ended", shortEnded);
+      currentVideoElement.removeEventListener("ended", onVideoEnded);
+      currentVideoElement.removeEventListener("timeupdate", onTimeUpdate);
       currentVideoElement._hasEndEvent = false;
     }
     // Scroll to the next short container
@@ -266,7 +322,7 @@ function createOnScreenToggleButton() {
   const toggleButton = document.createElement("div");
   toggleButton.id = "yt-shorts-auto-scroll-toggle";
   toggleButton.innerHTML = `
-        <div class="sf-toggle-btn ${applicationIsOn ? "active" : ""}" 
+        <div class="sf-toggle-btn ${applicationIsOn ? "active" : ""}"
              title="${applicationIsOn ? "Auto-scroll ON - Click to disable" : "Auto-scroll OFF - Click to enable"}">
             <div class="sf-toggle-btn-inner">
                 <svg class="sf-toggle-svg" viewBox="0 0 24 24" fill="none">
