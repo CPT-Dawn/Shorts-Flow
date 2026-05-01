@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Get DOM elements
   const statusToggle = document.getElementById("status-toggle");
   const scrollOnCommentsInput = document.getElementById(
-    "scrollOnCommentsInput"
+    "scrollOnCommentsInput",
   );
   const onScreenButtonInput = document.getElementById("onScreenButtonInput");
   const errorMessage = document.getElementById("error-message");
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const mainSettingCard = document.getElementById("main-setting-card");
   const commentsSettingCard = document.getElementById("comments-setting-card");
   const onScreenButtonSettingCard = document.getElementById(
-    "onscreen-button-setting-card"
+    "onscreen-button-setting-card",
   );
 
   // Load settings on startup
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // On-screen button setting change
       onScreenButtonInput.addEventListener(
         "change",
-        handleOnScreenButtonToggle
+        handleOnScreenButtonToggle,
       );
     }
 
@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         active: true,
         currentWindow: true,
       });
-      
+
       const currentUrl = tabs[0]?.url || "";
       if (currentUrl && !currentUrl.includes("youtube.com")) {
         showError("Extension only works on YouTube!");
@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       console.log(
         "[Popup] On-screen button setting updated:",
-        showOnScreenButton
+        showOnScreenButton,
       );
     } catch (error) {
       console.error("[Popup] Error updating on-screen button setting:", error);
@@ -198,21 +198,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             false,
             "Not on YouTube",
             "Navigate to YouTube Shorts to use this extension",
-            "warning"
+            "warning",
           );
         } else if (isYouTube && !isShorts && statusToggle.checked) {
           updateStatus(
             true,
             "Ready for Shorts",
             "Navigate to YouTube Shorts to start auto-scrolling",
-            "warning"
+            "warning",
           );
         } else if (isShorts && statusToggle.checked) {
           updateStatus(
             true,
             "Active on Shorts",
             "Auto-scrolling YouTube Shorts",
-            "active"
+            "active",
           );
         }
       }
@@ -241,7 +241,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log(
       `[Popup] Status: ${isActive ? "Active" : "Inactive"}${
         title ? " - " + title : ""
-      }`
+      }`,
     );
   }
   function showError(message) {

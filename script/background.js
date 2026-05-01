@@ -12,7 +12,7 @@ chrome.runtime.onInstalled.addListener((details) => {
       if (result.showOnScreenButton === undefined) {
         chrome.storage.local.set({ showOnScreenButton: true });
       }
-    }
+    },
   );
 
   console.log("[YouTube Shorts Auto Scroller] Extension installed/updated");

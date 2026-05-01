@@ -6,7 +6,8 @@ const VIDEOS_LIST_SELECTORS = [
   ".reel-video-in-sequence-new",
 ];
 const CURRENT_SHORT_SELECTOR = "ytd-reel-video-renderer";
-const LIKE_BUTTON_SELECTOR = "like-button-view-model button, #like-button button, [aria-label*='like' i] button";
+const LIKE_BUTTON_SELECTOR =
+  "like-button-view-model button, #like-button button, [aria-label*='like' i] button";
 const COMMENTS_SELECTOR =
   "ytd-engagement-panel-section-list-renderer[target-id='engagement-panel-comments-section']";
 
@@ -104,7 +105,8 @@ async function checkForNewShort() {
   if (currentVideoElement?.hasAttribute("loop") && applicationIsOn) {
     currentVideoElement.removeAttribute("loop");
   }
-}function shortEnded(e) {
+}
+function shortEnded(e) {
   e.preventDefault();
   if (!applicationIsOn) return stopAutoScrolling();
   scrollToNextShort(currentShortId);
@@ -253,7 +255,7 @@ function createOnScreenToggleButton() {
 
   if (!buttonContainer) return;
 
-  const actionBar = 
+  const actionBar =
     buttonContainer.closest("reel-action-bar-view-model") ||
     buttonContainer.closest("#button-bar") ||
     buttonContainer.closest("#actions") ||
@@ -346,7 +348,10 @@ function checkAndManageOnScreenButton() {
   // Watch for short changes via MutationObserver (more efficient than polling)
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
-      if (mutation.type === "attributes" && mutation.attributeName === "is-active") {
+      if (
+        mutation.type === "attributes" &&
+        mutation.attributeName === "is-active"
+      ) {
         if (mutation.target.hasAttribute("is-active")) {
           checkForNewShort();
         }
@@ -360,7 +365,7 @@ function checkAndManageOnScreenButton() {
     childList: true,
     attributes: true,
     subtree: true,
-    attributeFilter: ["is-active"]
+    attributeFilter: ["is-active"],
   });
 
   // Handle storage changes
@@ -369,7 +374,7 @@ function checkAndManageOnScreenButton() {
       if (changes["applicationIsOn"].newValue) startAutoScrolling();
       else stopAutoScrolling();
     }
-    
+
     if (changes["scrollOnComments"]) {
       scrollOnCommentsCheck = changes["scrollOnComments"].newValue;
     }
@@ -388,9 +393,9 @@ function checkAndManageOnScreenButton() {
         scrollOnCommentsCheck = result["scrollOnComments"];
       if (result["showOnScreenButton"] !== undefined)
         showOnScreenButton = result["showOnScreenButton"];
-      
+
       checkForNewShort();
-    }
+    },
   );
 })();
 function isShortsPage() {
