@@ -80,6 +80,13 @@ function stopAutoScrolling() {
     currentVideoElement.removeEventListener("timeupdate", onTimeUpdate);
     currentVideoElement._hasEndEvent = false;
   }
+
+  // Reset state so it re-detects correctly when turned back on
+  currentShortId = null;
+  currentShortElement = null;
+  currentVideoElement = null;
+  lastScrolledElement = null;
+
   updateOnScreenButtonState();
 }
 async function checkForNewShort() {
@@ -480,33 +487,66 @@ function checkAndManageOnScreenButton() {
 // INITIATION AND SETTINGS FETCH
 // ------------------------------
 (function initiate() {
-  // Initial state fetch - Default to false if not set
-  chrome.storage.local.get(["applicationIsOn"], (result) => {
-    if (result["applicationIsOn"] === true) startAutoScrolling();
-    else stopAutoScrolling();
-  });
+  // 1. Fetch ALL settings first to ensure logic starts with correct state
+  chrome.storage.local.get(
+    ["applicationIsOn", "scrollOnComments", "showOnScreenButton"],
+    (result) => {
+      // Sync local variables with storage
+      if (result["scrollOnComments"] !== undefined)
+        scrollOnCommentsCheck = result["scrollOnComments"];
+      if (result["showOnScreenButton"] !== undefined)
+        showOnScreenButton = result["showOnScreenButton"];
+
+      // Start or stop based on applicationIsOn (defaults to false)
+      if (result["applicationIsOn"] === true) {
+        startAutoScrolling();
+      } else {
+        stopAutoScrolling();
+      }
+
+      // Initial check once settings are ready
+      checkForNewShort();
+    },
+  );
 
   // Handle YouTube's SPA navigation (important for first video detection)
   window.addEventListener("yt-navigate-finish", () => {
-    if (isShortsPage()) {
+    // Small delay to allow YouTube to hydrate the new short renderer
+    setTimeout(() => {
       checkForNewShort();
-    }
+    }, 200);
   });
 
-  // Watch for short changes via MutationObserver (more efficient than polling)
+  // Watch for short changes via MutationObserver
   const observer = new MutationObserver((mutations) => {
+    if (!isShortsPage()) return;
+
+    let shouldCheck = false;
     for (const mutation of mutations) {
       if (
         mutation.type === "attributes" &&
         mutation.attributeName === "is-active"
       ) {
         if (mutation.target.hasAttribute("is-active")) {
-          checkForNewShort();
+          shouldCheck = true;
+          break;
         }
-      } else if (mutation.type === "childList" && isShortsPage()) {
-        checkForNewShort();
+      } else if (mutation.type === "childList") {
+        // Optimization: only check if relevant elements are added
+        const hasRelevantNode = Array.from(mutation.addedNodes).some(
+          (node) =>
+            node.nodeType === 1 &&
+            (node.tagName === "VIDEO" ||
+              node.classList?.contains("reel-video-in-sequence") ||
+              node.querySelector?.("video")),
+        );
+        if (hasRelevantNode) {
+          shouldCheck = true;
+          break;
+        }
       }
     }
+    if (shouldCheck) checkForNewShort();
   });
 
   observer.observe(document.body, {
@@ -519,7 +559,7 @@ function checkAndManageOnScreenButton() {
   // Handle storage changes
   chrome.storage.onChanged.addListener((changes) => {
     if (changes["applicationIsOn"]) {
-      if (changes["applicationIsOn"].newValue) startAutoScrolling();
+      if (changes["applicationIsOn"].newValue === true) startAutoScrolling();
       else stopAutoScrolling();
     }
 
@@ -532,19 +572,6 @@ function checkAndManageOnScreenButton() {
       checkAndManageOnScreenButton();
     }
   });
-
-  // Initial settings fetch
-  chrome.storage.local.get(
-    ["scrollOnComments", "showOnScreenButton"],
-    (result) => {
-      if (result["scrollOnComments"] !== undefined)
-        scrollOnCommentsCheck = result["scrollOnComments"];
-      if (result["showOnScreenButton"] !== undefined)
-        showOnScreenButton = result["showOnScreenButton"];
-
-      checkForNewShort();
-    },
-  );
 })();
 
 function isShortsPage() {
