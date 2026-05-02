@@ -427,7 +427,10 @@ function createOnScreenToggleButton() {
     }
     onScreenToggleButton = toggleButton;
   } catch (err) {
-    console.error("[Auto Youtube Shorts Scroller] Failed to insert toggle button:", err);
+    console.error(
+      "[Auto Youtube Shorts Scroller] Failed to insert toggle button:",
+      err,
+    );
   }
 }
 
@@ -483,6 +486,13 @@ function checkAndManageOnScreenButton() {
     else stopAutoScrolling();
   });
 
+  // Handle YouTube's SPA navigation (important for first video detection)
+  window.addEventListener("yt-navigate-finish", () => {
+    if (isShortsPage()) {
+      checkForNewShort();
+    }
+  });
+
   // Watch for short changes via MutationObserver (more efficient than polling)
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
@@ -536,11 +546,15 @@ function checkAndManageOnScreenButton() {
     },
   );
 })();
+
 function isShortsPage() {
-  let containsShortElements = false;
-  const doesPageHaveAShort = document.querySelector(
+  // Check 1: URL path
+  const isShortsUrl = window.location.pathname.startsWith("/shorts/");
+
+  // Check 2: DOM elements (fallback for cases where URL might not have updated yet)
+  const hasShortsElements = !!document.querySelector(
     VIDEOS_LIST_SELECTORS.join(","),
   );
-  if (doesPageHaveAShort) containsShortElements = true;
-  return containsShortElements;
+
+  return isShortsUrl || hasShortsElements;
 }
