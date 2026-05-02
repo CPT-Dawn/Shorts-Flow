@@ -4,16 +4,30 @@
 [![Version](https://img.shields.io/badge/version-2.2.0-brightgreen.svg)](manifest.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Experience YouTube Shorts hands-free. **Shorts Flow** automatically scrolls to the next video when the current one ends, instantly skips ads, and adds an intuitive on-screen toggle right into the YouTube player.
+Experience YouTube Shorts hands-free. **Shorts Flow** automatically scrolls to the next shorts when the current one ends, instantly skips ads, and adds an intuitive on-screen toggle right into the YouTube player.
 
 ## 📑 Table of Contents
-- [Features](#-features)
 - [Installation](#-installation)
+- [Features](#-features)
 - [Usage](#-usage)
 - [Configuration](#-configuration)
 - [Technical Architecture](#-technical-architecture)
 - [Development & Contributing](#-development--contributing)
 - [License](#-license)
+
+## 🚀 Installation
+
+### From the Chrome Web Store
+[![Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-Available-blue?logo=googlechrome)](https://chromewebstore.google.com/detail/shorts-flow-auto-scroll-a/kfkkpgeijmfhmdhlcnoecidgceljccdf)
+
+### Manual Installation (Developer Mode)
+1. Clone or download this repository.
+   ```bash
+   git clone https://github.com/CPT-Dawn/Shorts-Flow.git
+   ```
+2. Open Google Chrome and navigate to `chrome://extensions/`.
+3. Enable **Developer mode** in the top right corner.
+4. Click **Load unpacked** and select the repository directory.
 
 ## ✨ Features
 
@@ -22,20 +36,6 @@ Experience YouTube Shorts hands-free. **Shorts Flow** automatically scrolls to t
 - **Native UI Integration**: Injects a sleek, non-intrusive toggle button directly above the 'Like' button in the Shorts player.
 - **Smart Comment Handling**: Optionally pauses auto-scrolling when you are reading or typing in the comments section.
 - **Robust Detection**: Built with dual URL and DOM observation to handle YouTube's Single Page Application (SPA) navigation flawlessly.
-
-## 🚀 Installation
-
-### From the Chrome Web Store
-*(Link coming soon upon publication)*
-
-### Manual Installation (Developer Mode)
-1. Clone or download this repository.
-   ```bash
-   git clone https://github.com/yourusername/shorts-flow.git
-   ```
-2. Open Google Chrome and navigate to `chrome://extensions/`.
-3. Enable **Developer mode** in the top right corner.
-4. Click **Load unpacked** and select the repository directory.
 
 ## 💻 Usage
 
