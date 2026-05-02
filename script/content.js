@@ -466,9 +466,10 @@ function checkAndManageOnScreenButton() {
 // INITIATION AND SETTINGS FETCH
 // ------------------------------
 (function initiate() {
-  // Initial state fetch
+  // Initial state fetch - Default to false if not set
   chrome.storage.local.get(["applicationIsOn"], (result) => {
-    if (result["applicationIsOn"] !== false) startAutoScrolling();
+    if (result["applicationIsOn"] === true) startAutoScrolling();
+    else stopAutoScrolling();
   });
 
   // Watch for short changes via MutationObserver (more efficient than polling)

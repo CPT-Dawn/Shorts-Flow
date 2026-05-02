@@ -36,11 +36,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Only set toggle states if elements exist
       if (statusToggle) {
-        statusToggle.checked = result.applicationIsOn !== false; // Default to true
+        statusToggle.checked = result.applicationIsOn === true; // Default to false
       }
 
       if (scrollOnCommentsInput) {
-        scrollOnCommentsInput.checked = result.scrollOnComments === true; // Default to false
+        scrollOnCommentsInput.checked = result.scrollOnComments !== false; // Default to true
       }
 
       if (onScreenButtonInput) {
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       // Update UI status - function now checks for element existence
-      updateStatus(result.applicationIsOn !== false);
+      updateStatus(result.applicationIsOn === true);
 
       console.log("[Popup] Settings loaded:", result);
     } catch (error) {
