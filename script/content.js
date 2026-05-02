@@ -368,7 +368,9 @@ async function waitForNextShort(retries = 5, delay = 500) {
 function createOnScreenToggleButton() {
   if (onScreenToggleButton || !showOnScreenButton) return;
 
-  const likeButton = document.querySelector(LIKE_BUTTON_SELECTOR);
+  // Search for buttons specifically within the current short to avoid attaching to inactive shorts
+  const scope = currentShortElement || document;
+  const likeButton = scope.querySelector(LIKE_BUTTON_SELECTOR);
   if (!likeButton) return;
 
   const buttonContainer =
@@ -416,8 +418,17 @@ function createOnScreenToggleButton() {
     else stopAutoScrolling();
   });
 
-  actionBar.insertBefore(toggleButton, buttonContainer);
-  onScreenToggleButton = toggleButton;
+  // Fix: Ensure buttonContainer is actually a child of actionBar to prevent NotFoundError
+  try {
+    if (actionBar.contains(buttonContainer)) {
+      actionBar.insertBefore(toggleButton, buttonContainer);
+    } else {
+      actionBar.prepend(toggleButton);
+    }
+    onScreenToggleButton = toggleButton;
+  } catch (err) {
+    console.error("[Auto Youtube Shorts Scroller] Failed to insert toggle button:", err);
+  }
 }
 
 function updateOnScreenButtonState() {
