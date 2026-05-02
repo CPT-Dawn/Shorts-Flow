@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Shorts Flow: Auto Scroll & Ad Skip for YouTube Shorts",
   "short_name": "Shorts Flow",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Experience YouTube Shorts hands-free. Auto-scroll continuously, automatically skip ads instantly, and never swipe again. 🚀",
   "content_scripts": [
     {
