@@ -20,12 +20,15 @@ let showOnScreenButton = true;
 // STATE VARIABLES
 // ------------------------------
 let currentShortId = null;
+let currentShortElement = null; // Track element instead of just ID
 let currentVideoElement = null;
 let applicationIsOn = false;
 let onScreenToggleButton = null;
 let scrollTimeout;
-let lastScrolledId = null;
+let lastScrolledElement = null; // Use element for more reliable locking
 let lastVideoTime = 0;
+let isChecking = false; // Prevent race conditions
+let safetyCheckInterval = null; // For periodic checks
 const MAX_RETRIES = 15;
 const RETRY_DELAY_MS = 500;
 // ------------------------------
@@ -35,15 +38,42 @@ function startAutoScrolling() {
   if (!applicationIsOn) {
     applicationIsOn = true;
     currentShortId = null;
+    currentShortElement = null;
     currentVideoElement = null;
-    lastScrolledId = null;
+    lastScrolledElement = null;
     lastVideoTime = 0;
   }
+
+  // Start safety check interval if not already running
+  if (!safetyCheckInterval) {
+    safetyCheckInterval = setInterval(() => {
+      if (applicationIsOn && isShortsPage()) {
+        const video = currentVideoElement;
+        if (
+          video &&
+          (video.ended ||
+            (video.duration > 0 && video.currentTime >= video.duration - 0.1))
+        ) {
+          onVideoEnded();
+        }
+        // Also ensure we haven't missed a short change
+        checkForNewShort();
+      }
+    }, 2000); // Check every 2 seconds as a safety net
+  }
+
   checkForNewShort();
   updateOnScreenButtonState();
 }
+
 function stopAutoScrolling() {
   applicationIsOn = false;
+
+  if (safetyCheckInterval) {
+    clearInterval(safetyCheckInterval);
+    safetyCheckInterval = null;
+  }
+
   if (currentVideoElement) {
     currentVideoElement.setAttribute("loop", "true");
     currentVideoElement.removeEventListener("ended", onVideoEnded);
@@ -53,73 +83,96 @@ function stopAutoScrolling() {
   updateOnScreenButtonState();
 }
 async function checkForNewShort() {
-  if (!isShortsPage()) return;
+  if (!isShortsPage() || isChecking) return;
+  isChecking = true;
 
-  const currentShort = findShortContainer();
-  if (!currentShort) return;
+  try {
+    const currentShort = findShortContainer();
+    if (!currentShort) return;
 
-  if (currentShort.id != currentShortId) {
-    if (scrollTimeout) clearTimeout(scrollTimeout);
-
-    removeOnScreenToggleButton();
-
-    if (currentVideoElement) {
-      currentVideoElement.removeEventListener("ended", onVideoEnded);
-      currentVideoElement.removeEventListener("timeupdate", onTimeUpdate);
-      currentVideoElement._hasEndEvent = false;
-    }
-
-    currentShortId = currentShort.id;
-    lastScrolledId = null; // Reset scroll lock for new short
-    lastVideoTime = 0; // Reset time tracking
-    currentVideoElement = currentShort.querySelector("video");
-
-    if (currentVideoElement == null) {
-      let l = 0;
-      while (currentVideoElement == null) {
-        currentVideoElement = currentShort.querySelector("video");
-        if (l > MAX_RETRIES) {
-          let prevShortId = currentShortId;
-          currentShortId = null;
-          if (applicationIsOn) {
-            return scrollToNextShort(prevShortId);
-          } else {
-            return;
-          }
-        }
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-        l++;
-      }
-    }
-
+    // Use both element reference and ID for tracking
     if (
-      currentShort.querySelector("ytd-ad-slot-renderer") ||
-      currentShort.querySelector("ad-button-view-model")
+      currentShort !== currentShortElement ||
+      (currentShort.id && currentShort.id !== currentShortId)
     ) {
-      if (applicationIsOn) {
-        removeOnScreenToggleButton();
-        return scrollToNextShort(currentShortId, false);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+
+      removeOnScreenToggleButton();
+
+      if (currentVideoElement) {
+        currentVideoElement.removeEventListener("ended", onVideoEnded);
+        currentVideoElement.removeEventListener("timeupdate", onTimeUpdate);
+        currentVideoElement._hasEndEvent = false;
       }
+
+      currentShortElement = currentShort;
+      currentShortId = currentShort.id;
+      lastScrolledElement = null; // Reset scroll lock for new short
+      lastVideoTime = 0; // Reset time tracking
+      currentVideoElement = currentShort.querySelector("video");
+
+      if (currentVideoElement == null) {
+        let l = 0;
+        while (
+          currentVideoElement == null &&
+          currentShort === currentShortElement
+        ) {
+          currentVideoElement = currentShort.querySelector("video");
+          if (l > MAX_RETRIES) {
+            let prevShortElement = currentShortElement;
+            currentShortId = null;
+            currentShortElement = null;
+            if (applicationIsOn) {
+              return scrollToNextShort(prevShortElement);
+            } else {
+              return;
+            }
+          }
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+          l++;
+        }
+      }
+
+      if (
+        currentShort.querySelector("ytd-ad-slot-renderer") ||
+        currentShort.querySelector("ad-button-view-model")
+      ) {
+        if (applicationIsOn) {
+          removeOnScreenToggleButton();
+          return scrollToNextShort(currentShortElement, false);
+        }
+      }
+
+      if (currentVideoElement) {
+        // Ensure we don't add multiple listeners
+        currentVideoElement.removeEventListener("ended", onVideoEnded);
+        currentVideoElement.removeEventListener("timeupdate", onTimeUpdate);
+
+        currentVideoElement.addEventListener("ended", onVideoEnded);
+        currentVideoElement.addEventListener("timeupdate", onTimeUpdate);
+        currentVideoElement._hasEndEvent = true;
+
+        // Ensure loop is off immediately
+        if (applicationIsOn) {
+          currentVideoElement.loop = false;
+          currentVideoElement.removeAttribute("loop");
+        }
+
+        // If the video is already ended, trigger scroll
+        if (currentVideoElement.ended && applicationIsOn) {
+          onVideoEnded();
+        }
+      }
+
+      checkAndManageOnScreenButton();
     }
 
-    if (currentVideoElement) {
-      currentVideoElement.addEventListener("ended", onVideoEnded);
-      currentVideoElement.addEventListener("timeupdate", onTimeUpdate);
-      currentVideoElement._hasEndEvent = true;
-
-      // Ensure loop is off immediately
-      if (applicationIsOn) {
-        currentVideoElement.loop = false;
-        currentVideoElement.removeAttribute("loop");
-      }
+    if (currentVideoElement?.hasAttribute("loop") && applicationIsOn) {
+      currentVideoElement.removeAttribute("loop");
+      currentVideoElement.loop = false;
     }
-
-    checkAndManageOnScreenButton();
-  }
-
-  if (currentVideoElement?.hasAttribute("loop") && applicationIsOn) {
-    currentVideoElement.removeAttribute("loop");
-    currentVideoElement.loop = false;
+  } finally {
+    isChecking = false;
   }
 }
 
@@ -127,10 +180,14 @@ function onVideoEnded() {
   if (!applicationIsOn) return stopAutoScrolling();
 
   // Prevent duplicate triggers for the same short
-  if (lastScrolledId === currentShortId) return;
-  lastScrolledId = currentShortId;
+  if (
+    lastScrolledElement === currentShortElement &&
+    currentShortElement !== null
+  )
+    return;
+  lastScrolledElement = currentShortElement;
 
-  scrollToNextShort(currentShortId);
+  scrollToNextShort(currentShortElement);
 }
 
 function onTimeUpdate() {
@@ -165,11 +222,11 @@ function onTimeUpdate() {
 }
 
 async function scrollToNextShort(
-  prevShortId = null,
+  prevShort = null,
   useDelayAndCheckComments = true,
 ) {
   if (!applicationIsOn) return stopAutoScrolling();
-  if (prevShortId) lastScrolledId = prevShortId; // Prevent multiple triggers from the same short
+  if (prevShort) lastScrolledElement = prevShort; // Prevent multiple triggers from the same short
 
   const comments = document.querySelector(COMMENTS_SELECTOR);
   const isCommentsOpen = () => {
@@ -184,7 +241,7 @@ async function scrollToNextShort(
       while (
         isCommentsOpen() && // Waits till the comments are closed
         !scrollOnCommentsCheck && // Stops if the setting is changed
-        prevShortId == currentShortId // Stops if the short changes
+        prevShort === currentShortElement // Stops if the short changes
       ) {
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
@@ -192,7 +249,7 @@ async function scrollToNextShort(
   }
   if (scrollTimeout) clearTimeout(scrollTimeout);
   scrollTimeout = setTimeout(async () => {
-    if (prevShortId != null && currentShortId != prevShortId) return; // If the short changed, don't scroll
+    if (prevShort != null && currentShortElement != prevShort) return; // If the short changed, don't scroll
     const nextShortContainer = await waitForNextShort();
     if (nextShortContainer == null && isShortsPage())
       return window.location.reload(); // If no next short is found, reload the page (Last resort)
@@ -228,25 +285,37 @@ function findShortContainer(id = null) {
       break;
     }
   }
+
+  // If no shorts found by sequence class, try direct renderer elements
+  if (shorts.length === 0) {
+    shorts = [...document.querySelectorAll(CURRENT_SHORT_SELECTOR)];
+  }
+
   // If an id is provided, find the short with that id
   if (id != null) {
-    if (shorts.length === 0) return document.getElementById(id); // Short container should always contain id of the short order.
+    if (shorts.length === 0) return document.getElementById(id);
     const short = shorts.find((short) => short.id == id.toString());
     if (short) return short;
   }
-  // If no shorts are found, return the first short with the id of 0
-  if (shorts.length === 0) return document.getElementById(currentShortId || 0);
 
-  // If no id is provided, find the first short with the is-active attribute
-  return (
-    shorts.find(
-      (short) =>
-        // Active short either has the is-active attribute or a hydrated HTML of short.
-        short.hasAttribute("is-active") ||
-        short.querySelector(CURRENT_SHORT_SELECTOR) ||
-        short.querySelector("[is-active]"),
-    ) || shorts[0] /*If no short found, return first short */
+  // Find the active short
+  const activeShort = shorts.find(
+    (short) =>
+      short.hasAttribute("is-active") ||
+      short.querySelector("[is-active]") ||
+      // In some YouTube versions, the active short is the only one with a playing video
+      (short.querySelector("video") && !short.querySelector("video").paused),
   );
+
+  if (activeShort) return activeShort;
+
+  // Fallback to current element if it's still in DOM
+  if (currentShortElement && document.body.contains(currentShortElement)) {
+    return currentShortElement;
+  }
+
+  // Last resort: first short or ID "0"
+  return shorts[0] || document.getElementById("0");
 }
 
 async function waitForNextShort(retries = 5, delay = 500) {
@@ -254,7 +323,7 @@ async function waitForNextShort(retries = 5, delay = 500) {
 
   // First, try to find the next sibling of the current short
   // This is the most reliable way as it doesn't depend on IDs being sequential
-  const currentShort = findShortContainer(currentShortId);
+  const currentShort = currentShortElement || findShortContainer();
 
   for (let i = 0; i < retries; i++) {
     let nextShort = null;
@@ -265,14 +334,15 @@ async function waitForNextShort(retries = 5, delay = 500) {
       // Verify it matches one of our expected selectors or is a valid container
       if (
         VIDEOS_LIST_SELECTORS.some((selector) => sibling.matches(selector)) ||
-        sibling.tagName.toLowerCase() === "ytd-reel-video-renderer"
+        sibling.tagName.toLowerCase() === "ytd-reel-video-renderer" ||
+        sibling.classList.contains("reel-video-in-sequence")
       ) {
         nextShort = sibling;
       }
     }
 
-    // Strategy 2: Fallback to ID + 1 (only if sibling check failed or currentShort wasn't found)
-    if (!nextShort) {
+    // Strategy 2: Fallback to ID + 1
+    if (!nextShort && currentShortId !== null) {
       const currentIdNum = parseInt(currentShortId);
       if (!isNaN(currentIdNum)) {
         const nextId = currentIdNum + 1;
