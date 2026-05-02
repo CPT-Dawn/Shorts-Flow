@@ -97,15 +97,22 @@ async function checkForNewShort() {
     const currentShort = findShortContainer();
     if (!currentShort) return;
 
-    // Use both element reference and ID for tracking
-    if (
+    const videoInShort = currentShort.querySelector("video");
+
+    // Use element reference, ID, and video element presence for tracking.
+    // Also re-run if application is ON but listeners are missing.
+    const needsUpdate =
       currentShort !== currentShortElement ||
-      (currentShort.id && currentShort.id !== currentShortId)
-    ) {
+      (currentShort.id && currentShort.id !== currentShortId) ||
+      (videoInShort && videoInShort !== currentVideoElement) ||
+      (applicationIsOn && videoInShort && !videoInShort._hasEndEvent);
+
+    if (needsUpdate) {
       if (scrollTimeout) clearTimeout(scrollTimeout);
 
       removeOnScreenToggleButton();
 
+      // Cleanup old video listeners
       if (currentVideoElement) {
         currentVideoElement.removeEventListener("ended", onVideoEnded);
         currentVideoElement.removeEventListener("timeupdate", onTimeUpdate);
@@ -116,13 +123,14 @@ async function checkForNewShort() {
       currentShortId = currentShort.id;
       lastScrolledElement = null; // Reset scroll lock for new short
       lastVideoTime = 0; // Reset time tracking
-      currentVideoElement = currentShort.querySelector("video");
+      currentVideoElement = videoInShort;
 
+      // Retry loop if video is not found immediately
       if (currentVideoElement == null) {
         let l = 0;
         while (
           currentVideoElement == null &&
-          currentShort === currentShortElement
+          (currentShort === currentShortElement || currentShortElement === null)
         ) {
           currentVideoElement = currentShort.querySelector("video");
           if (l > MAX_RETRIES) {
@@ -151,7 +159,7 @@ async function checkForNewShort() {
       }
 
       if (currentVideoElement) {
-        // Ensure we don't add multiple listeners
+        // Double check listeners aren't already there (though we cleaned up above)
         currentVideoElement.removeEventListener("ended", onVideoEnded);
         currentVideoElement.removeEventListener("timeupdate", onTimeUpdate);
 
@@ -174,6 +182,7 @@ async function checkForNewShort() {
       checkAndManageOnScreenButton();
     }
 
+    // Secondary check: ensure loop is always disabled if app is on
     if (currentVideoElement?.hasAttribute("loop") && applicationIsOn) {
       currentVideoElement.removeAttribute("loop");
       currentVideoElement.loop = false;
@@ -511,10 +520,15 @@ function checkAndManageOnScreenButton() {
 
   // Handle YouTube's SPA navigation (important for first video detection)
   window.addEventListener("yt-navigate-finish", () => {
+    // Reset state to force fresh detection on the new page
+    currentShortId = null;
+    currentShortElement = null;
+    currentVideoElement = null;
+
     // Small delay to allow YouTube to hydrate the new short renderer
     setTimeout(() => {
       checkForNewShort();
-    }, 200);
+    }, 500); // Increased delay slightly for better hydration coverage
   });
 
   // Watch for short changes via MutationObserver
