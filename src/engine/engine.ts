@@ -4,6 +4,7 @@ import { createAdvance } from './advance';
 import { autoScroll } from './auto-scroll';
 import type { Feature, Feed } from './feed';
 import { whileOnShortsFeed } from './route';
+import { skipSponsoredShorts } from './skip-sponsored';
 
 /** Time as the engine sees it, so tests can move it forward by hand. */
 export interface Clock {
@@ -45,7 +46,7 @@ export type EngineOptions = {
  * Every feature, each mounted once per visit to the Shorts Feed. A new
  * feature is a module exporting a `Feature`, added to this list.
  */
-const FEATURES: Feature[] = [autoScroll];
+const FEATURES: Feature[] = [autoScroll, skipSponsoredShorts];
 
 /**
  * Mounts the Shorts Flow engine onto `document` and returns its teardown.

@@ -8,10 +8,16 @@ import { storage } from 'wxt/utils/storage';
 export type Settings = {
   /** Whether the Shorts Feed Advances on its own when the Current Short ends. */
   autoScroll: boolean;
+  /**
+   * Whether a Sponsored Short (an ad slot in the Shorts Feed) is skipped as
+   * soon as it becomes the Current Short, whether Auto-Scroll is on or off.
+   */
+  skipSponsoredShorts: boolean;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
   autoScroll: true,
+  skipSponsoredShorts: true,
 };
 
 export interface SettingsStore {

@@ -56,6 +56,18 @@
     "message": "Allow on YouTube",
     "description": "Firefox only: button that asks Firefox to give Shorts Flow its access to youtube.com back."
   },
+  "popupSkipSponsored": {
+    "message": "Skip sponsored Shorts",
+    "description": "Name of the switch that skips a Sponsored Short (an ad YouTube puts in the Shorts Feed) as soon as it comes up. It skips, it does not block ads: never say \"block\"."
+  },
+  "popupSkipSponsoredOn": {
+    "message": "Moves past them as soon as one comes up",
+    "description": "Under the Skip sponsored Shorts switch while it is on."
+  },
+  "popupSkipSponsoredOff": {
+    "message": "They play like any other Short",
+    "description": "Under the Skip sponsored Shorts switch while it is off."
+  },
   "popupSettings": {
     "message": "Settings",
     "description": "Accessible name of the Popup's list of settings."
