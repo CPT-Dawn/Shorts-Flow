@@ -114,19 +114,24 @@ class Names {
     return this.#placeholders.get(text)!;
   }
 
-  /** Real values that are still somewhere in `html`, in any HTML escaping. */
+  /**
+   * Real values that are still somewhere in `html`, in any HTML escaping.
+   * Ids and handles are looked for everywhere. Words people wrote are looked
+   * for outside the inlined stylesheets: those rules are YouTube's own, and a
+   * hashtag such as #top or #shorts would otherwise be found in its selectors.
+   */
   survivorsIn(html: string) {
-    const text = unescapeHtml(html);
-    const originals = [
-      ...this.shortId.originals(),
-      ...this.handle.originals(),
-      ...this.channelId.originals(),
-      ...this.words.originals().filter((words) => words.length >= 4),
-    ];
-    return originals.filter((original) => {
+    const markup = html.replace(/<style\b[^>]*>[\s\S]*?<\/style>/g, '');
+    const found = (original: string, within: string) => {
       const pattern = new RegExp(`(^|[^\\w])${escapeRegExp(original)}($|[^\\w])`, 'i');
-      return pattern.test(text) || pattern.test(html);
-    });
+      return pattern.test(unescapeHtml(within)) || pattern.test(within);
+    };
+    return [
+      ...[...this.shortId.originals(), ...this.handle.originals(), ...this.channelId.originals()].filter((id) =>
+        found(id, html),
+      ),
+      ...this.words.originals().filter((words) => words.length >= 4 && found(words, markup)),
+    ];
   }
 }
 
@@ -279,16 +284,24 @@ function replaceHref(href: string, names: Names) {
   if (!URL.canParse(href, YOUTUBE)) return '#';
   const url = new URL(href, YOUTUBE);
   if (url.origin !== new URL(YOUTUBE).origin) return '#';
-  const segments = url.pathname.split('/').map((segment, i, all) => {
-    const previous = all[i - 1] ?? '';
+  // A segment names something only right after a keyword that is not itself
+  // a name: in /hashtag/shorts/shorts the last segment is not a Short's id.
+  let keyword = '';
+  const segments = url.pathname.split('/').map((segment) => {
+    const replaced = replaceSegment(segment, keyword);
+    keyword = replaced === segment ? segment : '';
+    return replaced;
+  });
+  return segments.join('/');
+
+  function replaceSegment(segment: string, previous: string) {
     if (segment === '') return segment;
     if (segment.startsWith('@')) return `@${names.handle.of(segment.slice(1))}`;
     if (['shorts', 'watch', 'source', 'vi'].includes(previous)) return names.shortId.of(segment);
     if (previous === 'channel') return names.channelId.of(segment);
     if (previous === 'hashtag') return names.hashtag.of(segment);
     return segment;
-  });
-  return segments.join('/');
+  }
 }
 
 // --- 6. Replace names and everything people wrote.

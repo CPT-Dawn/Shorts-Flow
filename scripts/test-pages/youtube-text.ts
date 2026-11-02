@@ -21,7 +21,7 @@ const EXACT = new Set([
   'Seek slider', 'No captions are available for this video', 'Subtitles/closed captions unavailable',
   'Next (SHIFT+n)', 'Clip', 'View chapter', 'View key moments', 'Expand', 'Collapse',
   'Theater mode (t)', 'Theater mode', 'Play on TV', 'Full screen (f)', 'Full screen', 'Mute', 'Next',
-  'Picture-in-picture', 'Play from this position',
+  'Picture-in-picture', 'Play from this position', 'Subtitles/CC turned on', 'Try Premium for $0',
   'Exit precise seeking', 'Click or scroll the panel for the precise seeking.', 'Watch full video',
   "If playback doesn't begin shortly, try restarting your device.",
   'An error occurred while retrieving sharing information. Please try again later.',
@@ -31,6 +31,9 @@ const EXACT = new Set([
   'Previous video', 'Next video', 'Go to video', 'Go to channel', 'Close panel', 'Sort comments',
   'Top', 'Show featured comments', 'Newest', 'Show recent comments, including potential spam',
   'Likes', 'Views', 'Description', '...more', '…', '•', '·', '/',
+  // Comments panel
+  'Reply', 'Dislike', 'Dislike this comment', 'No likes or dislikes', 'Add a comment...', 'Read more',
+  "Top is selected, so you'll see featured comments", 'Default profile photo', 'N/A',
 ]);
 
 const PATTERNS: RegExp[] = [
@@ -48,6 +51,8 @@ const PATTERNS: RegExp[] = [
   /^like this video along with [\d,.]+ (thousand |million |billion )?other people$/,
   /^View [\d,.]+[KMB]? comments$/,
   /^Comments [\d,.]+[KMB]?$/,
+  /^Like this comment along with [\d,.]+ other (person|people)$/,
+  /^\d+ (second|minute|hour|day|week|month|year)s? ago$/,
 ];
 
 export function isYouTubeText(text: string): boolean {

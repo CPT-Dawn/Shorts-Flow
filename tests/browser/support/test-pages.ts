@@ -22,6 +22,12 @@ export function hasNextShort(page: TestPage): boolean {
   return current >= 0 && current < page.shorts.length - 1;
 }
 
+/** Pages that open with the comments or description panel open: a Hold applies from the start. */
+export const panelOpenPages = testPages.filter((page) => ['shorts-comments', 'shorts-description'].includes(page.name));
+
+/** Pages where nothing holds the feed until the viewer steps in. */
+export const feedPages = testPages.filter((page) => !panelOpenPages.includes(page));
+
 /** The page exactly as committed, for scanning. */
 export async function pageSource(page: TestPage) {
   const response = await fetch(`${page.path}?test-page=${page.name}`);
@@ -42,6 +48,11 @@ export async function openTestPage(page: TestPage) {
   const window = frame.contentWindow!;
   // The address bar shows the Shorts address, as on YouTube.
   window.history.replaceState(null, '', page.path);
+  // HTML keeps no scroll position: put the Current Short's slot back on
+  // screen, where YouTube had scrolled the feed (past the first Short, say).
+  const current = window.document.querySelector<HTMLElement>('.reel-video-in-sequence-new:has(ytd-reel-video-renderer)');
+  const feed = window.document.querySelector('#shorts-container');
+  if (current && feed) feed.scrollTop = current.offsetTop;
   const close = () => frame.remove();
   onTestFinished(close);
   return { window, document: window.document, close };

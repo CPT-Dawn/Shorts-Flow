@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { aMomentLater, expectTimeline, mountShortsFeed } from './support/shorts-feed';
 import { createTestSettingsStore } from './support/stores';
-import { hasNextShort, testPages } from './support/test-pages';
+import { feedPages, hasNextShort, testPages } from './support/test-pages';
 
 const SOUND = 'See more videos using this sound';
 
@@ -164,7 +164,9 @@ describe.each(testPages)('on $name', (page) => {
     });
     await aMomentLater();
 
-    expect(shortsFeed.railLabels()).toEqual(['like this video along with 238 thousand other people', 'View 1,985 comments', 'Share', 'Remix', SOUND]);
+    // Like and Comments carry each capture's own counts in their names.
+    expect(shortsFeed.railLabels()).toHaveLength(5);
+    expect(shortsFeed.railLabels().slice(-3)).toEqual(['Share', 'Remix', SOUND]);
   });
 
   it('leaves the rail when the viewer leaves the Shorts Feed', async () => {
@@ -199,7 +201,7 @@ describe.each(testPages)('on $name', (page) => {
   });
 });
 
-describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
+describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
   it('is back on the next Short after an Advance, though YouTube rebuilt the rail', async () => {
     const shortsFeed = await mountShortsFeed(page);
 
@@ -208,6 +210,9 @@ describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
     await expect.poll(() => shortsFeed.railLabels().slice(-2)).toEqual(['Auto-Scroll', SOUND]);
     expect(shortsFeed.railLabels()).toHaveLength(6);
   });
+});
+
+describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
 
   it('is back on each Short the viewer moves to by hand', async () => {
     const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll: false }) });

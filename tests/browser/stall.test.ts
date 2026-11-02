@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { aMomentLater, expectTimeline, mountShortsFeed } from './support/shorts-feed';
-import { hasNextShort, testPages } from './support/test-pages';
+import { feedPages, hasNextShort, testPages } from './support/test-pages';
 
 /** How long Shorts Flow gives YouTube to move on before it calls it a Stall. */
 const BOUNDED_WAIT = 3000;
@@ -125,7 +125,7 @@ describe.each(stallPages)('on $name', (page) => {
   });
 });
 
-describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
+describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
   it('shows no notice when the Advance found the next Short', async () => {
     const shortsFeed = await mountShortsFeed(page);
     await expectTimeline(shortsFeed, ['Short 1 started over', 'Short 2 is current']);
