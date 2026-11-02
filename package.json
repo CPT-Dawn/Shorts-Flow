@@ -23,6 +23,8 @@
     "postinstall": "wxt prepare"
   },
   "devDependencies": {
+    "@fontsource/instrument-sans": "5.3.0",
+    "@fontsource/sora": "5.3.0",
     "@vitest/browser-playwright": "5.0.5",
     "cheerio": "1.2.0",
     "domhandler": "6.0.1",

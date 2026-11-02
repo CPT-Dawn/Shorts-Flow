@@ -37,3 +37,18 @@ it('tells every open page when a setting changes anywhere', async () => {
   await new Promise((resolve) => setTimeout(resolve, 50));
   expect(seen).toHaveLength(1);
 });
+
+it('has Speed off after a fresh install, with a Preferred Speed of 1.5×', async () => {
+  const settings = await createSettingsStore().get();
+
+  expect(settings.speedOn).toBe(false);
+  expect(settings.preferredSpeed).toBe(1.5);
+});
+
+it('remembers Speed and the Preferred Speed across a browser restart', async () => {
+  await createSettingsStore().set({ speedOn: true, preferredSpeed: 2.25 });
+
+  const afterRestart = await createSettingsStore().get();
+  expect(afterRestart.speedOn).toBe(true);
+  expect(afterRestart.preferredSpeed).toBe(2.25);
+});

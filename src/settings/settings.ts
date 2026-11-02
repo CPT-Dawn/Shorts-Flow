@@ -8,11 +8,20 @@ import { storage } from 'wxt/utils/storage';
 export type Settings = {
   /** Whether the Shorts Feed Advances on its own when the Current Short ends. */
   autoScroll: boolean;
+  /** Whether every new Current Short plays at the Preferred Speed. */
+  speedOn: boolean;
+  /** The Preferred Speed, one of `PREFERRED_SPEEDS`. */
+  preferredSpeed: number;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
   autoScroll: true,
+  speedOn: false,
+  preferredSpeed: 1.5,
 };
+
+/** Every Preferred Speed there is to pick: 0.5× to 3× in steps of 0.25. */
+export const PREFERRED_SPEEDS: readonly number[] = Array.from({ length: 11 }, (_, i) => 0.5 + i * 0.25);
 
 export interface SettingsStore {
   get(): Promise<Settings>;
