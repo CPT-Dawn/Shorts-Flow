@@ -30,7 +30,7 @@ jobs:
 
       - run: bun run typecheck
 
-      - name: Test (lifecycle, and browser in Chromium and Firefox)
+      - name: Test (lifecycle, test-page tool, and browser in Chromium and Firefox)
         run: bun run test
 
       - name: Build Chrome and Firefox
