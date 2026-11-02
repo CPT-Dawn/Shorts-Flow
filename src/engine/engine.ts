@@ -26,7 +26,11 @@ export type EngineMessage =
   /** The Stall notice. */
   | 'stallNotice'
   /** Its retry button. */
-  | 'stallRetry';
+  | 'stallRetry'
+  /** The Break Nudge's title, text and button. */
+  | 'breakNudgeTitle'
+  | 'breakNudgeText'
+  | 'breakNudgeKeepWatching';
 
 /** Looks up user-facing text in the locale files: `browser.i18n.getMessage` in the extension. */
 export type GetMessage = (name: EngineMessage, substitutions?: string | string[]) => string;

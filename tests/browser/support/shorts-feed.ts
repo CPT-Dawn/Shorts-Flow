@@ -66,6 +66,13 @@ export type ShortsFeed = {
   notice(): { text: string; actions: string[]; element: HTMLElement } | undefined;
   /** Presses the notice's button labelled `label`, as the viewer does. */
   pressNoticeAction(label: string): void;
+  /**
+   * The dialog Shorts Flow shows over the player (the Break Nudge), if one is
+   * open: its title, its text, its buttons, and the element a viewer sees.
+   */
+  dialog(): { title: string; text: string; actions: string[]; element: HTMLDialogElement } | undefined;
+  /** Presses the open dialog's button labelled `label`, as the viewer does. */
+  pressDialogAction(label: string): void;
   /** Tears the engine down, leaving the page playing. */
   unmountEngine(): void;
 };
@@ -147,6 +154,13 @@ export async function mountShortsFeed(
       const notice = findNotice(document);
       const button = notice && [...notice.element.querySelectorAll('button')].find((b) => b.textContent?.trim() === label);
       if (!button) throw new Error(`No notice with a "${label}" button is showing`);
+      button.click();
+    },
+    dialog: () => findDialog(document),
+    pressDialogAction(label) {
+      const dialog = findDialog(document);
+      const button = dialog && [...dialog.element.querySelectorAll('button')].find((b) => b.textContent?.trim() === label);
+      if (!button) throw new Error(`No dialog with a "${label}" button is open`);
       button.click();
     },
     unmountEngine,
@@ -236,6 +250,23 @@ function findNotice(document: Document) {
       const text = (withoutButtons.textContent ?? '').replace(/\s+/g, ' ').trim();
       return { text, actions, element };
     }
+  }
+  return undefined;
+}
+
+/** An open dialog on the page, in the page itself or inside an element's shadow root, as the viewer finds it. */
+function findDialog(document: Document) {
+  const roots: (Document | ShadowRoot)[] = [document];
+  for (const element of document.querySelectorAll('*')) if (element.shadowRoot) roots.push(element.shadowRoot);
+  for (const root of roots) {
+    const element = root.querySelector<HTMLDialogElement>('dialog[open]');
+    if (!element) continue;
+    const named = (attribute: string) => {
+      const id = element.getAttribute(attribute);
+      return (id && root.getElementById(id)?.textContent?.trim()) ?? '';
+    };
+    const actions = [...element.querySelectorAll('button')].map((button) => button.textContent?.trim() ?? '');
+    return { title: named('aria-labelledby'), text: named('aria-describedby'), actions, element };
   }
   return undefined;
 }

@@ -79,5 +79,17 @@
   "stallRetry": {
     "message": "Retry",
     "description": "Button on the Stall notice that asks YouTube for the next Short again."
+  },
+  "breakNudgeTitle": {
+    "message": "Time for a break?",
+    "description": "Title of the Break Nudge, the calm notice over the Shorts Feed when the viewer reaches the Session Limit they set. No guilt-trip wording."
+  },
+  "breakNudgeText": {
+    "message": "You've reached the session limit you set. Take a moment, or keep watching.",
+    "description": "Text under the Break Nudge's title. Calm, no guilt-trip wording, no numbers or countdown."
+  },
+  "breakNudgeKeepWatching": {
+    "message": "Keep watching",
+    "description": "The Break Nudge's only button, also chosen by Space, Enter or Escape: the Short plays on, and the next Break Nudge comes only after another full Session Limit."
   }
 }
