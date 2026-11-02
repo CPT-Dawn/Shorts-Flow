@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { aMomentLater, expectTimeline, mountShortsFeed, TWO_SHORTS } from './support/shorts-feed';
 import { createTestSettingsStore } from './support/stores';
-import { feedPages } from './support/test-pages';
+import { feedPages, hasNextShort } from './support/test-pages';
 
-describe.each(feedPages)('on $name', (page) => {
+describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
   it('Advances from the first Short to the next one when it ends', async () => {
     const shortsFeed = await mountShortsFeed(page);
 

@@ -12,6 +12,8 @@
  *   in the page too, and must never be taken for the Short.
  * - YouTube never moves the feed on by itself. Its Next video control does,
  *   and so does its own ArrowDown key handling.
+ * - The dark theme is `dark` on `<html>`, light is its absence. YouTube's theme
+ *   variables are empty, so Native Look colours are fixed values per theme.
  *
  * Every function takes the document, because the engine may be mounted onto a
  * document from another window (tests use an iframe). No `instanceof` on DOM
@@ -63,4 +65,20 @@ export function advanceFeed(document: Document): void {
   target.dispatchEvent(
     new view.KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', keyCode: 40, bubbles: true, composed: true }),
   );
+}
+
+/** Whether YouTube is showing its dark theme. */
+export function isDarkTheme(document: Document): boolean {
+  return document.documentElement.hasAttribute('dark');
+}
+
+/**
+ * Calls `changed` whenever YouTube switches between its dark and light themes,
+ * until `signal` aborts.
+ */
+export function watchTheme(document: Document, changed: (dark: boolean) => void, signal: AbortSignal): void {
+  const view = document.defaultView!;
+  const observer = new view.MutationObserver(() => changed(isDarkTheme(document)));
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['dark'] });
+  signal.addEventListener('abort', () => observer.disconnect(), { once: true });
 }

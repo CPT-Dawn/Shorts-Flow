@@ -50,6 +50,19 @@ export type ShortsFeed = {
    * behind the Shorts Feed. Resolves once it has ended.
    */
   playHiddenWatchPlayer(): Promise<void>;
+  /** YouTube fetches one more Short onto the end of the feed, which is how a Stall ends. */
+  loadNextShort(): void;
+  /** Clicks YouTube's Next video control, as the viewer does to move on by hand. */
+  pressNextVideo(): void;
+  /** Switches YouTube between its dark and light themes, as its Appearance setting does. */
+  setTheme(theme: 'dark' | 'light'): void;
+  /**
+   * The notice Shorts Flow shows on the page, if one is showing: what it
+   * says, its buttons, and the element a viewer sees (for its looks).
+   */
+  notice(): { text: string; actions: string[]; element: HTMLElement } | undefined;
+  /** Presses the notice's button labelled `label`, as the viewer does. */
+  pressNoticeAction(label: string): void;
   /** Tears the engine down, leaving the page playing. */
   unmountEngine(): void;
 };
@@ -115,6 +128,20 @@ export async function mountShortsFeed(
       youtube.video.pause();
     },
     playHiddenWatchPlayer: youtube.playHiddenWatchPlayer,
+    loadNextShort: youtube.loadNextShort,
+    pressNextVideo() {
+      document.querySelector<HTMLButtonElement>('#navigation-button-down button')!.click();
+    },
+    setTheme(theme) {
+      document.documentElement.toggleAttribute('dark', theme === 'dark');
+    },
+    notice: () => findNotice(document),
+    pressNoticeAction(label) {
+      const notice = findNotice(document);
+      const button = notice && [...notice.element.querySelectorAll('button')].find((b) => b.textContent?.trim() === label);
+      if (!button) throw new Error(`No notice with a "${label}" button is showing`);
+      button.click();
+    },
     unmountEngine,
   };
 }
@@ -131,7 +158,9 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
   const video = shorts.querySelector<HTMLVideoElement>('#shorts-player video')!;
   const renderer = shorts.querySelector('#reel-overlay-container')!;
   const container = shorts.querySelector('#shorts-container')!;
-  let current = page.shorts.findIndex((short) => page.path.endsWith(short.id));
+  // YouTube adds Shorts to the end of the feed as it fetches them.
+  const feed = [...page.shorts];
+  let current = feed.findIndex((short) => page.path.endsWith(short.id));
   // The timeline counts Shorts from the one the page opens on.
   const opening = current;
 
@@ -144,7 +173,7 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
   const next = () => {
     // YouTube takes a moment to fetch and swap in the next Short.
     setTimeout(() => {
-      const following = page.shorts[current + 1];
+      const following = feed[current + 1];
       if (!following) return;
       current += 1;
       const slot = shorts.querySelector(`.reel-video-in-sequence-new[id="${current}"]`)!;
@@ -165,6 +194,15 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
 
   return {
     video,
+    loadNextShort() {
+      const slots = shorts.querySelectorAll('.reel-video-in-sequence-new');
+      const last = slots[slots.length - 1]!;
+      const slot = last.cloneNode(false) as Element;
+      slot.id = String(slots.length);
+      last.after(slot);
+      const id = `vid${String(feed.length + 1).padStart(8, '0')}`;
+      feed.push({ id, clip: page.shorts[feed.length % page.shorts.length]?.clip ?? page.shorts[0]!.clip });
+    },
     playHiddenWatchPlayer() {
       const hidden = document.querySelector<HTMLVideoElement>('#movie_player video')!;
       hidden.muted = true;
@@ -174,6 +212,27 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
       return ended;
     },
   };
+}
+
+/**
+ * A notice on the page as the viewer finds it: a visible status message,
+ * whether in the page itself or inside an element's shadow root.
+ */
+function findNotice(document: Document) {
+  const roots: (Document | ShadowRoot)[] = [document];
+  for (const element of document.querySelectorAll('*')) if (element.shadowRoot) roots.push(element.shadowRoot);
+  for (const root of roots) {
+    for (const element of root.querySelectorAll<HTMLElement>('[role="status"]')) {
+      const box = element.getBoundingClientRect();
+      if (box.width === 0 || box.height === 0 || !element.checkVisibility({ visibilityProperty: true })) continue;
+      const actions = [...element.querySelectorAll('button')].map((button) => button.textContent?.trim() ?? '');
+      const withoutButtons = element.cloneNode(true) as HTMLElement;
+      for (const button of withoutButtons.querySelectorAll('button')) button.remove();
+      const text = (withoutButtons.textContent ?? '').replace(/\s+/g, ' ').trim();
+      return { text, actions, element };
+    }
+  }
+  return undefined;
 }
 
 /** Calls `scrolled` whenever script asks the page to scroll: Shorts Flow never should. */

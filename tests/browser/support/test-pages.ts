@@ -16,6 +16,12 @@ export const testPages: TestPage[] = Object.entries(
   import.meta.glob<Omit<TestPage, 'name'>>('../../pages/*/test-page.json', { eager: true, import: 'default' }),
 ).map(([file, page]) => ({ ...page, name: file.split('/').at(-2)! }));
 
+/** Whether YouTube has a next Short to move on to from where `page` opens (not so on the Stall page). */
+export function hasNextShort(page: TestPage): boolean {
+  const current = page.shorts.findIndex((short) => page.path.endsWith(short.id));
+  return current >= 0 && current < page.shorts.length - 1;
+}
+
 /** Pages that open with the comments or description panel open: a Hold applies from the start. */
 export const panelOpenPages = testPages.filter((page) => ['shorts-comments', 'shorts-description'].includes(page.name));
 

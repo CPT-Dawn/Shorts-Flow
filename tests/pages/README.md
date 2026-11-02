@@ -11,6 +11,7 @@ Anonymised copies of youtube.com/shorts that the browser tests in `tests/browser
 | `shorts-second` | The same, one Short further down: YouTube shows the up arrow. Its own capture. |
 | `shorts-comments` | The first Short with the comments panel open (`is-watch-while-mode`, panel `ENGAGEMENT_PANEL_VISIBILITY_EXPANDED`). Its own capture. A Hold applies from the start. |
 | `shorts-description` | The first Short with the description panel open. Its own capture, opened by clicking the Short's title. A Hold applies from the start. |
+| `shorts-last` | The same capture with every Short slot after the first removed by hand (YouTube's feed never runs out live), so there is no next Short. For Stall. Tests that need a next Short skip it with `hasNextShort(page)`; the test support's `loadNextShort()` stands in for YouTube finally fetching one. |
 
 ## Using a test page
 
