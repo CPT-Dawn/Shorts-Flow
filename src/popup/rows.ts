@@ -60,9 +60,7 @@ export type StatusPart = (popup: PopupContext) => Node;
 
 /**
  * The settings list, top to bottom. A setting the Popup shows is a module
- * exporting a `PopupRow`, added here; the list stays hidden while it is empty.
- * Planned order: Skip Sponsored Shorts, Show button on Shorts, Speed, Session
- * Limit, Shortcuts.
+ * exporting a `PopupRow`, added here.
  */
 export const POPUP_ROWS: PopupRow[] = [skipSponsoredRow, shortsControlRow, speedRow, sessionLimitRow, shortcutsRow];
 

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import type { WhatsNew } from '@/lifecycle/whats-new';
-import { type HostAccess, mountPopup, type PopupOptions, type PopupRow } from '@/popup/popup';
+import { type HostAccess, mountPopup, type PopupOptions } from '@/popup/popup';
 import type { SettingsStore } from '@/settings/settings';
 import { getMessage } from './support/messages';
 import { createTestSessionStore, createTestSettingsStore } from './support/stores';
@@ -283,48 +283,6 @@ describe('Show button on Shorts', () => {
 
     await shown.click();
     await expect.poll(async () => (await settings.get()).shortsControlShown).toBe(true);
-  });
-});
-
-describe('rows added by later features', () => {
-  // Stands in for a feature's row; the only on/off setting so far is Auto-Scroll.
-  const testRow: PopupRow = (popup) =>
-    popup.switchRow({
-      setting: 'autoScroll',
-      label: 'Test setting',
-      hint: (settings) => (settings.autoScroll ? 'Is on' : 'Is off'),
-    });
-
-  it('shows no settings list while no feature has a row', async () => {
-    openPopup({ rows: [] });
-    await expect.element(page.getByRole('switch', { name: 'Auto-Scroll' })).toBeVisible();
-
-    await expect.element(page.getByRole('list', { name: 'Settings' })).not.toBeInTheDocument();
-  });
-
-  it('lists each row under Settings, its switch kept in step with the setting both ways', async () => {
-    const settings = createTestSettingsStore({ autoScroll: true });
-    openPopup({ settings, rows: [testRow] });
-    const list = page.getByRole('list', { name: 'Settings' });
-    const testSwitch = list.getByRole('switch', { name: 'Test setting' });
-    await expect.element(testSwitch).toBeChecked();
-    await expect.element(testSwitch).toHaveAccessibleDescription('Is on');
-
-    await testSwitch.click();
-    await expect.poll(async () => (await settings.get()).autoScroll).toBe(false);
-    await expect.element(testSwitch).toHaveAccessibleDescription('Is off');
-
-    await settings.set({ autoScroll: true });
-    await expect.element(testSwitch).toBeChecked();
-  });
-
-  it('adds what a status part says after the Shorts Feed, set off by a middle dot', async () => {
-    openPopup({
-      isOnShortsFeed: async () => true,
-      statusParts: [(popup) => popup.document.createTextNode('14 Shorts this Session')],
-    });
-
-    await expect.element(page.getByRole('status')).toHaveTextContent('On the Shorts Feed · 14 Shorts this Session');
   });
 });
 

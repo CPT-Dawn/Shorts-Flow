@@ -6,7 +6,7 @@ import { siteUrl } from '@/site/site-links';
 import type { HostAccess } from './host-access';
 import { drawMark } from './mark';
 import type { PopupMessage } from './messages';
-import { POPUP_ROWS, STATUS_PARTS, type PopupContext, type PopupRow, type StatusPart } from './rows';
+import { POPUP_ROWS, STATUS_PARTS, type PopupContext } from './rows';
 import './popup.css';
 
 export type { HostAccess } from './host-access';
@@ -32,10 +32,6 @@ export type PopupOptions = {
   isOnShortsFeed: () => Promise<boolean>;
   /** Firefox's record of the access to youtube.com; absent in the Chrome build. */
   hostAccess?: HostAccess;
-  /** The settings list; `POPUP_ROWS` unless a test brings its own. */
-  rows?: PopupRow[];
-  /** What the status line says after the Shorts Feed; `STATUS_PARTS` unless a test brings its own. */
-  statusParts?: StatusPart[];
 };
 
 /** Builds the Popup into `document.body` and returns its teardown. */
@@ -50,8 +46,6 @@ export function mountPopup(
     readBrowser,
     isOnShortsFeed,
     hostAccess,
-    rows = POPUP_ROWS,
-    statusParts = STATUS_PARTS,
   }: PopupOptions,
 ): () => void {
   const popup = new AbortController();
@@ -242,9 +236,9 @@ export function mountPopup(
     },
   };
 
-  for (const part of statusParts) status.append(separator(), part(context));
+  for (const part of STATUS_PARTS) status.append(separator(), part(context));
 
-  const list = element('ul', 'sf-list', ...rows.map((row) => row(context)));
+  const list = element('ul', 'sf-list', ...POPUP_ROWS.map((row) => row(context)));
   list.setAttribute('aria-label', getMessage('popupSettings'));
 
   const main = element(
@@ -253,7 +247,7 @@ export function mountPopup(
     header,
     feature,
     status,
-    ...(rows.length ? [list] : []),
+    list,
     footer,
   );
   document.body.append(main);
