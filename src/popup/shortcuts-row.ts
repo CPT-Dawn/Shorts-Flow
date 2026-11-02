@@ -19,7 +19,7 @@ const SHORTCUTS: { action: ShortcutAction; name: PopupMessage }[] = [
  * YouTube's own keys (so its navigation and player keys keep working).
  */
 export const shortcutsRow: PopupRow = (popup) => {
-  const { document, signal, message } = popup;
+  const { document, signal, getMessage } = popup;
   const id = 'sf-setting-shortcuts';
   let listening: ShortcutAction | undefined;
   let refusal: string | undefined;
@@ -30,7 +30,7 @@ export const shortcutsRow: PopupRow = (popup) => {
     button.className = 'sf-shortcut';
     button.setAttribute('aria-describedby', `${id}-hint`);
     const label = document.createElement('span');
-    label.textContent = message(name);
+    label.textContent = getMessage(name);
     const keycap = document.createElement('kbd');
     keycap.className = 'sf-kbd';
     button.append(label, keycap);
@@ -47,7 +47,7 @@ export const shortcutsRow: PopupRow = (popup) => {
   controls.className = 'sf-row-value';
   controls.append(...keys.map(({ button }) => button));
 
-  const item = popup.row({ id, label: message('popupShortcuts'), hint: '', control: controls });
+  const item = popup.row({ id, label: getMessage('popupShortcuts'), hint: '', control: controls });
   const hint = item.querySelector(`[id="${id}-hint"]`)!;
   hint.setAttribute('aria-live', 'polite');
 
@@ -57,12 +57,12 @@ export const shortcutsRow: PopupRow = (popup) => {
     for (const { action, name, button, keycap } of keys) {
       const keyName = shortcutKeyName(shortcuts[action]);
       const waiting = listening === action;
-      keycap.textContent = waiting ? message('popupPressKey') : keyName;
-      button.setAttribute('aria-label', message('popupShortcutKey', [message(name), keyName]));
+      keycap.textContent = waiting ? getMessage('popupPressKey') : keyName;
+      button.setAttribute('aria-label', getMessage('popupShortcutKey', [getMessage(name), keyName]));
       button.setAttribute('aria-pressed', String(waiting));
       button.disabled = false;
     }
-    hint.textContent = refusal ?? message(listening ? 'popupShortcutsListening' : 'popupShortcutsHint');
+    hint.textContent = refusal ?? getMessage(listening ? 'popupShortcutsListening' : 'popupShortcutsHint');
   };
 
   const listen = (action: ShortcutAction | undefined) => {
@@ -97,9 +97,9 @@ export const shortcutsRow: PopupRow = (popup) => {
   /** Why `key` can't be `action`'s Shortcut, if it can't. */
   const clash = (shortcuts: Shortcuts, action: ShortcutAction, key: string): string | undefined => {
     const keyName = shortcutKeyName(key);
-    if (isYouTubeKey(key)) return message('popupKeyYouTube', [keyName]);
+    if (isYouTubeKey(key)) return getMessage('popupKeyYouTube', [keyName]);
     const other = SHORTCUTS.find((shortcut) => shortcut.action !== action && shortcuts[shortcut.action] === key);
-    return other && message('popupKeyTaken', [keyName, message(other.name)]);
+    return other && getMessage('popupKeyTaken', [keyName, getMessage(other.name)]);
   };
 
   popup.watchSettings(show);

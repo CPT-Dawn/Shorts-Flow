@@ -4,6 +4,6 @@ import type { PopupRow } from './rows';
 export const shortsControlRow: PopupRow = (popup) =>
   popup.switchRow({
     setting: 'shortsControlShown',
-    label: popup.message('popupShortsControlShown'),
-    hint: () => popup.message('popupShortsControlShownHint'),
+    label: popup.getMessage('popupShortsControlShown'),
+    hint: () => popup.getMessage('popupShortsControlShownHint'),
   });

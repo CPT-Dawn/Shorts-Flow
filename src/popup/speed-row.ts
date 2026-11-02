@@ -7,14 +7,14 @@ import type { PopupRow } from './rows';
  * Speed off too, so the viewer can set the speed before turning it on.
  */
 export const speedRow: PopupRow = (popup) => {
-  const { document, signal, message } = popup;
+  const { document, signal, getMessage } = popup;
   const id = 'sf-setting-speed';
 
   const picker = document.createElement('select');
   picker.className = 'sf-select';
-  picker.setAttribute('aria-label', message('popupPreferredSpeed'));
+  picker.setAttribute('aria-label', getMessage('popupPreferredSpeed'));
   for (const speed of PREFERRED_SPEEDS) {
-    picker.append(new Option(message('popupSpeedValue', [String(speed)]), String(speed)));
+    picker.append(new Option(getMessage('popupSpeedValue', [String(speed)]), String(speed)));
   }
   picker.addEventListener('change', () => popup.changeSettings({ preferredSpeed: Number(picker.value) }), { signal });
 
@@ -33,13 +33,13 @@ export const speedRow: PopupRow = (popup) => {
   controls.className = 'sf-row-value';
   controls.append(picker, toggle);
 
-  const item = popup.row({ id, label: message('popupSpeed'), hint: '', control: controls });
+  const item = popup.row({ id, label: getMessage('popupSpeed'), hint: '', control: controls });
   const hint = item.querySelector(`[id="${id}-hint"]`)!;
   popup.watchSettings(({ speedOn, preferredSpeed }) => {
     toggle.checked = speedOn;
     picker.value = String(preferredSpeed);
     picker.disabled = toggle.disabled = false;
-    hint.textContent = message(speedOn ? 'popupSpeedOn' : 'popupSpeedOff');
+    hint.textContent = getMessage(speedOn ? 'popupSpeedOn' : 'popupSpeedOff');
   });
   return item;
 };

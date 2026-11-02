@@ -4,6 +4,6 @@ import type { PopupRow } from './rows';
 export const skipSponsoredRow: PopupRow = (popup) =>
   popup.switchRow({
     setting: 'skipSponsoredShorts',
-    label: popup.message('popupSkipSponsored'),
-    hint: (settings) => popup.message(settings.skipSponsoredShorts ? 'popupSkipSponsoredOn' : 'popupSkipSponsoredOff'),
+    label: popup.getMessage('popupSkipSponsored'),
+    hint: (settings) => popup.getMessage(settings.skipSponsoredShorts ? 'popupSkipSponsoredOn' : 'popupSkipSponsoredOff'),
   });

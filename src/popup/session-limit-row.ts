@@ -22,14 +22,14 @@ const KINDS: [SessionLimit['kind'], PopupMessage][] = [
  * Session has come towards it since the last Break Nudge, live.
  */
 export const sessionLimitRow: PopupRow = (popup) => {
-  const { document, signal, message } = popup;
+  const { document, signal, getMessage } = popup;
   const id = 'sf-setting-session-limit';
 
   const kind = document.createElement('select');
   kind.className = 'sf-select';
   kind.setAttribute('aria-labelledby', id);
   kind.setAttribute('aria-describedby', `${id}-hint`);
-  for (const [value, label] of KINDS) kind.append(new Option(message(label), value));
+  for (const [value, label] of KINDS) kind.append(new Option(getMessage(label), value));
   kind.addEventListener(
     'change',
     () => {
@@ -66,7 +66,7 @@ export const sessionLimitRow: PopupRow = (popup) => {
   // The kind first: it decides whether there is a number to set.
   controls.append(kind, value);
 
-  const item = popup.row({ id, label: message('popupSessionLimit'), hint: '', control: controls });
+  const item = popup.row({ id, label: getMessage('popupSessionLimit'), hint: '', control: controls });
   const hint = item.querySelector(`[id="${id}-hint"]`)!;
 
   let session: Session = NO_SESSION;
@@ -77,18 +77,18 @@ export const sessionLimitRow: PopupRow = (popup) => {
     kind.disabled = false;
     value.hidden = limit.kind === 'off';
     if (limit.kind === 'off') {
-      hint.textContent = message('popupSessionLimitHintOff');
+      hint.textContent = getMessage('popupSessionLimitHintOff');
       return;
     }
     const shorts = limit.kind === 'shorts';
-    value.setAttribute('aria-label', message(shorts ? 'popupSessionLimitShortsValue' : 'popupSessionLimitMinutesValue'));
+    value.setAttribute('aria-label', getMessage(shorts ? 'popupSessionLimitShortsValue' : 'popupSessionLimitMinutesValue'));
     // Not while the viewer is typing a new one.
     if (document.activeElement !== value) value.value = String(limit.value);
     const from = session.limitFrom ?? NO_SESSION;
     const sofar = shorts
       ? session.shortsWatched - from.shortsWatched
       : Math.floor((session.playingMs - from.playingMs) / 60_000);
-    hint.textContent = message(shorts ? 'popupSessionLimitProgressShorts' : 'popupSessionLimitProgressMinutes', [
+    hint.textContent = getMessage(shorts ? 'popupSessionLimitProgressShorts' : 'popupSessionLimitProgressMinutes', [
       String(Math.min(Math.max(sofar, 0), limit.value)),
       String(limit.value),
     ]);

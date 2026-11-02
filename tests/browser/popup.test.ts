@@ -26,7 +26,7 @@ function openPopup(options: Partial<PopupOptions> & { settings?: SettingsStore }
   unmount = mountPopup(document, {
     settings: createTestSettingsStore(),
     session: createTestSessionStore(),
-    message: getMessage,
+    getMessage,
     version: '3.0.0',
     whatsNew: whatsNewFlag(false),
     readBrowser: async () => ({ browser: 'chrome', browserVersion: '142' }),

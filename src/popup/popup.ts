@@ -18,7 +18,7 @@ export type PopupOptions = {
   /** The current Session, kept by the Shorts tabs. */
   session: SessionStore;
   /** Looks up text in the locale files, filling in `substitutions` in order: `browser.i18n.getMessage`. */
-  message: (key: PopupMessage, substitutions?: string[]) => string;
+  getMessage: (key: PopupMessage, substitutions?: string[]) => string;
   /** The extension's version, from the manifest. */
   version: string;
   /** Whether an update brought news the viewer hasn't opened yet. */
@@ -44,7 +44,7 @@ export function mountPopup(
   {
     settings,
     session,
-    message,
+    getMessage,
     version,
     whatsNew,
     readBrowser,
@@ -113,7 +113,7 @@ export function mountPopup(
   };
 
   // Auto-Scroll: the one bright thing, on the night card.
-  const autoScrollTitle = element('span', 'sf-feature-title', message('popupAutoScroll'));
+  const autoScrollTitle = element('span', 'sf-feature-title', getMessage('popupAutoScroll'));
   autoScrollTitle.id = 'sf-auto-scroll';
   const autoScrollHint = element('span', 'sf-feature-hint');
   autoScrollHint.id = 'sf-auto-scroll-hint';
@@ -130,7 +130,7 @@ export function mountPopup(
   watchSettings(({ autoScroll: on }) => {
     autoScroll.checked = on;
     autoScroll.disabled = false;
-    autoScrollHint.textContent = message(on ? 'popupAutoScrollOn' : 'popupAutoScrollOff');
+    autoScrollHint.textContent = getMessage(on ? 'popupAutoScrollOn' : 'popupAutoScrollOff');
   });
 
   // The status line: whether the tab the Popup opened over is on the Shorts
@@ -141,19 +141,19 @@ export function mountPopup(
   void isOnShortsFeed().then((onShortsFeed) => {
     if (signal.aborted) return;
     status.dataset.feed = onShortsFeed ? 'on' : 'off';
-    feedStatus.textContent = message(onShortsFeed ? 'popupOnShortsFeed' : 'popupOffShortsFeed');
+    feedStatus.textContent = getMessage(onShortsFeed ? 'popupOnShortsFeed' : 'popupOffShortsFeed');
   });
 
   // The header: the mark, the name, and the version carrying What's new.
-  const title = message('popupTitle');
+  const title = getMessage('popupTitle');
   document.title = title;
   const shortVersion = displayVersion(version);
   const versionChip = element('span', 'sf-version', shortVersion);
   versionChip.setAttribute('role', 'note');
-  versionChip.setAttribute('aria-label', message('popupVersion', [shortVersion]));
+  versionChip.setAttribute('aria-label', getMessage('popupVersion', [shortVersion]));
   const unreadDot = element('span', 'sf-unread');
   unreadDot.setAttribute('role', 'img');
-  unreadDot.setAttribute('aria-label', message('popupWhatsNewUnread'));
+  unreadDot.setAttribute('aria-label', getMessage('popupWhatsNewUnread'));
   const header = element(
     'header',
     'sf-header',
@@ -163,13 +163,13 @@ export function mountPopup(
   );
 
   // Firefox: a notice while the viewer has turned off access to youtube.com.
-  const restore = element('button', 'sf-button', message('popupHostAccessRestore'));
+  const restore = element('button', 'sf-button', getMessage('popupHostAccessRestore'));
   restore.type = 'button';
   const hostNotice = element(
     'section',
     'sf-notice',
-    element('p', 'sf-notice-title', message('popupHostAccessLost')),
-    element('p', 'sf-notice-hint', message('popupHostAccessHint')),
+    element('p', 'sf-notice-title', getMessage('popupHostAccessLost')),
+    element('p', 'sf-notice-hint', getMessage('popupHostAccessHint')),
     restore,
   );
   hostNotice.setAttribute('role', 'alert');
@@ -188,7 +188,7 @@ export function mountPopup(
   }
 
   // The footer: news and help, each on Shorts Flow's own site.
-  const whatsNewLink = link(element('a', 'sf-link sf-whats-new', message('popupWhatsNew')), siteUrl('welcome', { v3: true }));
+  const whatsNewLink = link(element('a', 'sf-link sf-whats-new', getMessage('popupWhatsNew')), siteUrl('welcome', { v3: true }));
   let whatsNewOpened = false;
   whatsNewLink.addEventListener(
     'click',
@@ -203,7 +203,7 @@ export function mountPopup(
     if (unread && !whatsNewOpened && !signal.aborted) versionChip.append(unreadDot);
   });
 
-  const reportLink = link(element('a', 'sf-link', message('popupReportProblem')), siteUrl('report', { version }));
+  const reportLink = link(element('a', 'sf-link', getMessage('popupReportProblem')), siteUrl('report', { version }));
   void readBrowser().then((browser) => {
     reportLink.href = siteUrl('report', { version, ...browser });
   });
@@ -216,7 +216,7 @@ export function mountPopup(
       'sf-help',
       reportLink,
       separator(),
-      link(element('a', 'sf-link', message('popupSupport')), siteUrl('support', {})),
+      link(element('a', 'sf-link', getMessage('popupSupport')), siteUrl('support', {})),
     ),
   );
 
@@ -224,7 +224,7 @@ export function mountPopup(
   const context: PopupContext = {
     document,
     signal,
-    message,
+    getMessage,
     settings: () => current,
     watchSettings,
     changeSettings: (changes) => void settings.set(changes),
@@ -248,7 +248,7 @@ export function mountPopup(
   for (const part of statusParts) status.append(separator(), part(context));
 
   const list = element('ul', 'sf-list', ...rows.map((row) => row(context)));
-  list.setAttribute('aria-label', message('popupSettings'));
+  list.setAttribute('aria-label', getMessage('popupSettings'));
 
   const main = element(
     'main',

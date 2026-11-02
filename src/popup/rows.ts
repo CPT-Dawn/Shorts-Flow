@@ -17,7 +17,7 @@ export type PopupContext = {
   document: Document;
   /** Aborts when the Popup is unmounted. */
   signal: AbortSignal;
-  message: (key: PopupMessage, substitutions?: string[]) => string;
+  getMessage: (key: PopupMessage, substitutions?: string[]) => string;
   /** The settings as last read, or undefined until the first read arrives: show nothing until then. */
   settings(): Settings | undefined;
   /** Calls `listener` with the settings as soon as they are known, and again on every change from anywhere. */
@@ -27,7 +27,7 @@ export type PopupContext = {
   /** The current Session, kept by the Shorts tabs. */
   session: SessionStore;
   /**
-   * A row of the settings list: `label` (already looked up with `message`) and
+   * A row of the settings list: `label` (already looked up with `getMessage`) and
    * an optional `hint` under it on the left, `control` on the right. The row
    * gives the label and hint the ids `<id>` and `<id>-hint`, for the control's
    * aria-labelledby and aria-describedby.

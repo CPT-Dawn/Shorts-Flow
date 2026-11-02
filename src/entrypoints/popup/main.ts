@@ -10,7 +10,7 @@ import { readBrowser } from '@/site/browser-info';
 mountPopup(document, {
   settings: createSettingsStore(),
   session: createSessionStore(),
-  message: (key, substitutions) => browser.i18n.getMessage(key, substitutions),
+  getMessage: (key, substitutions) => browser.i18n.getMessage(key, substitutions),
   version: browser.runtime.getManifest().version,
   whatsNew: createWhatsNew(),
   readBrowser: () => readBrowser(),

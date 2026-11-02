@@ -18,7 +18,7 @@ function openPopup(settings: SettingsStore) {
   unmount = mountPopup(document, {
     settings,
     session: createTestSessionStore(),
-    message: getMessage,
+    getMessage,
     version: '3.0.0',
     whatsNew: { isUnread: async () => false, markUnread: async () => {}, markRead: async () => {} },
     readBrowser: async () => ({}),
