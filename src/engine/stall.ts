@@ -1,4 +1,5 @@
 import type { Feed } from './feed';
+import { watchManualNavigation } from './holds';
 import { createToast } from './toast';
 import { currentShortId, isShortsVideo } from './youtube';
 
@@ -15,7 +16,9 @@ export type StallNotice = {
  * page is never reloaded or scrolled, and the Current Short plays on.
  *
  * It clears itself as soon as the feed is on another Short, whether a later
- * Advance got there or the viewer moved by hand, and when the visit ends.
+ * Advance got there or the viewer moved by hand; as soon as the viewer
+ * navigates by hand at all, even with no Short to move to; and when the
+ * visit ends.
  */
 export function createStallNotice(
   feed: Pick<Feed, 'document' | 'signal' | 'setTimeout' | 'clearTimeout' | 'getMessage'>,
@@ -33,6 +36,10 @@ export function createStallNotice(
   for (const type of ['loadstart', 'playing', 'timeupdate']) {
     feed.document.addEventListener(type, checkStillStalled, { capture: true, signal: feed.signal });
   }
+  // The viewer has taken over: the notice has said its piece.
+  watchManualNavigation(feed, () => {
+    if (toast.shown) hide();
+  });
 
   return {
     show(retry) {

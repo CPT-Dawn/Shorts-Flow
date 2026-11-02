@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aMomentLater, expectTimeline, mountShortsFeed } from './support/shorts-feed';
+import { aMomentLater, expectTimeline, mountShortsFeed, type ShortsFeed } from './support/shorts-feed';
 import { feedPages, hasNextShort, testPages } from './support/test-pages';
 
 /** How long Shorts Flow gives YouTube to move on before it calls it a Stall. */
@@ -76,6 +76,18 @@ describe.each(stallPages)('on $name', (page) => {
 
     await expect.poll(() => shortsFeed.timeline).toContain('Short 2 is current');
     await expect.poll(() => shortsFeed.notice()).toBeUndefined();
+  });
+
+  it.each([
+    ['turns the mouse wheel', (shortsFeed: ShortsFeed) => shortsFeed.scrollByHand()],
+    ['presses ArrowDown', (shortsFeed: ShortsFeed) => shortsFeed.pressArrowDownByHand()],
+  ])('clears when the viewer %s by hand, though there is still no next Short', async (_, moveByHand) => {
+    const shortsFeed = await stalled();
+
+    await moveByHand(shortsFeed);
+
+    await expect.poll(() => shortsFeed.notice()).toBeUndefined();
+    expect(shortsFeed.timeline).not.toContain('Short 2 is current');
   });
 
   it('clears when the viewer leaves the Shorts Feed', async () => {
