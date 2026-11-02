@@ -1,5 +1,5 @@
 import type { Feature } from './feed';
-import { isHeld } from './holds';
+import { watchHolds } from './holds';
 import { watchShortEnds } from './short-end';
 
 /**
@@ -10,8 +10,8 @@ import { watchShortEnds } from './short-end';
  * again.
  */
 export const autoScroll: Feature = (feed) => {
-  isHeld(feed); // Start watching for Holds now, before the first end.
+  const isHeld = watchHolds(feed);
   watchShortEnds(feed, () => {
-    if (feed.settings()?.autoScroll && !isHeld(feed)) feed.advance();
+    if (feed.settings()?.autoScroll && !isHeld()) feed.advance();
   });
 };

@@ -33,13 +33,17 @@ const NOT_TYPED = new Set(['button', 'checkbox', 'color', 'file', 'image', 'radi
 const holdsByFeed = new WeakMap<Feed, Set<Hold>>();
 
 /**
- * Whether a Hold applies right now on this visit to the Shorts Feed. The
- * first call starts watching for manual scrolls, so a feature that checks
- * Holds calls it once as it mounts.
+ * Starts watching for Holds on this visit to the Shorts Feed (a manual scroll
+ * must be seen as it happens to be remembered), and returns the check:
+ * whether a Hold applies right now. A feature that checks Holds calls this
+ * once as it mounts, and the check as often as it likes.
  */
-export function isHeld(feed: Feed): boolean {
-  for (const hold of holdsOf(feed)) if (hold()) return true;
-  return false;
+export function watchHolds(feed: Feed): () => boolean {
+  const holds = holdsOf(feed);
+  return () => {
+    for (const hold of holds) if (hold()) return true;
+    return false;
+  };
 }
 
 /**
@@ -58,17 +62,15 @@ function holdsOf(feed: Feed): Set<Hold> {
   let holds = holdsByFeed.get(feed);
   if (!holds) {
     const { document } = feed;
-    const scrolledByHandAt = watchManualScrolls(feed);
+    let scrolledByHandAt: number | undefined;
+    watchManualNavigation(feed, () => (scrolledByHandAt = feed.clock.now()));
     holds = new Set<Hold>([
       // YouTube loops Shorts, so a paused one was paused by the viewer.
       () => isPaused(shortsVideo(document)),
       () => isPanelOpen(document),
       () => isMenuOrDialogOpen(document),
       () => isTyping(document),
-      () => {
-        const at = scrolledByHandAt();
-        return at !== undefined && feed.clock.now() - at < MANUAL_SCROLL_HOLD;
-      },
+      () => scrolledByHandAt !== undefined && feed.clock.now() - scrolledByHandAt < MANUAL_SCROLL_HOLD,
     ]);
     holdsByFeed.set(feed, holds);
   }
@@ -76,28 +78,35 @@ function holdsOf(feed: Feed): Set<Hold> {
 }
 
 /**
- * Remembers when the viewer last moved the feed by hand: the wheel, a swipe,
- * a scroll key, or YouTube's Previous and Next video controls. Only the
- * viewer's own (trusted) events count, so Shorts Flow's own Advance, which
- * clicks Next video or sends ArrowDown from script, never holds the feed.
+ * Calls `moved` whenever the viewer moves the feed by hand, for as long as
+ * the visit lasts: the wheel, a swipe, a scroll key, or YouTube's Previous
+ * and Next video controls, whether or not there is a Short to move to. Only
+ * the viewer's own (trusted) events count, so Shorts Flow's own Advance,
+ * which clicks Next video or sends ArrowDown from script, never does; nor
+ * does a key pressed in Shorts Flow's own interface (Space on a button).
  */
-function watchManualScrolls(feed: Feed): () => number | undefined {
-  let at: number | undefined;
-  const moved = (event: Event) => {
+export function watchManualNavigation(feed: Pick<Feed, 'document' | 'signal'>, moved: () => void): void {
+  const onEvent = (event: Event) => {
     if (!event.isTrusted) return;
     if (event.type === 'keydown' && !isScrollKey(event as KeyboardEvent, feed.document)) return;
     if (event.type === 'click' && !isFeedNavigation(event.target)) return;
-    at = feed.clock.now();
+    moved();
   };
   for (const type of ['wheel', 'touchmove', 'keydown', 'click']) {
-    feed.document.addEventListener(type, moved, { capture: true, passive: true, signal: feed.signal });
+    feed.document.addEventListener(type, onEvent, { capture: true, passive: true, signal: feed.signal });
   }
-  return () => at;
 }
 
 function isScrollKey(event: KeyboardEvent, document: Document) {
   if (event.ctrlKey || event.altKey || event.metaKey) return false;
+  if (isShortsFlowOwn(event.target)) return false;
   return SCROLL_KEYS.has(event.key) && !isTyping(document);
+}
+
+/** Whether `target` is part of Shorts Flow's own interface on the page (it carries `data-shorts-flow`). */
+function isShortsFlowOwn(target: EventTarget | null) {
+  const element = target as Element | null;
+  return typeof element?.closest === 'function' && element.closest('[data-shorts-flow]') !== null;
 }
 
 function isPaused(video: HTMLVideoElement | undefined) {
