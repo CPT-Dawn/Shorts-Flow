@@ -59,7 +59,7 @@ export function createToast(feed: Pick<Feed, 'document' | 'signal' | 'setTimeout
         const button = document.createElement('button');
         button.type = 'button';
         button.textContent = action.label;
-        button.addEventListener('click', () => action.onPress());
+        button.addEventListener('click', () => action.onPress(), { signal: feed.signal });
         actions.append(button);
       }
       toast.hidden = false;
