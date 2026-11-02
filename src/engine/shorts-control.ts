@@ -1,5 +1,6 @@
 import type { Settings } from '@/settings/settings';
 import type { Feature, Feed } from './feed';
+import { quickSettings } from './quick-settings';
 import { createRailButton, isDarkTheme, watchActionRail, watchTheme, type RailButton } from './youtube';
 
 /** The Shorts Control as built for one visit, for what `SHORTS_CONTROL_EXTRAS` adds to it. */
@@ -19,7 +20,7 @@ export type ShortsControl = RailButton & {
 export type ShortsControlExtra = (control: ShortsControl, feed: Feed) => void;
 
 /** What the Shorts Control carries besides the Auto-Scroll button. */
-export const SHORTS_CONTROL_EXTRAS: ShortsControlExtra[] = [];
+export const SHORTS_CONTROL_EXTRAS: ShortsControlExtra[] = [quickSettings];
 
 /**
  * The Shorts Control: an Auto-Scroll button in YouTube's action rail, just
@@ -243,6 +244,65 @@ const SHORTS_CONTROL_CSS = `
   line-height: 18px;
   text-align: center;
   white-space: nowrap;
+}
+/*
+ * The quick-settings opener: a small round button on the control's top
+ * corner, in the rail's own tonal colours, shown while the control is
+ * pointed at or focused and while its menu is open.
+ */
+.shorts-flow-quick-settings-button {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 11px;
+  background: #e5e5e5;
+  color: #0f0f0f;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.shorts-flow-control[data-theme="dark"] .shorts-flow-quick-settings-button {
+  background: #3f3f3f;
+  color: #f1f1f1;
+}
+.shorts-flow-quick-settings-button:hover {
+  background: #d9d9d9;
+}
+.shorts-flow-control[data-theme="dark"] .shorts-flow-quick-settings-button:hover {
+  background: #535353;
+}
+.shorts-flow-control:hover .shorts-flow-quick-settings-button,
+.shorts-flow-control:focus-within .shorts-flow-quick-settings-button,
+.shorts-flow-quick-settings-button[aria-expanded="true"] {
+  opacity: 1;
+}
+.shorts-flow-quick-settings-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+.shorts-flow-quick-settings-icon {
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
+@media (hover: none) {
+  .shorts-flow-quick-settings-button { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shorts-flow-quick-settings-button { transition: none; }
+}
+@media (forced-colors: active) {
+  .shorts-flow-quick-settings-button { border: 1px solid ButtonText; opacity: 1; }
 }
 .shorts-flow-control-tooltip {
   position: fixed;

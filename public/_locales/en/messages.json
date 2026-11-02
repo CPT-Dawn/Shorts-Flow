@@ -241,5 +241,30 @@
   "shortsControlTurnOn": {
     "message": "Turn Auto-Scroll on",
     "description": "Shorts Control: tooltip while Auto-Scroll is off, saying what a click does."
+  },
+  "quickSettingsName": {
+    "message": "Quick settings",
+    "description": "Name of the small menu off the Shorts Control (the Auto-Scroll button in YouTube's row of buttons beside each Short), and of the small button that opens it. It holds Skip sponsored Shorts, Speed and the Preferred Speed."
+  },
+  "quickSettingsSkipSponsored": {
+    "message": "Skip sponsored Shorts",
+    "description": "Quick settings menu: the switch that skips a Sponsored Short (an ad YouTube puts in the Shorts Feed) as soon as it comes up. Same wording as the Popup's switch. It skips, it does not block ads: never say \"block\"."
+  },
+  "quickSettingsSpeed": {
+    "message": "Speed",
+    "description": "Quick settings menu: the Speed switch. While it is on, every Short plays at the Preferred Speed."
+  },
+  "quickSettingsPreferredSpeed": {
+    "message": "Preferred Speed",
+    "description": "Quick settings menu: the item showing the Preferred Speed, which opens the list of speeds to pick from; also the title of that list."
+  },
+  "quickSettingsSpeedValue": {
+    "message": "$SPEED$×",
+    "description": "One playback speed in the Quick settings menu, such as 1.5×.",
+    "placeholders": { "speed": { "content": "$1", "example": "1.5" } }
+  },
+  "quickSettingsBack": {
+    "message": "Back to Quick settings",
+    "description": "Accessible name of the item at the top of the list of speeds, which goes back to the Quick settings menu."
   }
 }

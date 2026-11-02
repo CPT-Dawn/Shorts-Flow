@@ -143,6 +143,31 @@ export type ShortsFeed = {
   moveToBackground(): void;
   /** Tears the engine down, leaving the page playing. */
   unmountEngine(): void;
+  /** The Shorts Control's quick-settings opener, as the viewer finds it by its name, if it is there. */
+  quickSettingsButton(): HTMLElement | undefined;
+  /** Clicks the Shorts Control's quick-settings opener with the mouse, as the viewer does. */
+  openQuickSettings(): Promise<void>;
+  /** Right-clicks the Shorts Control's Auto-Scroll button, as the viewer does for its menu. */
+  rightClickShortsControl(): Promise<void>;
+  /**
+   * The menu Shorts Flow shows on the page, if one is open: its accessible
+   * name, its items as a screen reader lists them, the item with the
+   * keyboard focus, and the element a viewer sees.
+   */
+  quickSettings(): QuickSettingsMenu | undefined;
+  /** Clicks the open menu's item whose accessible name starts with `name`, with the mouse. */
+  chooseQuickSetting(name: string): Promise<void>;
+  /** Clicks with the mouse somewhere on the page away from any menu, as the viewer does to dismiss one. */
+  clickElsewhere(): Promise<void>;
+};
+
+/** An open menu as `quickSettings()` finds it. */
+export type QuickSettingsMenu = {
+  name: string;
+  items: { role: string; name: string; checked?: boolean; expanded?: boolean }[];
+  /** The accessible name of the item with the keyboard focus, if one has it. */
+  focused: string | undefined;
+  element: HTMLElement;
 };
 
 /**
@@ -234,7 +259,9 @@ export async function mountShortsFeed(
       button.click();
     },
     async pressKey(key, { holding } = {}) {
-      focusPage(window);
+      // Focusing the frame would take the focus from an element in it (a menu item, say).
+      const focused = document.activeElement;
+      if (!focused || focused === document.body) focusPage(window);
       const name = key === ' ' ? '{Space}' : key.length === 1 ? key : `{${key}}`;
       await userEvent.keyboard(holding ? `{${holding}>}${name}{/${holding}}` : name);
     },
@@ -343,6 +370,26 @@ export async function mountShortsFeed(
       window.dispatchEvent(new (window as Window & typeof globalThis).Event('blur'));
     },
     unmountEngine,
+    quickSettingsButton: () => findByName(document, QUICK_SETTINGS),
+    async openQuickSettings() {
+      await frame().getByRole('button', { name: QUICK_SETTINGS, exact: true }).click();
+    },
+    async rightClickShortsControl() {
+      await frame().getByRole('button', { name: 'Auto-Scroll', exact: true }).click({ button: 'right' });
+    },
+    quickSettings: () => findMenu(document),
+    async chooseQuickSetting(name) {
+      const menu = findMenu(document);
+      const item = menu?.items.find((item) => item.name.startsWith(name));
+      if (!item) throw new Error(`No open menu has an item named "${name}"`);
+      await frame()
+        .getByRole(item.role as 'menuitem', { name: item.name, exact: true })
+        .click();
+    },
+    async clickElsewhere() {
+      // The page's top left corner, away from the player and the rail: nothing happens there.
+      await browserPage.elementLocator(window.frameElement!).click({ position: { x: 5, y: 5 } });
+    },
   };
 
   /** The page as the viewer's mouse and keyboard reach it: their events are trusted. */
@@ -444,6 +491,73 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
       return ended;
     },
   };
+}
+
+/** The accessible name of the Shorts Control's quick-settings opener. */
+const QUICK_SETTINGS = 'Quick settings';
+
+/** Every root a viewer's screen reader looks through: the page and each open shadow root in it. */
+function allRoots(document: Document): (Document | ShadowRoot)[] {
+  const roots: (Document | ShadowRoot)[] = [document];
+  for (const element of document.querySelectorAll('*')) if (element.shadowRoot) roots.push(element.shadowRoot);
+  return roots;
+}
+
+/** A button on the page named `name` by its aria-label, as a screen reader finds it. */
+function findByName(document: Document, name: string) {
+  for (const root of allRoots(document)) {
+    for (const element of root.querySelectorAll<HTMLElement>('button, [role="button"]')) {
+      if (element.getAttribute('aria-label') === name && isVisible(element)) return element;
+    }
+  }
+  return undefined;
+}
+
+function isVisible(element: Element) {
+  const box = element.getBoundingClientRect();
+  return box.width > 0 && box.height > 0 && element.checkVisibility({ visibilityProperty: true });
+}
+
+/** The text a screen reader reads for `element`: its aria-label, or its text without what is hidden from it. */
+function accessibleName(element: Element): string {
+  const label = element.getAttribute('aria-label');
+  if (label) return label;
+  const labelledBy = element.getAttribute('aria-labelledby');
+  const root = element.getRootNode() as Document | ShadowRoot;
+  if (labelledBy) {
+    return labelledBy
+      .split(' ')
+      .map((id) => root.getElementById(id)?.textContent?.trim() ?? '')
+      .join(' ');
+  }
+  const copy = element.cloneNode(true) as Element;
+  for (const hidden of copy.querySelectorAll('[aria-hidden="true"]')) hidden.remove();
+  return (copy.textContent ?? '').replace(/\s+/g, ' ').trim();
+}
+
+/** An open menu on the page, in the page itself or in a shadow root, as the viewer finds it. */
+function findMenu(document: Document): QuickSettingsMenu | undefined {
+  for (const root of allRoots(document)) {
+    for (const element of root.querySelectorAll<HTMLElement>('[role="menu"]')) {
+      if (!isVisible(element)) continue;
+      const items = [...element.querySelectorAll('[role^="menuitem"]')].map((item) => {
+        const checked = item.getAttribute('aria-checked');
+        const expanded = item.getAttribute('aria-expanded');
+        return {
+          role: item.getAttribute('role')!,
+          name: accessibleName(item),
+          ...(checked !== null && { checked: checked === 'true' }),
+          ...(expanded !== null && { expanded: expanded === 'true' }),
+        };
+      });
+      const labelledBy = element.getAttribute('aria-labelledby');
+      const name = labelledBy ? (root.getElementById(labelledBy)?.textContent?.trim() ?? '') : accessibleName(element);
+      const active = root.activeElement;
+      const focused = active && element.contains(active) ? accessibleName(active) : undefined;
+      return { name: element.getAttribute('aria-label') ?? name, items, focused, element };
+    }
+  }
+  return undefined;
 }
 
 /**

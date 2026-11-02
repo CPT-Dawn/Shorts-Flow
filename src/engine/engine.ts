@@ -41,6 +41,13 @@ export type EngineMessage =
   | 'shortsControlTurnOff'
   /** Its tooltip while Auto-Scroll is off. */
   | 'shortsControlTurnOn'
+  /** The Shorts Control's quick-settings menu: its name (and its opener's), and its items. */
+  | 'quickSettingsName'
+  | 'quickSettingsSkipSponsored'
+  | 'quickSettingsSpeed'
+  | 'quickSettingsPreferredSpeed'
+  | 'quickSettingsSpeedValue'
+  | 'quickSettingsBack'
   /** The confirmations of the Shortcuts. */
   | 'shortcutAutoScrollOn'
   | 'shortcutAutoScrollOff'
