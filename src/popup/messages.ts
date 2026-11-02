@@ -15,6 +15,11 @@ export type PopupMessage =
   | 'popupHostAccessHint'
   | 'popupHostAccessRestore'
   | 'popupSettings'
+  | 'popupSpeed'
+  | 'popupSpeedOn'
+  | 'popupSpeedOff'
+  | 'popupPreferredSpeed'
+  | 'popupSpeedValue'
   | 'popupWhatsNew'
   | 'popupReportProblem'
   | 'popupSupport';
