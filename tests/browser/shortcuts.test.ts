@@ -31,15 +31,6 @@ describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
     expect((await settings.get()).speedOn).toBe(false);
   });
 
-  it('works with Shift held, as capital A', async () => {
-    const settings = createTestSettingsStore({ autoScroll: true });
-    const shortsFeed = await mountShortsFeed(page, { settings });
-
-    await shortsFeed.pressKey('A', { holding: 'Shift' });
-
-    await expect.poll(async () => (await settings.get()).autoScroll).toBe(false);
-  });
-
   it('lets the confirmation go after a moment', async () => {
     const shortsFeed = await mountShortsFeed(page);
     await shortsFeed.pressKey('a');
@@ -62,11 +53,11 @@ describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
     expect(shortsFeed.searchText()).toBe('a sad story');
   });
 
-  it.each(['Control', 'Alt', 'Meta'] as const)('does nothing with %s held', async (holding) => {
+  it.each(['Control', 'Alt', 'Meta', 'Shift'] as const)('does nothing with %s held', async (holding) => {
     const settings = createTestSettingsStore({ autoScroll: true });
     const shortsFeed = await mountShortsFeed(page, { settings });
 
-    await shortsFeed.pressKey('a', { holding });
+    await shortsFeed.pressKey(holding === 'Shift' ? 'A' : 'a', { holding });
     await aMomentLater();
 
     expect((await settings.get()).autoScroll).toBe(true);

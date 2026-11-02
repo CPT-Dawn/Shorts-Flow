@@ -13,7 +13,7 @@ const CONFIRMATION_MS = 2000;
  * setting for every tab and shows a brief confirmation in YouTube's style.
  *
  * A key is left alone, for YouTube and the browser, while the viewer types
- * (search, comments), with Ctrl, Alt or Meta held, while it is held down
+ * (search, comments), with Shift, Ctrl, Alt or Meta held, while it is held down
  * (repeats), and when a script made it up rather than the viewer's keyboard
  * (Shorts Flow's own ArrowDown fallback among them). YouTube's own keys can't
  * be bound (the Popup refuses them), so its navigation is never touched.
