@@ -35,6 +35,8 @@ export default defineConfig({
         test: {
           name: 'browser',
           include: ['tests/browser/**/*.test.ts'],
+          // Engine tests watch Shorts of 2 to 3 seconds play out, several in a row.
+          testTimeout: 30_000,
           browser: {
             enabled: true,
             headless: true,
