@@ -78,9 +78,12 @@ const FEATURES: Feature[] = [autoScroll, skipSponsoredShorts, shortsControl, spe
  * Mounts the Shorts Flow engine onto `document` and returns its teardown.
  *
  * The engine acts only while the page is on the Shorts Feed, following
- * YouTube as it navigates without a page load. Everything it does flows from
- * the page and the collaborators passed in, so tests drive it exactly as the
- * content script does.
+ * YouTube as it navigates without a page load. Off the Shorts Feed it keeps
+ * just two things running: the Route watcher's polling timer, and its watch
+ * on the settings, so it knows them the moment the viewer arrives. (The
+ * content script also answers the Popup's question about the Shorts Feed.)
+ * Everything it does flows from the page and the collaborators passed in, so
+ * tests drive it exactly as the content script does.
  *
  * The document may belong to another window than the engine's code (tests
  * mount it onto a test page in an iframe), so the engine reaches everything
@@ -120,6 +123,20 @@ export function mountEngine(
       timers.clear();
     });
 
+    const setTimeout: Feed['setTimeout'] = (callback, ms) => {
+      const id = clock.setTimeout(() => {
+        timers.delete(id);
+        callback();
+      }, ms);
+      timers.add(id);
+      return id;
+    };
+    const clearTimeout: Feed['clearTimeout'] = (id) => {
+      timers.delete(id);
+      clock.clearTimeout(id);
+    };
+    const advance = createAdvance({ document, signal: visit.signal, setTimeout, clearTimeout, getMessage });
+
     const feed: Feed = {
       document,
       clock,
@@ -135,21 +152,10 @@ export function mountEngine(
       },
       session,
       getMessage,
-      advance: () => {},
-      setTimeout(callback, ms) {
-        const id = clock.setTimeout(() => {
-          timers.delete(id);
-          callback();
-        }, ms);
-        timers.add(id);
-        return id;
-      },
-      clearTimeout(id) {
-        timers.delete(id);
-        clock.clearTimeout(id);
-      },
+      advance,
+      setTimeout,
+      clearTimeout,
     };
-    feed.advance = createAdvance(feed);
 
     for (const feature of FEATURES) feature(feed);
     return () => visit.abort();

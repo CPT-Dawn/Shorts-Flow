@@ -11,8 +11,8 @@ const CHECK_INTERVAL = 500;
 /**
  * The Route watcher: calls `visit` whenever the page becomes the Shorts Feed,
  * and the function it returns when the page leaves it. Stops watching, and
- * ends any visit, when `signal` aborts. Off the Shorts Feed nothing but this
- * one timer runs.
+ * ends any visit, when `signal` aborts. Its one timer runs on and off the
+ * Shorts Feed.
  */
 export function whileOnShortsFeed(window: Window, clock: Clock, signal: AbortSignal, visit: () => () => void): void {
   let leave: (() => void) | undefined;
