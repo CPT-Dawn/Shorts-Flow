@@ -1,0 +1,375 @@
+<title>Shorts Flow Brand Directions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a brand sheet for Tideline. Intro, the mark, then palette, type,
+   Popup in both themes, store art, and the rules that keep it honest. */
+:root {
+  /* Brand constants (theme-independent) */
+  --ink-900: #0b1220;   /* Abyss: tile base, darkest ink */
+  --ink-700: #16233f;   /* Deep tide: tile top-left */
+  --tide-500: #3b5bd9;  /* Tide: primary accent on light */
+  --tide-300: #8fa8f5;  /* Tide light: accent on dark */
+  --pearl-1: #e6f4fb;   /* Line start */
+  --pearl-2: #93cbe8;   /* Line end */
+  --sand: #e9c9a3;      /* Dawn: rare warm counterpoint */
+
+  /* Page tokens, light */
+  --bg: #f4f5f8;
+  --panel: #ffffff;
+  --ink: #111726;
+  --muted: #5d6576;
+  --line: rgba(17, 23, 38, 0.09);
+  --chip: #e9ecf2;
+  --accent: var(--tide-500);
+  --display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --ui: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a0d14; --panel: #111622; --ink: #edf0f6; --muted: #98a0b2;
+    --line: rgba(255, 255, 255, 0.08); --chip: #1b2232; --accent: var(--tide-300); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a0d14; --panel: #111622; --ink: #edf0f6; --muted: #98a0b2;
+  --line: rgba(255, 255, 255, 0.08); --chip: #1b2232; --accent: var(--tide-300); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 44px 80px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 28px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.label { font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+/* ---------- Hero ---------- */
+.hero-band {
+  border-radius: 24px; overflow: hidden; position: relative; color: #eef3fb;
+  background: radial-gradient(90% 120% at 85% 0%, #213769 0%, #121d36 48%, var(--ink-900) 100%);
+  padding: clamp(28px, 5vw, 56px); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: center;
+}
+.hero-band::after {
+  content: ""; position: absolute; inset: auto -10% -60% 40%; height: 120%;
+  background: radial-gradient(closest-side, rgba(147, 203, 232, 0.16), transparent 70%); pointer-events: none;
+}
+.hero-band .label { color: #9fb0cf; }
+.hero-band h1 { font-family: var(--display); font-weight: 600; font-size: clamp(32px, 5vw, 52px); line-height: 1.05; letter-spacing: -0.035em; margin-top: 10px; }
+.hero-band p { color: #b9c5dc; max-width: 54ch; margin-top: 14px; }
+.hero-band .mark-lg { width: clamp(120px, 18vw, 184px); height: auto; position: relative; z-index: 1; filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.45)); }
+@media (max-width: 640px) { .hero-band { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Generic panel ---------- */
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: clamp(18px, 3vw, 32px); display: grid; gap: 20px; }
+.panel > header { display: grid; gap: 6px; }
+.panel h2 { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -0.02em; }
+.panel header p { color: var(--muted); max-width: 70ch; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+@media (max-width: 820px) { .two { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Mark ---------- */
+.construct { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .construct { grid-template-columns: minmax(0, 1fr); } }
+.construct figure { margin: 0; border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 10px; justify-items: center; background: var(--bg); }
+.construct svg { width: 100%; max-width: 150px; height: auto; }
+.construct figcaption { font-size: 13px; color: var(--muted); text-align: center; }
+.construct .guide { stroke: var(--muted); }
+.construct .stroke { stroke: var(--ink); }
+
+.sizes { display: grid; grid-template-columns: 1fr 1fr; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+@media (max-width: 520px) { .sizes { grid-template-columns: 1fr; } }
+.sizes > div { display: flex; align-items: end; gap: 20px; padding: 20px; flex-wrap: wrap; }
+.sizes .lt { background: #f1f3f4; }
+.sizes .dk { background: #202124; }
+.sizes figure { margin: 0; display: grid; gap: 6px; justify-items: center; }
+.sizes figcaption { font-size: 11px; font-variant-numeric: tabular-nums; }
+.sizes .lt figcaption { color: #5f6368; }
+.sizes .dk figcaption { color: #9aa0a6; }
+
+/* ---------- Palette ---------- */
+.pal { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.sw { border-radius: 14px; border: 1px solid var(--line); overflow: hidden; background: var(--panel); }
+.sw i { display: block; height: 72px; }
+.sw div { padding: 10px 12px 12px; display: grid; gap: 2px; }
+.sw b { font-size: 14px; font-weight: 600; }
+.sw code { font-size: 12px; color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+.sw span { font-size: 12.5px; color: var(--muted); }
+.ratio { display: flex; height: 14px; border-radius: 999px; overflow: hidden; border: 1px solid var(--line); }
+.ratio i { display: block; height: 100%; }
+.ratio-key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--muted); }
+
+/* ---------- Type ---------- */
+.spec { display: grid; gap: 14px; }
+.spec .d1 { font-family: var(--display); font-weight: 600; font-size: clamp(30px, 4.5vw, 44px); line-height: 1.05; letter-spacing: -0.035em; }
+.spec .d2 { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -0.02em; }
+.spec .b1 { font-size: 16px; max-width: 60ch; }
+.spec .b2 { font-size: 13px; color: var(--muted); }
+.spec table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.spec td { padding: 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.spec td:first-child { color: var(--muted); width: 38%; padding-right: 12px; }
+
+/* ---------- Popup mock ---------- */
+.popups { display: grid; grid-template-columns: repeat(2, minmax(0, 340px)); gap: 24px; justify-content: center; }
+@media (max-width: 760px) { .popups { grid-template-columns: minmax(0, 340px); } }
+.popups figure { margin: 0; display: grid; gap: 10px; }
+.popups figcaption { font-size: 12px; color: var(--muted); text-align: center; }
+
+.pop { width: 100%; background: var(--p-canvas); color: var(--p-ink); font-family: var(--ui); border-radius: 18px; padding: 14px; display: grid; gap: 12px; border: 1px solid var(--p-line); box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 24px 48px -28px rgba(11,18,32,.55); }
+.pop.light { --p-canvas: #f6f7fa; --p-surface: #ffffff; --p-sunken: #eceef3; --p-ink: #111726; --p-muted: #5d6576; --p-line: rgba(17,23,38,.08); --p-line-2: rgba(17,23,38,.16); --p-on: #3b5bd9; --p-off: #d4d8e1; --p-link: #3150c4; --p-live: #3fae8c; }
+.pop.dark  { --p-canvas: #0d111a; --p-surface: #151b28; --p-sunken: #1d2534; --p-ink: #eef1f7; --p-muted: #99a1b3; --p-line: rgba(255,255,255,.07); --p-line-2: rgba(255,255,255,.16); --p-on: #8fa8f5; --p-off: #2c3546; --p-link: #a9bcf7; --p-live: #67cfa9; }
+.pop-top { display: flex; align-items: center; gap: 10px; padding: 2px 2px 0; }
+.pop-top svg { width: 28px; height: 28px; flex: none; }
+.pop-top .name { font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: -0.02em; }
+.pop-top .ver { font-size: 11px; color: var(--p-muted); background: var(--p-sunken); border-radius: 999px; padding: 1px 8px; margin-left: auto; position: relative; }
+.pop-top .ver::after { content: ""; position: absolute; top: -2px; right: -2px; width: 7px; height: 7px; border-radius: 50%; background: var(--p-on); box-shadow: 0 0 0 2px var(--p-canvas); }
+
+.feat { position: relative; overflow: hidden; border-radius: 14px; padding: 16px; display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; align-items: center; color: #eef3fb;
+  background: radial-gradient(110% 150% at 100% 0%, #233a70 0%, #131f3a 52%, #0b1220 100%); }
+.feat svg.wm { position: absolute; right: -18px; bottom: -34px; width: 120px; height: 120px; opacity: .14; }
+.feat .t { font-family: var(--display); font-weight: 600; font-size: 18px; letter-spacing: -0.02em; position: relative; }
+.feat .s { font-size: 12.5px; color: #b3c0d8; grid-column: 1; position: relative; }
+.feat .switch { grid-row: 1 / span 2; grid-column: 2; background: rgba(255,255,255,.18); }
+.feat .switch.on { background: linear-gradient(135deg, #e6f4fb, #93cbe8); }
+.feat .switch.on::after { background: #0b1220; box-shadow: none; }
+.status { font-size: 12px; color: var(--p-muted); display: flex; gap: 8px; align-items: center; padding: 0 2px; font-variant-numeric: tabular-nums; }
+.status i { width: 6px; height: 6px; border-radius: 50%; background: var(--p-live); flex: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--p-live) 22%, transparent); }
+.list { background: var(--p-surface); border-radius: 14px; border: 1px solid var(--p-line); overflow: hidden; }
+.row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; font-size: 13.5px; }
+.row + .row { border-top: 1px solid var(--p-line); }
+.row .lbl { flex: 1; min-width: 0; }
+.row .lbl small { display: block; color: var(--p-muted); font-size: 11.5px; }
+.row .val { color: var(--p-muted); font-size: 12.5px; display: inline-flex; gap: 6px; align-items: center; }
+.kbd { font-size: 11px; border: 1px solid var(--p-line-2); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; color: var(--p-ink); background: var(--p-canvas); font-family: ui-monospace, Menlo, monospace; }
+.switch { width: 36px; height: 21px; border-radius: 999px; background: var(--p-off); position: relative; flex: none; }
+.switch::after { content: ""; position: absolute; top: 2.5px; left: 2.5px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.22); }
+.switch.on { background: var(--p-on); }
+.switch.on::after { left: 17.5px; }
+.foot { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--p-muted); padding: 0 2px 2px; flex-wrap: wrap; }
+.foot span:first-child { color: var(--p-link); font-weight: 600; }
+
+/* ---------- Store art ---------- */
+.art { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 14px; align-items: start; }
+@media (max-width: 720px) { .art { grid-template-columns: minmax(0, 1fr); } }
+.art figure { margin: 0; display: grid; gap: 8px; }
+.art figcaption { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tile { border-radius: 14px; overflow: hidden; position: relative; display: grid; place-items: center; max-width: 100%;
+  background: radial-gradient(100% 130% at 90% 0%, #233a70 0%, #131f3a 50%, #0b1220 100%); }
+.tile.small { aspect-ratio: 440 / 280; }
+.tile.marquee { aspect-ratio: 1400 / 560; grid-template-columns: auto auto; gap: 6%; }
+.tile svg { height: 46%; width: auto; }
+.tile.marquee svg { height: 52%; }
+.tile .shorts { display: flex; gap: 10px; height: 64%; }
+.tile .shorts i { display: block; aspect-ratio: 9 / 16; height: 100%; border-radius: 10px; background: linear-gradient(180deg, rgba(230,244,251,.16), rgba(147,203,232,.05)); border: 1px solid rgba(230,244,251,.14); }
+.tile .shorts i:nth-child(2) { background: linear-gradient(180deg, rgba(230,244,251,.32), rgba(147,203,232,.12)); border-color: rgba(230,244,251,.35); transform: translateY(-6%); }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.rule { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 4px; }
+.rule b { font-size: 14px; }
+.rule span { font-size: 13px; color: var(--muted); }
+.rule.no b::before { content: "Never · "; color: #c4524a; }
+.rule.yes b::before { content: "Always · "; color: var(--accent); }
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.compare figure { margin: 0; display: grid; gap: 8px; }
+.compare .strip { display: flex; height: 36px; border-radius: 10px; overflow: hidden; }
+.compare .strip i { flex: 1; }
+.compare figcaption { font-size: 12.5px; color: var(--muted); }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22386b"/><stop offset=".55" stop-color="#131f3a"/><stop offset="1" stop-color="#0b1220"/>
+    </linearGradient>
+    <radialGradient id="sheen" cx=".2" cy=".08" r=".75">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".12"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pearl" x1="0" y1="0" x2=".3" y2="1">
+      <stop offset="0" stop-color="#e6f4fb"/><stop offset="1" stop-color="#93cbe8"/>
+    </linearGradient>
+    <symbol id="mark" viewBox="0 0 128 128">
+      <g fill="none" stroke="url(#pearl)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M84.8 60 A22 22 0 1 0 64 72 V101"/>
+        <path d="M53 90 64 101 75 90"/>
+      </g>
+    </symbol>
+    <symbol id="ico" viewBox="0 0 128 128">
+      <rect width="128" height="128" rx="30" fill="url(#tile)"/>
+      <rect width="128" height="128" rx="30" fill="url(#sheen)"/>
+      <rect x=".75" y=".75" width="126.5" height="126.5" rx="29.25" fill="none" stroke="#ffffff" stroke-opacity=".08" stroke-width="1.5"/>
+      <use href="#mark"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <section class="hero-band" aria-labelledby="h1">
+    <div>
+      <span class="label">Shorts Flow 3.0 · Brand: Tideline</span>
+      <h1 id="h1">The loop, opened into a line that carries on.</h1>
+      <p>Every Short loops until you swipe. Shorts Flow breaks that loop and carries you to the next one. The mark draws exactly that: a circle that doesn't close, running on downward. Deep night blue, one pearl line, nothing loud.</p>
+    </div>
+    <svg class="mark-lg" viewBox="0 0 128 128" role="img" aria-label="Shorts Flow icon"><use href="#ico"/></svg>
+  </section>
+
+  <!-- Mark -->
+  <section class="panel" aria-labelledby="h-mark">
+    <header>
+      <h2 id="h-mark">The mark</h2>
+      <p>One continuous stroke on a 128 grid: a 22-unit loop left open at its lower right, falling into a short arrow. The stroke is 11 units with round ends, the same weight at every size. The tile is a quiet night gradient with a soft sheen from the top left and a hairline edge so it holds on dark toolbars.</p>
+    </header>
+    <div class="construct">
+      <figure>
+        <svg viewBox="0 0 128 128" aria-hidden="true">
+          <g fill="none" stroke-width=".8" class="guide" stroke-dasharray="2 3" opacity=".6">
+            <circle cx="64" cy="50" r="22"/><path d="M64 14V114M28 50H100"/>
+          </g>
+          <g fill="none" class="stroke" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" opacity=".9">
+            <path d="M84.8 60 A22 22 0 1 0 64 72 V101"/><path d="M53 90 64 101 75 90"/>
+          </g>
+        </svg>
+        <figcaption>Construction · loop r22, gap at 25°, stroke 11</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 128 128" aria-hidden="true"><use href="#ico"/></svg>
+        <figcaption>App icon · tile with pearl line</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 128 128" aria-hidden="true">
+          <g fill="none" class="stroke" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M84.8 60 A22 22 0 1 0 64 72 V101"/><path d="M53 90 64 101 75 90"/>
+          </g>
+        </svg>
+        <figcaption>Monochrome · for Firefox's themed toolbar icon</figcaption>
+      </figure>
+    </div>
+    <div class="label">Icon at the sizes browsers really use</div>
+    <div class="sizes">
+      <div class="lt"><figure><svg width="64" height="64"><use href="#ico"/></svg><figcaption>128 store</figcaption></figure><figure><svg width="48" height="48"><use href="#ico"/></svg><figcaption>48</figcaption></figure><figure><svg width="32" height="32"><use href="#ico"/></svg><figcaption>32</figcaption></figure><figure><svg width="16" height="16"><use href="#ico"/></svg><figcaption>16 toolbar</figcaption></figure></div>
+      <div class="dk"><figure><svg width="64" height="64"><use href="#ico"/></svg><figcaption>128 store</figcaption></figure><figure><svg width="48" height="48"><use href="#ico"/></svg><figcaption>48</figcaption></figure><figure><svg width="32" height="32"><use href="#ico"/></svg><figcaption>32</figcaption></figure><figure><svg width="16" height="16"><use href="#ico"/></svg><figcaption>16 toolbar</figcaption></figure></div>
+    </div>
+  </section>
+
+  <!-- Palette -->
+  <section class="panel" aria-labelledby="h-pal">
+    <header>
+      <h2 id="h-pal">Palette</h2>
+      <p>The saturated cobalt and neon cyan from the first draft are gone. Everything now sits a step deeper and calmer: night blues for the ground, one pearl gradient for the line, a softened tide blue for controls, and a single warm sand used only on the website, never in the extension.</p>
+    </header>
+    <div class="compare">
+      <figure><div class="strip"><i style="background:#0a1838"></i><i style="background:#1d4fd8"></i><i style="background:#4fd1ff"></i><i style="background:#f2f5fb"></i></div><figcaption>First draft · bright cobalt, neon cyan</figcaption></figure>
+      <figure><div class="strip"><i style="background:#0b1220"></i><i style="background:#16233f"></i><i style="background:#3b5bd9"></i><i style="background:linear-gradient(90deg,#e6f4fb,#93cbe8)"></i><i style="background:#e9c9a3"></i></div><figcaption>Refined · night, tide, pearl, sand</figcaption></figure>
+    </div>
+    <div class="pal">
+      <div class="sw"><i style="background:#0b1220"></i><div><b>Abyss</b><code>#0B1220</code><span>Tile base, dark ground</span></div></div>
+      <div class="sw"><i style="background:#16233f"></i><div><b>Deep Tide</b><code>#16233F</code><span>Gradient partner, cards</span></div></div>
+      <div class="sw"><i style="background:#3b5bd9"></i><div><b>Tide</b><code>#3B5BD9</code><span>Controls on light</span></div></div>
+      <div class="sw"><i style="background:#8fa8f5"></i><div><b>Tide Light</b><code>#8FA8F5</code><span>Controls on dark</span></div></div>
+      <div class="sw"><i style="background:linear-gradient(135deg,#e6f4fb,#93cbe8)"></i><div><b>Pearl</b><code>#E6F4FB → #93CBE8</code><span>The line, Auto-Scroll on</span></div></div>
+      <div class="sw"><i style="background:#e9c9a3"></i><div><b>Dawn Sand</b><code>#E9C9A3</code><span>Website accents only</span></div></div>
+      <div class="sw"><i style="background:#f6f7fa"></i><div><b>Foam</b><code>#F6F7FA</code><span>Light canvas</span></div></div>
+      <div class="sw"><i style="background:#5d6576"></i><div><b>Slate</b><code>#5D6576</code><span>Secondary text</span></div></div>
+    </div>
+    <div class="label">How much of each, roughly</div>
+    <div class="ratio" role="img" aria-label="Neutrals 70 percent, night blues 20 percent, tide 6 percent, pearl 3 percent, sand 1 percent">
+      <i style="width:70%;background:#eceef3"></i><i style="width:20%;background:#16233f"></i><i style="width:6%;background:#3b5bd9"></i><i style="width:3%;background:#93cbe8"></i><i style="width:1%;background:#e9c9a3"></i>
+    </div>
+    <div class="ratio-key"><span>Neutrals 70%</span><span>Night 20%</span><span>Tide 6%</span><span>Pearl 3%</span><span>Sand 1%</span></div>
+  </section>
+
+  <!-- Type -->
+  <section class="panel" aria-labelledby="h-type">
+    <header>
+      <h2 id="h-type">Type</h2>
+      <p>Sora is kept for display only, in a tight 600, where its geometry looks deliberate. Running text moves to Instrument Sans, which is quieter and more legible at popup sizes than Sora.</p>
+    </header>
+    <div class="two">
+      <div class="spec">
+        <span class="d1">Stop swiping. Keep watching.</span>
+        <span class="d2">Auto-Scroll is on</span>
+        <span class="b1">Shorts Flow moves to the next Short when one ends, and waits while you read the comments.</span>
+        <span class="b2">Shortcuts work on the Shorts Feed only, never while you're typing.</span>
+      </div>
+      <div class="spec">
+        <table>
+          <tr><td>Display</td><td>Sora 600, tracking −3.5% at large sizes, −2% at 15–22 px</td></tr>
+          <tr><td>UI and body</td><td>Instrument Sans 400 / 500 / 600</td></tr>
+          <tr><td>Numbers</td><td>Instrument Sans, tabular figures</td></tr>
+          <tr><td>Keys</td><td>System monospace in a keycap</td></tr>
+          <tr><td>On YouTube</td><td>YouTube's own Roboto, never these</td></tr>
+          <tr><td>Shipping</td><td>Both fonts bundled in the extension and site, never loaded from Google</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popup -->
+  <section class="panel" aria-labelledby="h-pop">
+    <header>
+      <h2 id="h-pop">Popup</h2>
+      <p>Neutral surfaces carry almost everything. The night card is reserved for Auto-Scroll, with the mark as a faint watermark and the pearl line as its switch. Every other control uses the calmer tide blue, so there is only ever one bright thing on screen.</p>
+    </header>
+    <div class="popups">
+      <figure><div class="pop light">
+        <div class="pop-top"><svg aria-hidden="true"><use href="#ico"/></svg><span class="name">Shorts Flow</span><span class="ver">3.0</span></div>
+        <div class="feat"><svg class="wm" viewBox="0 0 128 128" aria-hidden="true"><use href="#mark"/></svg><span class="t">Auto-Scroll</span><span class="switch on" role="img" aria-label="On"></span><span class="s">Moves on when a Short ends</span></div>
+        <div class="status"><i></i>On the Shorts Feed · 14 Shorts this session</div>
+        <div class="list">
+          <div class="row"><span class="lbl">Skip sponsored Shorts</span><span class="switch on"></span></div>
+          <div class="row"><span class="lbl">Show button on Shorts</span><span class="switch on"></span></div>
+          <div class="row"><span class="lbl">Speed<small>1.5× when on</small></span><span class="switch"></span></div>
+          <div class="row"><span class="lbl">Session limit</span><span class="val">Off ›</span></div>
+          <div class="row"><span class="lbl">Shortcuts</span><span class="val"><span class="kbd">A</span><span class="kbd">S</span> ›</span></div>
+        </div>
+        <div class="foot"><span>What's new</span><span>Report a problem · Support</span></div>
+      </div><figcaption>Light</figcaption></figure>
+      <figure><div class="pop dark">
+        <div class="pop-top"><svg aria-hidden="true"><use href="#ico"/></svg><span class="name">Shorts Flow</span><span class="ver">3.0</span></div>
+        <div class="feat"><svg class="wm" viewBox="0 0 128 128" aria-hidden="true"><use href="#mark"/></svg><span class="t">Auto-Scroll</span><span class="switch on" role="img" aria-label="On"></span><span class="s">Moves on when a Short ends</span></div>
+        <div class="status"><i></i>On the Shorts Feed · 14 Shorts this session</div>
+        <div class="list">
+          <div class="row"><span class="lbl">Skip sponsored Shorts</span><span class="switch on"></span></div>
+          <div class="row"><span class="lbl">Show button on Shorts</span><span class="switch on"></span></div>
+          <div class="row"><span class="lbl">Speed<small>1.5× when on</small></span><span class="switch"></span></div>
+          <div class="row"><span class="lbl">Session limit</span><span class="val">Off ›</span></div>
+          <div class="row"><span class="lbl">Shortcuts</span><span class="val"><span class="kbd">A</span><span class="kbd">S</span> ›</span></div>
+        </div>
+        <div class="foot"><span>What's new</span><span>Report a problem · Support</span></div>
+      </div><figcaption>Dark</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- Store art -->
+  <section class="panel" aria-labelledby="h-art">
+    <header>
+      <h2 id="h-art">Store art</h2>
+      <p>No text on the tiles, as the Chrome Web Store recommends, since tiles aren't translated. The marquee pairs the mark with abstract Short frames, the middle one lifted as the Current Short. No YouTube screenshots, logos or red.</p>
+    </header>
+    <div class="art">
+      <figure><div class="tile small"><svg viewBox="20 18 88 96" aria-hidden="true"><use href="#mark"/></svg></div><figcaption>Small promo tile · 440 × 280</figcaption></figure>
+      <figure><div class="tile marquee"><svg viewBox="20 18 88 96" aria-hidden="true"><use href="#mark"/></svg><div class="shorts"><i></i><i></i><i></i></div></div><figcaption>Marquee · 1400 × 560</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- Rules -->
+  <section class="panel" aria-labelledby="h-rules">
+    <header>
+      <h2 id="h-rules">Rules</h2>
+      <p>These keep the brand clear of YouTube's marks and keep the extension calm.</p>
+    </header>
+    <div class="rules">
+      <div class="rule no"><b>YouTube red</b><span>No #FF0000 family anywhere off YouTube. Errors use a muted brick, not red.</span></div>
+      <div class="rule no"><b>Play triangle or "S" ribbon</b><span>The mark is a broken loop, never a play button or a Shorts-style S.</span></div>
+      <div class="rule no"><b>Brand on youtube.com</b><span>The Shorts Control uses YouTube's own look. Pearl and night never appear on the page.</span></div>
+      <div class="rule yes"><b>One bright thing</b><span>Only Auto-Scroll gets the night card and pearl. Everything else stays neutral.</span></div>
+      <div class="rule yes"><b>Hairline edge on the tile</b><span>So the icon holds its shape on dark toolbars and store pages.</span></div>
+      <div class="rule yes"><b>"Not affiliated with YouTube"</b><span>In the store listing and the site footer.</span></div>
+    </div>
+  </section>
+</div>
