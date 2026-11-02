@@ -1,0 +1,68 @@
+name: Release
+
+# Pushing a version tag (v3.0.0) builds the Chrome and Firefox zips and the
+# Firefox source bundle and attaches them to a GitHub Release. Store uploads
+# stay manual: nothing here talks to the Chrome Web Store or Firefox Add-ons.
+# See docs/release/checklist.md.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # WXT, Vitest and web-ext run on Node; Bun installs and runs the scripts.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Tag matches package.json version
+        run: |
+          version="$(bun -e 'console.log(require("./package.json").version)')"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+
+      - run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium firefox
+
+      # The same gate as CI, so a release never ships what CI would reject.
+      - run: bun run typecheck
+
+      - name: Test (lifecycle, and browser in Chromium and Firefox)
+        run: bun run test
+
+      - name: Build Chrome and Firefox
+        run: bun run build
+
+      - name: Lint the Firefox build
+        run: bun run lint:firefox
+
+      - name: Zip Chrome, Firefox and the Firefox sources
+        run: bun run zip
+
+      - name: Attach the zips to a GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -l .output/*.zip
+          gh release create "$GITHUB_REF_NAME" .output/*.zip \
+            --verify-tag \
+            --title "Shorts Flow ${GITHUB_REF_NAME#v}" \
+            --generate-notes \
+            $([[ "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease)

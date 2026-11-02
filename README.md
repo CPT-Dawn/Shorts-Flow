@@ -26,6 +26,10 @@ bunx playwright install chromium firefox   # once, for the browser tests
 
 CI runs typecheck, all test projects, both builds and `web-ext lint` on every push and pull request.
 
+## Releasing
+
+Work through `docs/release/checklist.md`. Pushing a `v*` tag that matches `package.json`'s version runs the same checks, then attaches the Chrome, Firefox and source zips to a GitHub Release. Store uploads stay manual, using the copy in `docs/release/store-listing.md`.
+
 ## Layout
 
 - `src/entrypoints/`: thin WXT entrypoints (background, content script, Popup).
