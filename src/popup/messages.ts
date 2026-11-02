@@ -15,6 +15,8 @@ export type PopupMessage =
   | 'popupHostAccessHint'
   | 'popupHostAccessRestore'
   | 'popupSettings'
+  | 'popupShortsControlShown'
+  | 'popupShortsControlShownHint'
   | 'popupWhatsNew'
   | 'popupReportProblem'
   | 'popupSupport';

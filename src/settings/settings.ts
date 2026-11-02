@@ -8,10 +8,13 @@ import { storage } from 'wxt/utils/storage';
 export type Settings = {
   /** Whether the Shorts Feed Advances on its own when the Current Short ends. */
   autoScroll: boolean;
+  /** Whether the Shorts Control shows in YouTube's action rail beside each Short. */
+  shortsControlShown: boolean;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
   autoScroll: true,
+  shortsControlShown: true,
 };
 
 export interface SettingsStore {
