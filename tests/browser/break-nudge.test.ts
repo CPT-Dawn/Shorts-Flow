@@ -80,7 +80,7 @@ describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
     await aMomentLater();
 
     expect(dialog.title).toBe('Time for a break?');
-    expect(dialog.text).toBe("You've reached the session limit you set. Take a moment, or keep watching.");
+    expect(dialog.text).toBe("You've reached the Session Limit you set. Take a moment, or keep watching.");
     expect(dialog.actions).toEqual(['Keep watching']);
     expect(dialog.element.matches(':modal')).toBe(true);
     expect(shortsFeed.dialog()!.element.textContent).toBe(dialog.element.textContent);

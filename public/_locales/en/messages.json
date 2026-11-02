@@ -45,12 +45,12 @@
     "description": "Status line: the tab the Popup opened over is not on the Shorts Feed, so Shorts Flow does nothing there."
   },
   "popupShortsWatched": {
-    "message": "Shorts watched: $COUNT$",
+    "message": "Shorts Watched: $COUNT$",
     "description": "Status line, after whether the tab is on the Shorts Feed: how many Shorts the viewer has watched in the current Session, one continuous stretch of watching that ends after 30 minutes with no Short playing.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "popupSessionLimit": {
-    "message": "Session limit",
+    "message": "Session Limit",
     "description": "Popup label of the optional Session Limit: a Break Nudge after a number of Shorts or minutes in one Session, one continuous stretch of watching the Shorts Feed."
   },
   "popupSessionLimitHintOff": {
@@ -63,7 +63,7 @@
   },
   "popupSessionLimitShorts": {
     "message": "Shorts",
-    "description": "Popup choice for the Session Limit: a number of Shorts watched."
+    "description": "Popup choice for the Session Limit: a number of Shorts Watched."
   },
   "popupSessionLimitMinutes": {
     "message": "Minutes",
@@ -79,7 +79,7 @@
   },
   "popupSessionLimitProgressShorts": {
     "message": "$COUNT$ of $LIMIT$ Shorts before a break",
-    "description": "Under the Session Limit: Shorts watched towards a limit in Shorts, since the last Break Nudge.",
+    "description": "Under the Session Limit: Shorts Watched towards a limit in Shorts, since the last Break Nudge.",
     "placeholders": { "count": { "content": "$1", "example": "12" }, "limit": { "content": "$2", "example": "30" } }
   },
   "popupSessionLimitProgressMinutes": {
@@ -100,16 +100,16 @@
     "description": "Firefox only: button that asks Firefox to give Shorts Flow its access to youtube.com back."
   },
   "popupSkipSponsored": {
-    "message": "Skip sponsored Shorts",
+    "message": "Skip Sponsored Shorts",
     "description": "Name of the switch that skips a Sponsored Short (an ad YouTube puts in the Shorts Feed) as soon as it comes up. It skips, it does not block ads: never say \"block\"."
   },
   "popupSkipSponsoredOn": {
     "message": "Moves past them as soon as one comes up",
-    "description": "Under the Skip sponsored Shorts switch while it is on."
+    "description": "Under the Skip Sponsored Shorts switch while it is on."
   },
   "popupSkipSponsoredOff": {
     "message": "They play like any other Short",
-    "description": "Under the Skip sponsored Shorts switch while it is off."
+    "description": "Under the Skip Sponsored Shorts switch while it is off."
   },
   "popupSettings": {
     "message": "Settings",
@@ -206,7 +206,7 @@
     "description": "Title of the Break Nudge, the calm notice over the Shorts Feed when the viewer reaches the Session Limit they set. No guilt-trip wording."
   },
   "breakNudgeText": {
-    "message": "You've reached the session limit you set. Take a moment, or keep watching.",
+    "message": "You've reached the Session Limit you set. Take a moment, or keep watching.",
     "description": "Text under the Break Nudge's title. Calm, no guilt-trip wording, no numbers or countdown."
   },
   "breakNudgeKeepWatching": {
@@ -244,10 +244,10 @@
   },
   "quickSettingsName": {
     "message": "Quick settings",
-    "description": "Name of the small menu off the Shorts Control (the Auto-Scroll button in YouTube's row of buttons beside each Short), and of the small button that opens it. It holds Skip sponsored Shorts, Speed and the Preferred Speed."
+    "description": "Name of the small menu off the Shorts Control (the Auto-Scroll button in YouTube's row of buttons beside each Short), and of the small button that opens it. It holds Skip Sponsored Shorts, Speed and the Preferred Speed."
   },
   "quickSettingsSkipSponsored": {
-    "message": "Skip sponsored Shorts",
+    "message": "Skip Sponsored Shorts",
     "description": "Quick settings menu: the switch that skips a Sponsored Short (an ad YouTube puts in the Shorts Feed) as soon as it comes up. Same wording as the Popup's switch. It skips, it does not block ads: never say \"block\"."
   },
   "quickSettingsSpeed": {

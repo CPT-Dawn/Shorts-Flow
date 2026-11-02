@@ -38,28 +38,28 @@ describe('Shorts Watched', () => {
   it('says how many Shorts the viewer has watched this Session', async () => {
     openPopup({ session: sessionUnderWay({ shortsWatched: 12 }) });
 
-    await expect.element(page.getByRole('status')).toHaveTextContent('On the Shorts Feed · Shorts watched: 12');
+    await expect.element(page.getByRole('status')).toHaveTextContent('On the Shorts Feed · Shorts Watched: 12');
   });
 
   it('starts again from none once the Session has ended', async () => {
     openPopup({ session: createTestSessionStore({ shortsWatched: 12, lastSeenAt: Date.now() - 31 * MINUTE }) });
 
-    await expect.element(page.getByRole('status')).toMatchTextContent(/Shorts watched: 0$/);
+    await expect.element(page.getByRole('status')).toMatchTextContent(/Shorts Watched: 0$/);
   });
 
   it('counts up live while a Shorts tab plays', async () => {
     const session = sessionUnderWay({ shortsWatched: 12 });
     openPopup({ session });
-    await expect.element(page.getByRole('status')).toMatchTextContent(/Shorts watched: 12$/);
+    await expect.element(page.getByRole('status')).toMatchTextContent(/Shorts Watched: 12$/);
 
     await session.update((stored) => ({ ...stored, shortsWatched: 13 }));
 
-    await expect.element(page.getByRole('status')).toMatchTextContent(/Shorts watched: 13$/);
+    await expect.element(page.getByRole('status')).toMatchTextContent(/Shorts Watched: 13$/);
   });
 });
 
 describe('Session Limit', () => {
-  const kind = () => page.getByRole('combobox', { name: 'Session limit' });
+  const kind = () => page.getByRole('combobox', { name: 'Session Limit' });
 
   it('is off by default', async () => {
     openPopup();

@@ -21,7 +21,7 @@ describe.each(testPages)('on $name', (page) => {
     expect((await settings.get()).autoScroll).toBe(true);
   });
 
-  it('lists Skip sponsored Shorts, Speed and the Preferred Speed, as they are set', async () => {
+  it('lists Skip Sponsored Shorts, Speed and the Preferred Speed, as they are set', async () => {
     const shortsFeed = await withQuickSettings(
       createTestSettingsStore({ skipSponsoredShorts: true, speedOn: false, preferredSpeed: 1.5 }),
     );
@@ -29,18 +29,18 @@ describe.each(testPages)('on $name', (page) => {
     await shortsFeed.openQuickSettings();
 
     await expect.poll(() => shortsFeed.quickSettings()?.items).toEqual([
-      { role: 'menuitemcheckbox', name: 'Skip sponsored Shorts', checked: true },
+      { role: 'menuitemcheckbox', name: 'Skip Sponsored Shorts', checked: true },
       { role: 'menuitemcheckbox', name: 'Speed', checked: false },
       { role: 'menuitem', name: 'Preferred Speed 1.5×', expanded: false },
     ]);
   });
 
-  it('switches Skip sponsored Shorts and Speed, for every tab and the Popup', async () => {
+  it('switches Skip Sponsored Shorts and Speed, for every tab and the Popup', async () => {
     const settings = createTestSettingsStore({ skipSponsoredShorts: true, speedOn: false, preferredSpeed: 2 });
     const shortsFeed = await withQuickSettings(settings);
     await shortsFeed.openQuickSettings();
 
-    await shortsFeed.chooseQuickSetting('Skip sponsored Shorts');
+    await shortsFeed.chooseQuickSetting('Skip Sponsored Shorts');
     await shortsFeed.chooseQuickSetting('Speed');
 
     await expect.poll(async () => await settings.get()).toMatchObject({ skipSponsoredShorts: false, speedOn: true });
@@ -78,7 +78,7 @@ describe.each(testPages)('on $name', (page) => {
     await settings.set({ skipSponsoredShorts: false, speedOn: true, preferredSpeed: 3 });
 
     await expect.poll(() => shortsFeed.quickSettings()?.items).toEqual([
-      { role: 'menuitemcheckbox', name: 'Skip sponsored Shorts', checked: false },
+      { role: 'menuitemcheckbox', name: 'Skip Sponsored Shorts', checked: false },
       { role: 'menuitemcheckbox', name: 'Speed', checked: true },
       { role: 'menuitem', name: 'Preferred Speed 3×', expanded: false },
     ]);
@@ -93,7 +93,7 @@ describe.each(testPages)('on $name', (page) => {
 
     opener.focus();
     await shortsFeed.pressKey('Enter');
-    await expect.poll(() => shortsFeed.quickSettings()?.focused).toBe('Skip sponsored Shorts');
+    await expect.poll(() => shortsFeed.quickSettings()?.focused).toBe('Skip Sponsored Shorts');
     expect(opener.getAttribute('aria-expanded')).toBe('true');
 
     await shortsFeed.pressKey('ArrowDown');
@@ -137,7 +137,7 @@ describe.each(testPages)('on $name', (page) => {
     const shortsFeed = await withQuickSettings(settings);
     shortsFeed.quickSettingsButton()!.focus();
     await shortsFeed.pressKey('Enter');
-    await expect.poll(() => shortsFeed.quickSettings()?.focused).toBe('Skip sponsored Shorts');
+    await expect.poll(() => shortsFeed.quickSettings()?.focused).toBe('Skip Sponsored Shorts');
 
     await shortsFeed.pressKey('s');
     await shortsFeed.pressKey('a');
@@ -145,7 +145,7 @@ describe.each(testPages)('on $name', (page) => {
 
     expect(await settings.get()).toMatchObject({ autoScroll: false, speedOn: true });
     expect(shortsFeed.quickSettings()?.items[1]).toMatchObject({ name: 'Speed', checked: true });
-    expect(shortsFeed.quickSettings()?.focused).toBe('Skip sponsored Shorts');
+    expect(shortsFeed.quickSettings()?.focused).toBe('Skip Sponsored Shorts');
   });
 
   it('closes on a click elsewhere, changing nothing', async () => {
@@ -260,7 +260,7 @@ describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
   it("keeps the arrow keys in the menu, so YouTube doesn't move the feed", async () => {
     const shortsFeed = await withQuickSettings(createTestSettingsStore({ autoScroll: false }));
     await shortsFeed.openQuickSettings();
-    await expect.poll(() => shortsFeed.quickSettings()?.focused).toBe('Skip sponsored Shorts');
+    await expect.poll(() => shortsFeed.quickSettings()?.focused).toBe('Skip Sponsored Shorts');
 
     await shortsFeed.pressKey('ArrowDown');
     await aMomentLater();

@@ -76,7 +76,7 @@ describe('Auto-Scroll', () => {
 });
 
 describe('Skip Sponsored Shorts', () => {
-  const skipSponsored = () => page.getByRole('list', { name: 'Settings' }).getByRole('switch', { name: 'Skip sponsored Shorts' });
+  const skipSponsored = () => page.getByRole('list', { name: 'Settings' }).getByRole('switch', { name: 'Skip Sponsored Shorts' });
 
   it('is on from the start, and says it skips rather than blocks', async () => {
     openPopup();
@@ -202,7 +202,7 @@ describe('keyboard', () => {
     await expect.poll(async () => (await settings.get()).autoScroll).toBe(false);
 
     await userEvent.tab();
-    await expect.element(page.getByRole('switch', { name: 'Skip sponsored Shorts' })).toHaveFocus();
+    await expect.element(page.getByRole('switch', { name: 'Skip Sponsored Shorts' })).toHaveFocus();
     await userEvent.tab();
     await expect.element(page.getByRole('switch', { name: 'Show button on Shorts' })).toHaveFocus();
     await userEvent.tab();
@@ -210,7 +210,7 @@ describe('keyboard', () => {
     await userEvent.tab();
     await expect.element(page.getByRole('switch', { name: 'Speed' })).toHaveFocus();
     await userEvent.tab();
-    await expect.element(page.getByRole('combobox', { name: 'Session limit' })).toHaveFocus();
+    await expect.element(page.getByRole('combobox', { name: 'Session Limit' })).toHaveFocus();
     await userEvent.tab();
     await expect.element(page.getByRole('button', { name: 'Auto-Scroll Shortcut: A' })).toHaveFocus();
     await userEvent.tab();
@@ -229,11 +229,11 @@ describe('keyboard', () => {
 
     for (const name of [
       'Auto-Scroll',
-      'Skip sponsored Shorts',
+      'Skip Sponsored Shorts',
       'Show button on Shorts',
       'Preferred Speed',
       'Speed',
-      'Session limit',
+      'Session Limit',
       'Auto-Scroll Shortcut',
       'Speed Shortcut',
       "What's new",

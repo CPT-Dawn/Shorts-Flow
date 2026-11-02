@@ -20,8 +20,8 @@ Shorts Flow is an extension for YouTube's desktop Shorts feed. When a Short fini
 - Skip Sponsored Shorts: moves straight past Sponsored Shorts in the feed. You can turn it off. Shorts Flow does not block ads: ads shown inside a Short or elsewhere on YouTube play as usual.
 - Speed: play every Short at your preferred speed, from 0.5× to 3×, and keep it across reloads.
 - Shortcuts: A for Auto-Scroll and S for Speed, both changeable in the toolbar popup.
-- Shorts watched: see how many Shorts you've watched this session.
-- Session limit: optionally take a gentle break after a number of Shorts or minutes.
+- Shorts Watched: see how many Shorts you've watched this Session.
+- Session Limit: optionally take a gentle break after a number of Shorts or minutes.
 - Never reloads the page: if the next Short can't be found, a quiet notice offers to try again.
 
 Privacy: Shorts Flow collects no data. No analytics, no tracking, no servers; nothing leaves your browser. It needs only the storage permission and access to youtube.com.
@@ -42,7 +42,7 @@ These must say the same as the Privacy page (https://shortsflow.cptdawn.dev/priv
 
 - **Single purpose** (Chrome Web Store, Privacy practices): "Moves YouTube's desktop Shorts feed to the next Short when the current one finishes, with controls for how and when it does."
 - **Permission justifications:**
-  - `storage`: keeps the viewer's settings (Auto-Scroll, Skip Sponsored Shorts, Speed, Shortcuts, Session Limit) and this Session's Shorts watched count in the browser's local extension storage. Nothing is synced or sent anywhere.
+  - `storage`: keeps the viewer's settings (Auto-Scroll, Skip Sponsored Shorts, Speed, Shortcuts, Session Limit) and this Session's Shorts Watched count in the browser's local extension storage. Nothing is synced or sent anywhere.
   - Host access to `https://www.youtube.com/*`: runs Shorts Flow's content script on YouTube so it can tell when a Short ends, move to the next one and place its button in the Shorts action rail. It matches all of youtube.com because YouTube moves into and out of the Shorts feed without loading a new page; off the Shorts feed it does nothing.
 - **Remote code: No.** Every script and font is bundled in the package.
 - **Data usage** (Chrome Web Store): tick none of the data types; Shorts Flow collects no data. Certify all three disclosures: data is not sold to third parties, not used or transferred for purposes unrelated to the single purpose, and not used to determine creditworthiness or for lending.
