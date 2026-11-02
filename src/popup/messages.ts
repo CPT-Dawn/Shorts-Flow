@@ -18,6 +18,11 @@ export type PopupMessage =
   | 'popupSkipSponsoredOn'
   | 'popupSkipSponsoredOff'
   | 'popupSettings'
+  | 'popupSpeed'
+  | 'popupSpeedOn'
+  | 'popupSpeedOff'
+  | 'popupPreferredSpeed'
+  | 'popupSpeedValue'
   | 'popupWhatsNew'
   | 'popupReportProblem'
   | 'popupSupport';

@@ -72,6 +72,27 @@
     "message": "Settings",
     "description": "Accessible name of the Popup's list of settings."
   },
+  "popupSpeed": {
+    "message": "Speed",
+    "description": "Name of the Speed switch in the Popup: every Short plays at the Preferred Speed while it is on."
+  },
+  "popupSpeedOn": {
+    "message": "Every Short at your speed",
+    "description": "Under the Speed switch while it is on: each new Short plays at the Preferred Speed picked beside it."
+  },
+  "popupSpeedOff": {
+    "message": "YouTube's own speed",
+    "description": "Under the Speed switch while it is off: Shorts play at whatever speed YouTube sets."
+  },
+  "popupPreferredSpeed": {
+    "message": "Preferred Speed",
+    "description": "Accessible name of the picker for the Preferred Speed, the playback speed Speed keeps across reloads."
+  },
+  "popupSpeedValue": {
+    "message": "$SPEED$×",
+    "description": "One playback speed in the Preferred Speed picker, such as 1.5×.",
+    "placeholders": { "speed": { "content": "$1", "example": "1.5" } }
+  },
   "popupWhatsNew": {
     "message": "What's new",
     "description": "Popup link to news about recent versions on the Shorts Flow website."
