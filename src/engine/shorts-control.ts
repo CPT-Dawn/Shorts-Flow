@@ -5,24 +5,17 @@ import { quickSettings } from './quick-settings';
 import { createRailButton, watchActionRail, type RailButton } from './youtube';
 import { followTheme, lookVariables } from './youtube-look';
 
-/** The Shorts Control as built for one visit, for what `SHORTS_CONTROL_EXTRAS` adds to it. */
+/**
+ * The Shorts Control as built for one visit, for its quick-settings menu to
+ * add its opener to. The menu may append its own elements to `item`
+ * (positioned against it; the item is `position: relative`). The control is
+ * the same element on every Short, so whatever is added survives YouTube
+ * rebuilding the rail.
+ */
 export type ShortsControl = RailButton & {
   /** Its YouTube-style tooltip under the button. */
   tooltip: { show(): void; hide(): void };
 };
-
-/**
- * Something more the Shorts Control carries, called once per visit after it
- * is built: the quick-settings menu (#13) adds its opener here. It may append
- * its own elements to `control.item` (positioned against it; the item is
- * `position: relative`), and passes `feed.signal` to its listeners. The
- * control is the same element on every Short, so whatever it adds survives
- * YouTube rebuilding the rail.
- */
-export type ShortsControlExtra = (control: ShortsControl, feed: Feed) => void;
-
-/** What the Shorts Control carries besides the Auto-Scroll button. */
-export const SHORTS_CONTROL_EXTRAS: ShortsControlExtra[] = [quickSettings];
 
 /**
  * The Shorts Control: an Auto-Scroll button in YouTube's action rail, just
@@ -66,7 +59,7 @@ export const shortsControl: Feature = (feed) => {
     tooltip.text(feed.getMessage(on ? 'shortsControlTurnOff' : 'shortsControlTurnOn'));
   };
   button.addEventListener('click', () => toggleSetting(feed, 'autoScroll'), { signal });
-  for (const extra of SHORTS_CONTROL_EXTRAS) extra(control, feed);
+  quickSettings(control, feed);
 
   // Nothing shows until the settings are known: it might be hidden.
   let shown = false;
