@@ -1,0 +1,3 @@
+# Native look inside YouTube, Shorts Flow's own brand everywhere else
+
+Everything Shorts Flow draws on youtube.com copies YouTube's design language (rail buttons, menus, type, light and dark themes) so it feels built in. Everything outside YouTube (toolbar icon, Popup, website, store listings) carries Shorts Flow's own brand, avoids YouTube red, the play triangle and the YouTube wordmark, and states that Shorts Flow is not affiliated with YouTube. Store policy treats implied affiliation as impersonation, and the 2.x icon and Popup header used YouTube's marks; the Featured badge is unreachable with them.
