@@ -10,12 +10,21 @@ export type Settings = {
   autoScroll: boolean;
   /** Whether the Shorts Control shows in YouTube's action rail beside each Short. */
   shortsControlShown: boolean;
+  /** Whether every new Current Short plays at the Preferred Speed. */
+  speedOn: boolean;
+  /** The Preferred Speed, one of `PREFERRED_SPEEDS`. */
+  preferredSpeed: number;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
   autoScroll: true,
   shortsControlShown: true,
+  speedOn: false,
+  preferredSpeed: 1.5,
 };
+
+/** Every Preferred Speed there is to pick: 0.5× to 3× in steps of 0.25. */
+export const PREFERRED_SPEEDS: readonly number[] = Array.from({ length: 11 }, (_, i) => 0.5 + i * 0.25);
 
 export interface SettingsStore {
   get(): Promise<Settings>;

@@ -17,6 +17,11 @@ export type PopupMessage =
   | 'popupSettings'
   | 'popupShortsControlShown'
   | 'popupShortsControlShownHint'
+  | 'popupSpeed'
+  | 'popupSpeedOn'
+  | 'popupSpeedOff'
+  | 'popupPreferredSpeed'
+  | 'popupSpeedValue'
   | 'popupWhatsNew'
   | 'popupReportProblem'
   | 'popupSupport';

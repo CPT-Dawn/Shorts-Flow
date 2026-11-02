@@ -170,6 +170,10 @@ describe('keyboard', () => {
     await userEvent.tab();
     await expect.element(page.getByRole('switch', { name: 'Show button on Shorts' })).toHaveFocus();
     await userEvent.tab();
+    await expect.element(page.getByRole('combobox', { name: 'Preferred Speed' })).toHaveFocus();
+    await userEvent.tab();
+    await expect.element(page.getByRole('switch', { name: 'Speed' })).toHaveFocus();
+    await userEvent.tab();
     await expect.element(page.getByRole('link', { name: "What's new" })).toHaveFocus();
     await userEvent.tab();
     await expect.element(page.getByRole('link', { name: 'Report a problem' })).toHaveFocus();
@@ -181,7 +185,7 @@ describe('keyboard', () => {
     openPopup();
     await expect.element(page.getByRole('switch', { name: 'Auto-Scroll' })).toBeEnabled();
 
-    for (const name of ['Auto-Scroll', 'Show button on Shorts', "What's new", 'Report a problem', 'Support']) {
+    for (const name of ['Auto-Scroll', 'Show button on Shorts', 'Preferred Speed', 'Speed', "What's new", 'Report a problem', 'Support']) {
       await userEvent.tab();
       const focused = document.activeElement!;
       expect(focused.matches(':focus-visible'), name).toBe(true);

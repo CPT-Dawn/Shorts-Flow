@@ -2,6 +2,7 @@ import type { SessionStore } from '@/settings/session';
 import type { Settings, SettingsStore } from '@/settings/settings';
 import { createAdvance } from './advance';
 import { autoScroll } from './auto-scroll';
+import { speed } from './speed';
 import type { Feature, Feed } from './feed';
 import { whileOnShortsFeed } from './route';
 import { shortsControl } from './shorts-control';
@@ -52,7 +53,7 @@ export type EngineOptions = {
  * Every feature, each mounted once per visit to the Shorts Feed. A new
  * feature is a module exporting a `Feature`, added to this list.
  */
-const FEATURES: Feature[] = [autoScroll, shortsControl];
+const FEATURES: Feature[] = [autoScroll, shortsControl, speed];
 
 /**
  * Mounts the Shorts Flow engine onto `document` and returns its teardown.
