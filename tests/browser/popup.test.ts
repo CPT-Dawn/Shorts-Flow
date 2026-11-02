@@ -113,13 +113,13 @@ describe('status line', () => {
   it('says so when the tab the Popup opened over is on the Shorts Feed', async () => {
     openPopup({ isOnShortsFeed: async () => true });
 
-    await expect.element(page.getByRole('status')).toHaveTextContent('On the Shorts Feed');
+    await expect.element(page.getByRole('status')).toMatchTextContent(/^On the Shorts Feed/);
   });
 
   it('says so when that tab is anywhere else', async () => {
     openPopup({ isOnShortsFeed: async () => false });
 
-    await expect.element(page.getByRole('status')).toHaveTextContent('Not on the Shorts Feed');
+    await expect.element(page.getByRole('status')).toMatchTextContent(/^Not on the Shorts Feed/);
   });
 });
 
@@ -210,6 +210,8 @@ describe('keyboard', () => {
     await userEvent.tab();
     await expect.element(page.getByRole('switch', { name: 'Speed' })).toHaveFocus();
     await userEvent.tab();
+    await expect.element(page.getByRole('combobox', { name: 'Session limit' })).toHaveFocus();
+    await userEvent.tab();
     await expect.element(page.getByRole('link', { name: "What's new" })).toHaveFocus();
     await userEvent.tab();
     await expect.element(page.getByRole('link', { name: 'Report a problem' })).toHaveFocus();
@@ -221,7 +223,7 @@ describe('keyboard', () => {
     openPopup();
     await expect.element(page.getByRole('switch', { name: 'Auto-Scroll' })).toBeEnabled();
 
-    for (const name of ['Auto-Scroll', 'Skip sponsored Shorts', 'Show button on Shorts', 'Preferred Speed', 'Speed', "What's new", 'Report a problem', 'Support']) {
+    for (const name of ['Auto-Scroll', 'Skip sponsored Shorts', 'Show button on Shorts', 'Preferred Speed', 'Speed', 'Session limit', "What's new", 'Report a problem', 'Support']) {
       await userEvent.tab();
       const focused = document.activeElement!;
       expect(focused.matches(':focus-visible'), name).toBe(true);
@@ -234,7 +236,7 @@ describe('keyboard', () => {
 describe('privacy', () => {
   it('draws in its own bundled fonts and fetches nothing from anywhere else', async () => {
     openPopup({ isOnShortsFeed: async () => true });
-    await expect.element(page.getByRole('status')).toHaveTextContent('On the Shorts Feed');
+    await expect.element(page.getByRole('status')).toMatchTextContent(/^On the Shorts Feed/);
     await document.fonts.ready;
 
     const loaded = [...document.fonts].filter((face) => face.status === 'loaded').map((face) => face.family.replaceAll('"', ''));

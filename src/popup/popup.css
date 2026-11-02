@@ -449,3 +449,13 @@ label.sf-row {
   cursor: default;
   opacity: 0.6;
 }
+
+/* A number in the same box (the Session Limit). */
+.sf-number {
+  width: 4.5em;
+  cursor: text;
+}
+
+.sf-number[hidden] {
+  display: none;
+}
