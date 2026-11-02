@@ -81,6 +81,43 @@
     "description": "One playback speed in the Preferred Speed picker, such as 1.5×.",
     "placeholders": { "speed": { "content": "$1", "example": "1.5" } }
   },
+  "popupShortcuts": {
+    "message": "Shortcuts",
+    "description": "Name of the Popup row listing the Shortcuts: single keys that switch Auto-Scroll and Speed on the Shorts Feed."
+  },
+  "popupShortcutsHint": {
+    "message": "Single keys on the Shorts Feed",
+    "description": "Under the Shortcuts row's name: the Shortcuts work on the Shorts Feed only. Pressing a key's button rebinds it."
+  },
+  "popupShortcutsListening": {
+    "message": "Press the new key, or Esc to keep it",
+    "description": "Under the Shortcuts row's name while it waits for the viewer to press a Shortcut's new key."
+  },
+  "popupShortcutKey": {
+    "message": "$ACTION$ Shortcut: $KEY$",
+    "description": "Accessible name of a Shortcut's key button in the Popup, such as \"Auto-Scroll Shortcut: A\". Pressing it rebinds the key.",
+    "placeholders": {
+      "action": { "content": "$1", "example": "Auto-Scroll" },
+      "key": { "content": "$2", "example": "A" }
+    }
+  },
+  "popupPressKey": {
+    "message": "Press a key",
+    "description": "Shown in place of a Shortcut's key while the Popup waits for its new key. Keep it short: it fits in a small keycap."
+  },
+  "popupKeyTaken": {
+    "message": "$KEY$ is already the $ACTION$ Shortcut",
+    "description": "The viewer tried to give a Shortcut the key another Shortcut has; it is refused.",
+    "placeholders": {
+      "key": { "content": "$1", "example": "S" },
+      "action": { "content": "$2", "example": "Speed" }
+    }
+  },
+  "popupKeyYouTube": {
+    "message": "$KEY$ is one of YouTube's own keys",
+    "description": "The viewer tried to give a Shortcut a key YouTube itself uses on Shorts (moving between Shorts, pausing, muting, ...); it is refused so YouTube's keys keep working.",
+    "placeholders": { "key": { "content": "$1", "example": "K" } }
+  },
   "popupWhatsNew": {
     "message": "What's new",
     "description": "Popup link to news about recent versions on the Shorts Flow website."
