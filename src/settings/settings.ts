@@ -8,6 +8,8 @@ import { storage } from 'wxt/utils/storage';
 export type Settings = {
   /** Whether the Shorts Feed Advances on its own when the Current Short ends. */
   autoScroll: boolean;
+  /** Whether the Shorts Control shows in YouTube's action rail beside each Short. */
+  shortsControlShown: boolean;
   /** Whether every new Current Short plays at the Preferred Speed. */
   speedOn: boolean;
   /** The Preferred Speed, one of `PREFERRED_SPEEDS`. */
@@ -24,6 +26,7 @@ export type Shortcuts = Record<ShortcutAction, string>;
 
 export const DEFAULT_SETTINGS: Settings = {
   autoScroll: true,
+  shortsControlShown: true,
   speedOn: false,
   preferredSpeed: 1.5,
   shortcuts: { toggleAutoScroll: 'a', toggleSpeed: 's' },

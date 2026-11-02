@@ -113,3 +113,141 @@ export function watchTheme(document: Document, changed: (dark: boolean) => void,
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['dark'] });
   signal.addEventListener('abort', () => observer.disconnect(), { once: true });
 }
+
+// The action rail (2026-11): `reel-action-bar-view-model` beside the Current
+// Short holds Like, Comments, Share, Remix and the sound thumbnail
+// (`pivot-button-view-model`), in that order. YouTube builds it afresh for
+// every Short, inside the one renderer, inside `ytd-shorts`.
+const SHORTS_ELEMENT = 'ytd-shorts';
+const ACTION_RAIL = 'ytd-reel-video-renderer reel-action-bar-view-model';
+const SOUND_THUMBNAIL = ':scope > pivot-button-view-model';
+
+/**
+ * Calls `place` with the Current Short's action rail and the item to insert
+ * a rail button before (the sound thumbnail, or null to append when it's
+ * missing), now and each time YouTube rebuilds or changes the rail, until
+ * `signal` aborts. `place` must leave a rail it is happy with untouched,
+ * since its own changes are watched too.
+ *
+ * One observer, scoped to the Shorts element (it waits for that element
+ * first, when YouTube has yet to build it). Returns a function that calls
+ * `place` again on demand.
+ */
+export function watchActionRail(
+  document: Document,
+  place: (rail: Element, before: Element | null) => void,
+  signal: AbortSignal,
+): () => void {
+  const view = document.defaultView!;
+  const sync = () => {
+    if (signal.aborted) return;
+    const rail = document.querySelector(ACTION_RAIL);
+    if (rail) place(rail, rail.querySelector(SOUND_THUMBNAIL));
+  };
+  const railObserver = new view.MutationObserver(sync);
+  const observeShorts = () => {
+    const shorts = document.querySelector(SHORTS_ELEMENT);
+    if (shorts) railObserver.observe(shorts, { childList: true, subtree: true });
+    return Boolean(shorts);
+  };
+  const waiting = new view.MutationObserver(() => {
+    if (!observeShorts()) return;
+    waiting.disconnect();
+    sync();
+  });
+  if (!observeShorts()) waiting.observe(document.documentElement, { childList: true, subtree: true });
+  signal.addEventListener(
+    'abort',
+    () => {
+      railObserver.disconnect();
+      waiting.disconnect();
+    },
+    { once: true },
+  );
+  sync();
+  return sync;
+}
+
+/** The parts of a rail button built by `createRailButton`. */
+export type RailButton = {
+  /** The rail item to insert into the rail. */
+  item: HTMLElement;
+  /** The item's inner column: the button with its caption under it. */
+  column: HTMLElement;
+  /** The round button itself. */
+  button: HTMLButtonElement;
+  /** Where the 24 px icon goes. */
+  icon: HTMLElement;
+  /** The caption under the button. */
+  caption: HTMLElement;
+  /** The caption's text. */
+  label: HTMLElement;
+};
+
+/**
+ * A rail button with the structure and classes of YouTube's own labelled rail
+ * buttons (Share, Remix), so YouTube's stylesheet gives it the Native Look:
+ *
+ * ```
+ * item.ytSpecButtonViewModelHost.ytwReelActionBarViewModelHostDesktopActionButton
+ *   label.ytSpecButtonShapeWithLabelHost (column)
+ *     button.ytSpecButtonShapeNext{Host,Tonal,Mono,SizeL,IconButton,…}
+ *       div.ytSpecButtonShapeNextIcon > span.ytIconWrapperHost > span.ytSpecIconShapeHost > div (icon)
+ *     div.ytSpecButtonShapeWithLabelLabel (caption) > span.ytAttributedStringHost (label)
+ * ```
+ *
+ * Only plain elements: YouTube's own tags (`button-view-model`, …) are custom
+ * elements its scripts would try to take over. `classes` gives each part a
+ * class of Shorts Flow's own as well, so fixed fallback styles still reach
+ * them if YouTube renames its classes.
+ */
+export function createRailButton(
+  document: Document,
+  classes: Record<Exclude<keyof RailButton, 'label'>, string>,
+): RailButton {
+  const element = <K extends keyof HTMLElementTagNameMap>(tag: K, ...names: string[]) => {
+    const node = document.createElement(tag);
+    node.className = names.join(' ');
+    return node;
+  };
+  const item = element('div', classes.item, 'ytSpecButtonViewModelHost', 'ytwReelActionBarViewModelHostDesktopActionButton');
+  const column = element('label', classes.column, 'ytSpecButtonShapeWithLabelHost');
+  const button = element(
+    'button',
+    classes.button,
+    'ytSpecButtonShapeNextHost',
+    'ytSpecButtonShapeNextTonal',
+    'ytSpecButtonShapeNextMono',
+    'ytSpecButtonShapeNextSizeL',
+    'ytSpecButtonShapeNextIconButton',
+    'ytSpecButtonShapeNextEnableBackdropFilterExperiment',
+    'ytSpecButtonShapeNextMainstageIconSize',
+    'ytSpecButtonShapeNextMainstagePadding',
+  );
+  button.type = 'button';
+  const iconBox = element('div', 'ytSpecButtonShapeNextIcon', 'ytSpecButtonShapeNextElevatedContent');
+  iconBox.setAttribute('aria-hidden', 'true');
+  const wrapper = element('span', 'ytIconWrapperHost');
+  wrapper.style.cssText = 'width: 24px; height: 24px;';
+  const shape = element('span', 'yt-icon-shape', 'ytSpecIconShapeHost');
+  const icon = element('div', classes.icon);
+  icon.style.cssText = 'width: 100%; height: 100%; display: block; fill: currentcolor;';
+  shape.append(icon);
+  wrapper.append(shape);
+  iconBox.append(wrapper);
+  button.append(iconBox);
+  const caption = element('div', classes.caption, 'ytSpecButtonShapeWithLabelLabel');
+  // The button carries the accessible name; the caption is for the eye.
+  caption.setAttribute('aria-hidden', 'true');
+  const label = element(
+    'span',
+    'ytAttributedStringHost',
+    'ytAttributedStringWhiteSpacePreWrap',
+    'ytAttributedStringTextAlignmentCenter',
+    'ytAttributedStringWordWrapping',
+  );
+  caption.append(label);
+  column.append(button, caption);
+  item.append(column);
+  return { item, column, button, icon, caption, label };
+}

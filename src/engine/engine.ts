@@ -6,6 +6,7 @@ import { shortcuts } from './shortcuts';
 import { speed } from './speed';
 import type { Feature, Feed } from './feed';
 import { whileOnShortsFeed } from './route';
+import { shortsControl } from './shorts-control';
 
 /** Time as the engine sees it, so tests can move it forward by hand. */
 export interface Clock {
@@ -28,6 +29,12 @@ export type EngineMessage =
   | 'stallNotice'
   /** Its retry button. */
   | 'stallRetry'
+  /** The Shorts Control's accessible name and the text under it. */
+  | 'shortsControlName'
+  /** Its tooltip while Auto-Scroll is on. */
+  | 'shortsControlTurnOff'
+  /** Its tooltip while Auto-Scroll is off. */
+  | 'shortsControlTurnOn'
   /** The confirmations of the Shortcuts. */
   | 'shortcutAutoScrollOn'
   | 'shortcutAutoScrollOff'
@@ -52,7 +59,7 @@ export type EngineOptions = {
  * Every feature, each mounted once per visit to the Shorts Feed. A new
  * feature is a module exporting a `Feature`, added to this list.
  */
-const FEATURES: Feature[] = [autoScroll, speed, shortcuts];
+const FEATURES: Feature[] = [autoScroll, shortsControl, speed, shortcuts];
 
 /**
  * Mounts the Shorts Flow engine onto `document` and returns its teardown.

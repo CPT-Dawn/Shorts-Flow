@@ -60,6 +60,14 @@
     "message": "Settings",
     "description": "Accessible name of the Popup's list of settings."
   },
+  "popupShortsControlShown": {
+    "message": "Show button on Shorts",
+    "description": "Popup switch: whether the Shorts Control, Shorts Flow's Auto-Scroll button beside each Short on YouTube, is shown."
+  },
+  "popupShortsControlShownHint": {
+    "message": "An Auto-Scroll button beside each Short",
+    "description": "Under the \"Show button on Shorts\" switch: what the button is."
+  },
   "popupSpeed": {
     "message": "Speed",
     "description": "Name of the Speed switch in the Popup: every Short plays at the Preferred Speed while it is on."
@@ -154,5 +162,17 @@
   "shortcutSpeedOff": {
     "message": "Speed off",
     "description": "Brief confirmation on the Shorts Feed after the viewer turned Speed off with its Shortcut: Shorts play at YouTube's own speed again."
+  },
+  "shortsControlName": {
+    "message": "Auto-Scroll",
+    "description": "Shorts Control: name of the Auto-Scroll button Shorts Flow adds to YouTube's row of buttons beside each Short, shown under it like YouTube's \"Share\". Keep it very short: it has about 64 px."
+  },
+  "shortsControlTurnOff": {
+    "message": "Turn Auto-Scroll off",
+    "description": "Shorts Control: tooltip while Auto-Scroll is on, saying what a click does."
+  },
+  "shortsControlTurnOn": {
+    "message": "Turn Auto-Scroll on",
+    "description": "Shorts Control: tooltip while Auto-Scroll is off, saying what a click does."
   }
 }
