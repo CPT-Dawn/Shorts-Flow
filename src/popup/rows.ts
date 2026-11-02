@@ -1,6 +1,7 @@
 import type { SessionStore } from '@/settings/session';
 import type { Settings } from '@/settings/settings';
 import type { PopupMessage } from './messages';
+import { shortsWatched } from './session';
 
 /** The settings that are on or off, which a switch row can show. */
 export type SwitchSetting = { [K in keyof Settings]: Settings[K] extends boolean ? K : never }[keyof Settings];
@@ -57,4 +58,4 @@ export type StatusPart = (popup: PopupContext) => Node;
 export const POPUP_ROWS: PopupRow[] = [];
 
 /** What the status line says after the Shorts Feed, in order. */
-export const STATUS_PARTS: StatusPart[] = [];
+export const STATUS_PARTS: StatusPart[] = [shortsWatched];

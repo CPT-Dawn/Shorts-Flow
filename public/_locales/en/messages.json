@@ -44,6 +44,11 @@
     "message": "Not on the Shorts Feed",
     "description": "Status line: the tab the Popup opened over is not on the Shorts Feed, so Shorts Flow does nothing there."
   },
+  "popupShortsWatched": {
+    "message": "Shorts watched: $COUNT$",
+    "description": "Status line, after whether the tab is on the Shorts Feed: how many Shorts the viewer has watched in the current Session, one continuous stretch of watching that ends after 30 minutes with no Short playing.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
   "popupHostAccessLost": {
     "message": "Shorts Flow can't reach YouTube",
     "description": "Firefox only: heading of the notice shown when the viewer turned off Shorts Flow's access to youtube.com."

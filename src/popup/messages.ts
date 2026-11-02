@@ -11,6 +11,7 @@ export type PopupMessage =
   | 'popupAutoScrollOff'
   | 'popupOnShortsFeed'
   | 'popupOffShortsFeed'
+  | 'popupShortsWatched'
   | 'popupHostAccessLost'
   | 'popupHostAccessHint'
   | 'popupHostAccessRestore'
