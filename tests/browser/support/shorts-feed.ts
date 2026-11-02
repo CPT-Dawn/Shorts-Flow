@@ -44,6 +44,10 @@ export type ShortsFeed = {
   setPlaybackSpeed(rate: number): void;
   /** Pauses the Current Short where it is, as YouTube's pause control does. */
   pause(): void;
+  /** Plays the Current Short from where it is, as YouTube's play control does. */
+  play(): void;
+  /** Whether the Current Short is playing, as the viewer sees: not paused, nor waiting for data. */
+  playing(): boolean;
   /**
    * Plays a clip to its end in the hidden watch-page player YouTube keeps
    * behind the Shorts Feed. Resolves once it has ended.
@@ -126,6 +130,10 @@ export async function mountShortsFeed(
     pause() {
       youtube.video.pause();
     },
+    play() {
+      youtube.video.play().catch(() => {});
+    },
+    playing: () => !youtube.video.paused && youtube.video.readyState >= youtube.video.HAVE_FUTURE_DATA,
     playHiddenWatchPlayer: youtube.playHiddenWatchPlayer,
     loadNextShort: youtube.loadNextShort,
     pressNextVideo() {

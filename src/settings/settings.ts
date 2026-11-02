@@ -8,10 +8,16 @@ import { storage } from 'wxt/utils/storage';
 export type Settings = {
   /** Whether the Shorts Feed Advances on its own when the Current Short ends. */
   autoScroll: boolean;
+  /** When to show the Break Nudge: off, or after so many Shorts Watched or minutes of Shorts playing. */
+  sessionLimit: SessionLimit;
 };
+
+/** The Session Limit: off, or a number of Shorts Watched or of minutes, counted from the last Break Nudge. */
+export type SessionLimit = { kind: 'off' } | { kind: 'shorts' | 'minutes'; value: number };
 
 export const DEFAULT_SETTINGS: Settings = {
   autoScroll: true,
+  sessionLimit: { kind: 'off' },
 };
 
 export interface SettingsStore {
