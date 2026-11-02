@@ -47,8 +47,7 @@ export const shortcutsRow: PopupRow = (popup) => {
   controls.className = 'sf-row-value';
   controls.append(...keys.map(({ button }) => button));
 
-  const item = popup.row({ id, label: getMessage('popupShortcuts'), hint: '', control: controls });
-  const hint = item.querySelector(`[id="${id}-hint"]`)!;
+  const { item, hint } = popup.row({ id, label: getMessage('popupShortcuts'), control: controls });
   hint.setAttribute('aria-live', 'polite');
 
   const show = () => {

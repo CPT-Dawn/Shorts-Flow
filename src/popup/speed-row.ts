@@ -18,12 +18,7 @@ export const speedRow: PopupRow = (popup) => {
   }
   picker.addEventListener('change', () => popup.changeSettings({ preferredSpeed: Number(picker.value) }), { signal });
 
-  const toggle = document.createElement('input');
-  toggle.type = 'checkbox';
-  toggle.className = 'sf-switch';
-  toggle.setAttribute('role', 'switch');
-  toggle.setAttribute('aria-labelledby', id);
-  toggle.setAttribute('aria-describedby', `${id}-hint`);
+  const toggle = popup.switchInput(id, `${id}-hint`);
   toggle.addEventListener('change', () => popup.changeSettings({ speedOn: toggle.checked }), { signal });
 
   // Disabled until the settings arrive, so nothing shows a guess.
@@ -33,8 +28,7 @@ export const speedRow: PopupRow = (popup) => {
   controls.className = 'sf-row-value';
   controls.append(picker, toggle);
 
-  const item = popup.row({ id, label: getMessage('popupSpeed'), hint: '', control: controls });
-  const hint = item.querySelector(`[id="${id}-hint"]`)!;
+  const { item, hint } = popup.row({ id, label: getMessage('popupSpeed'), control: controls });
   popup.watchSettings(({ speedOn, preferredSpeed }) => {
     toggle.checked = speedOn;
     picker.value = String(preferredSpeed);

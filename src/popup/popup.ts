@@ -76,18 +76,14 @@ export function mountPopup(
     return input;
   };
 
-  /** One item of the settings list: label and hint on the left, `control` on the right. */
-  const listRow = (tag: 'div' | 'label', id: string, label: string, hint: string | undefined, control: Node) => {
+  /** One item of the settings list: label, and a hint if it has one, on the left; `control` on the right. */
+  const listRow = (tag: 'div' | 'label', id: string, label: string, control: Node, { withHint }: { withHint: boolean }) => {
     const labelNode = element('span', 'sf-row-label', label);
     labelNode.id = id;
-    const text = element('span', 'sf-row-text', labelNode);
-    let hintNode: HTMLSpanElement | undefined;
-    if (hint !== undefined) {
-      hintNode = element('span', 'sf-row-hint', hint);
-      hintNode.id = `${id}-hint`;
-      text.append(hintNode);
-    }
-    return { item: element('li', 'sf-row-item', element(tag, 'sf-row', text, control)), hintNode };
+    const hint = element('span', 'sf-row-hint');
+    hint.id = `${id}-hint`;
+    const text = element('span', 'sf-row-text', labelNode, ...(withHint ? [hint] : []));
+    return { item: element('li', 'sf-row-item', element(tag, 'sf-row', text, control)), hint };
   };
 
   // Settings, as last read or changed, shared with every row.
@@ -229,19 +225,20 @@ export function mountPopup(
     watchSettings,
     changeSettings: (changes) => void settings.set(changes),
     session,
-    row: ({ id, label, hint, control }) => listRow('div', id, label, hint, control).item,
+    row: ({ id, label, control }) => listRow('div', id, label, control, { withHint: true }),
+    switchInput: (labelledBy, describedBy) => switchInput('sf-switch', labelledBy, describedBy),
     switchRow({ setting, label, hint }) {
       const id = `sf-setting-${setting}`;
       const input = switchInput('sf-switch', id, hint && `${id}-hint`);
       input.addEventListener('change', () => context.changeSettings({ [setting]: input.checked }), { signal });
       // The whole row is the switch's label, so a click anywhere on it switches.
-      const { item, hintNode } = listRow('label', id, label, hint && '', input);
+      const row = listRow('label', id, label, input, { withHint: hint !== undefined });
       watchSettings((shown) => {
         input.checked = shown[setting];
         input.disabled = false;
-        if (hint && hintNode) hintNode.textContent = hint(shown);
+        if (hint) row.hint.textContent = hint(shown);
       });
-      return item;
+      return row.item;
     },
   };
 

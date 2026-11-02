@@ -27,12 +27,19 @@ export type PopupContext = {
   /** The current Session, kept by the Shorts tabs. */
   session: SessionStore;
   /**
-   * A row of the settings list: `label` (already looked up with `getMessage`) and
-   * an optional `hint` under it on the left, `control` on the right. The row
-   * gives the label and hint the ids `<id>` and `<id>-hint`, for the control's
-   * aria-labelledby and aria-describedby.
+   * A row of the settings list: `label` (already looked up with `getMessage`)
+   * and a hint under it on the left, `control` on the right. Returns the row
+   * and its hint, empty for the row to fill in and keep up to date. The row
+   * gives the label and hint the ids `<id>` and `<id>-hint`, for the
+   * control's aria-labelledby and aria-describedby.
    */
-  row(parts: { id: string; label: string; hint?: string; control: Node }): HTMLLIElement;
+  row(parts: { id: string; label: string; control: Node }): { item: HTMLLIElement; hint: HTMLElement };
+  /**
+   * A native checkbox drawn as a switch, named by the element `labelledBy`
+   * and described by `describedBy` (ids). Disabled until the row enables it
+   * once the settings are known.
+   */
+  switchInput(labelledBy: string, describedBy?: string): HTMLInputElement;
   /**
    * A row with a switch for a setting that is on or off, kept in step with the
    * setting both ways. `hint`, if given, is worked out again from the

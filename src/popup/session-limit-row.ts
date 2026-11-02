@@ -66,8 +66,7 @@ export const sessionLimitRow: PopupRow = (popup) => {
   // The kind first: it decides whether there is a number to set.
   controls.append(kind, value);
 
-  const item = popup.row({ id, label: getMessage('popupSessionLimit'), hint: '', control: controls });
-  const hint = item.querySelector(`[id="${id}-hint"]`)!;
+  const { item, hint } = popup.row({ id, label: getMessage('popupSessionLimit'), control: controls });
 
   let session: Session = NO_SESSION;
   const show = () => {
