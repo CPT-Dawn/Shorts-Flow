@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # WXT, Vitest and web-ext run on Node; Bun installs and runs the scripts.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+
+      - run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium firefox
+
+      - run: bun run typecheck
+
+      - name: Test (lifecycle, and browser in Chromium and Firefox)
+        run: bun run test
+
+      - name: Build Chrome and Firefox
+        run: bun run build
+
+      - name: Lint the Firefox build
+        run: bun run lint:firefox
