@@ -1,8 +1,10 @@
 import { PREFERRED_SPEEDS, type Settings } from '@/settings/settings';
 import type { Feed } from './feed';
 import { holdWhile } from './holds';
+import { drawIcon } from './icon';
 import { placeOnPage } from './on-page';
 import type { ShortsControl } from './shorts-control';
+import { lookVariables } from './youtube-look';
 
 /**
  * The Shorts Control's quick-settings menu: Skip Sponsored Shorts, Speed and
@@ -33,8 +35,7 @@ export function quickSettings(control: ShortsControl, feed: Feed): void {
   opener.setAttribute('aria-label', getMessage('quickSettingsName'));
   opener.setAttribute('aria-haspopup', 'menu');
   opener.setAttribute('aria-expanded', 'false');
-  opener.append(drawIcon(document, OPENER_ICON, 16, 'currentColor', 'none'));
-  opener.firstElementChild!.setAttribute('class', 'shorts-flow-quick-settings-icon');
+  opener.append(drawIcon(document, OPENER_ICON, { size: 16, filled: true, className: 'shorts-flow-quick-settings-icon' }));
   control.item.append(opener);
 
   const { host, root } = placeOnPage(feed, 'quick-settings', { css: MENU_CSS });
@@ -223,7 +224,7 @@ function item(document: Document, role: string, icon: string[], text: string, ..
   const iconBox = document.createElement('span');
   iconBox.className = 'icon';
   iconBox.setAttribute('aria-hidden', 'true');
-  iconBox.append(drawIcon(document, icon, 24, 'none', 'currentColor'));
+  iconBox.append(drawIcon(document, icon));
   const label = document.createElement('span');
   label.className = 'label';
   label.textContent = text;
@@ -246,33 +247,10 @@ function chevron(document: Document) {
   const box = document.createElement('span');
   box.className = 'chevron';
   box.setAttribute('aria-hidden', 'true');
-  box.append(drawIcon(document, ['M10 7l5 5-5 5'], 24, 'none', 'currentColor'));
+  box.append(drawIcon(document, ['M10 7l5 5-5 5']));
   return box;
 }
 
-function drawIcon(document: Document, paths: string[], size: number, fill: string, stroke: string): SVGSVGElement {
-  const SVG = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(SVG, 'svg');
-  const attributes = {
-    viewBox: '0 0 24 24',
-    width: String(size),
-    height: String(size),
-    focusable: 'false',
-    'aria-hidden': 'true',
-    fill,
-    stroke,
-    'stroke-width': '2',
-    'stroke-linecap': 'round',
-    'stroke-linejoin': 'round',
-  };
-  for (const [name, value] of Object.entries(attributes)) svg.setAttribute(name, value);
-  for (const d of paths) {
-    const path = document.createElementNS(SVG, 'path');
-    path.setAttribute('d', d);
-    svg.append(path);
-  }
-  return svg;
-}
 
 // Outline icons in the weight of YouTube's menu icons: 24 px, 2 px lines.
 const ICONS = {
@@ -290,35 +268,12 @@ const OPENER_ICON = ['M12 3.5a2 2 0 1 0 0 4a2 2 0 1 0 0-4z', 'M12 10a2 2 0 1 0 0
 
 /**
  * YouTube's menus, from the 2026-11 capture (rail.md, overflow-menu-dark.png):
- * a raised sheet (#282828 on dark, #fff on light) with 12 px corners, 8 px
- * above and below, 40 px items of Roboto 14 px with a 24 px icon 16 px in,
- * secondary text in #aaa / #606060, and YouTube's monochrome switch.
+ * a raised sheet with 12 px corners, 8 px above and below, 40 px items of
+ * Roboto 14 px with a 24 px icon 16 px in, secondary text, and YouTube's
+ * monochrome switch, in YouTube's colours (youtube-look.ts).
  */
 const MENU_CSS = `
-:host {
-  --menu-background: #fff;
-  --menu-ink: #0f0f0f;
-  --menu-secondary: #606060;
-  --menu-hover: rgba(0, 0, 0, 0.1);
-  --menu-shadow: 0 4px 32px rgba(0, 0, 0, 0.1);
-  --toggle-off: rgba(0, 0, 0, 0.1);
-  --toggle-on: #0f0f0f;
-  --knob-off: #fff;
-  --knob-on: #fff;
-  --knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-:host([data-theme="dark"]) {
-  --menu-background: #282828;
-  --menu-ink: #f1f1f1;
-  --menu-secondary: #aaa;
-  --menu-hover: rgba(255, 255, 255, 0.1);
-  --menu-shadow: 0 4px 32px rgba(0, 0, 0, 0.6);
-  --toggle-off: rgba(255, 255, 255, 0.2);
-  --toggle-on: #f1f1f1;
-  --knob-off: #aaa;
-  --knob-on: #0f0f0f;
-  --knob-shadow: none;
-}
+${lookVariables({ light: ':host', dark: ':host([data-theme="dark"])' })}
 .menu {
   position: fixed;
   z-index: 2202;
@@ -328,9 +283,9 @@ const MENU_CSS = `
   overflow-y: auto;
   padding: 8px 0;
   border-radius: 12px;
-  background-color: var(--menu-background);
-  box-shadow: var(--menu-shadow);
-  color: var(--menu-ink);
+  background-color: var(--shorts-flow-menu);
+  box-shadow: var(--shorts-flow-menu-shadow);
+  color: var(--shorts-flow-ink);
   font-family: Roboto, Arial, sans-serif;
   font-size: 14px;
   font-weight: 400;
@@ -357,13 +312,13 @@ const MENU_CSS = `
 }
 .item:hover,
 .item:focus-visible {
-  background-color: var(--menu-hover);
+  background-color: var(--shorts-flow-menu-hover);
 }
 .item:focus {
   outline: none;
 }
 .item:focus-visible {
-  outline: 2px solid var(--menu-ink);
+  outline: 2px solid var(--shorts-flow-ink);
   outline-offset: -2px;
 }
 .icon {
@@ -378,7 +333,7 @@ const MENU_CSS = `
   margin-right: 16px;
 }
 .value {
-  color: var(--menu-secondary);
+  color: var(--shorts-flow-secondary);
   font-size: 12px;
   line-height: 18px;
 }
@@ -387,7 +342,7 @@ const MENU_CSS = `
   width: 24px;
   height: 24px;
   margin-left: 4px;
-  color: var(--menu-secondary);
+  color: var(--shorts-flow-secondary);
 }
 [role="menuitemradio"] .icon {
   visibility: hidden;
@@ -398,7 +353,7 @@ const MENU_CSS = `
 .back {
   height: 48px;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--menu-hover);
+  border-bottom: 1px solid var(--shorts-flow-menu-hover);
   font-weight: 500;
 }
 .toggle {
@@ -408,7 +363,7 @@ const MENU_CSS = `
   width: 36px;
   height: 20px;
   border-radius: 10px;
-  background-color: var(--toggle-off);
+  background-color: var(--shorts-flow-toggle-off);
   transition: background-color 0.1s;
 }
 .knob {
@@ -418,16 +373,16 @@ const MENU_CSS = `
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: var(--knob-off);
-  box-shadow: var(--knob-shadow);
+  background-color: var(--shorts-flow-knob-off);
+  box-shadow: var(--shorts-flow-knob-shadow);
   transition: transform 0.1s, background-color 0.1s;
 }
 [aria-checked="true"] .toggle {
-  background-color: var(--toggle-on);
+  background-color: var(--shorts-flow-toggle-on);
 }
 [aria-checked="true"] .knob {
   transform: translateX(16px);
-  background-color: var(--knob-on);
+  background-color: var(--shorts-flow-knob-on);
 }
 @media (prefers-reduced-motion: reduce) {
   .toggle, .knob { transition: none; }

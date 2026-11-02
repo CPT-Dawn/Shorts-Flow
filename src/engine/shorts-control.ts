@@ -1,7 +1,9 @@
 import type { Settings } from '@/settings/settings';
 import type { Feature, Feed } from './feed';
+import { drawIcon } from './icon';
 import { quickSettings } from './quick-settings';
-import { createRailButton, isDarkTheme, watchActionRail, watchTheme, type RailButton } from './youtube';
+import { createRailButton, watchActionRail, type RailButton } from './youtube';
+import { followTheme, lookVariables } from './youtube-look';
 
 /** The Shorts Control as built for one visit, for what `SHORTS_CONTROL_EXTRAS` adds to it. */
 export type ShortsControl = RailButton & {
@@ -52,9 +54,7 @@ export const shortsControl: Feature = (feed) => {
   style.textContent = SHORTS_CONTROL_CSS;
   document.head.append(style);
 
-  const setTheme = (dark: boolean) => (item.dataset.theme = dark ? 'dark' : 'light');
-  setTheme(isDarkTheme(document));
-  watchTheme(document, setTheme, signal);
+  followTheme(document, item, signal);
 
   const tooltip = createTooltip(feed, parts);
   const control: ShortsControl = { ...parts, tooltip };
@@ -116,6 +116,7 @@ function createTooltip(feed: Feed, { button }: RailButton) {
   tooltip.id = 'shorts-flow-control-tooltip';
   tooltip.setAttribute('role', 'tooltip');
   tooltip.hidden = true;
+  followTheme(document, tooltip, signal);
   document.body.append(tooltip);
   signal.addEventListener('abort', () => tooltip.remove(), { once: true });
   button.setAttribute('aria-describedby', tooltip.id);
@@ -157,55 +158,26 @@ const TOOLTIP_OFFSET = 14;
 const ICON_ON = ['M5 4.5l7 7 7-7', 'M5 12.5l7 7 7-7'];
 const ICON_OFF = ['M20 12a8 8 0 1 1-2.34-5.66', 'M20 3.5v4.5h-4.5'];
 
-/** One of the icons above as an inline SVG, drawn in the button's text colour. */
-function drawIcon(document: Document, paths: string[]): SVGSVGElement {
-  const SVG = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(SVG, 'svg');
-  const attributes = {
-    viewBox: '0 0 24 24',
-    width: '24',
-    height: '24',
-    focusable: 'false',
-    'aria-hidden': 'true',
-    style: 'pointer-events: none; display: inherit; width: 100%; height: 100%;',
-    fill: 'none',
-    stroke: 'currentColor',
-    'stroke-width': '2',
-    'stroke-linecap': 'round',
-    'stroke-linejoin': 'round',
-  };
-  for (const [name, value] of Object.entries(attributes)) svg.setAttribute(name, value);
-  for (const d of paths) {
-    const path = document.createElementNS(SVG, 'path');
-    path.setAttribute('d', d);
-    svg.append(path);
-  }
-  return svg;
-}
-
 /**
  * The fixed Native Look from the 2026-11 capture (rail.md), behind YouTube's
  * own classes: every rule sits in `:where()`, so it counts for nothing
  * against YouTube's stylesheet and fills in only what that no longer styles.
- * The tooltip is Shorts Flow's own, in YouTube's tooltip style.
+ * Its colours are YouTube's, from the adapter (youtube-look.ts). The tooltip
+ * is Shorts Flow's own, in YouTube's tooltip style.
  */
 const SHORTS_CONTROL_CSS = `
+${lookVariables({
+  light: ':where(.shorts-flow-control, .shorts-flow-control-tooltip)',
+  dark: ':where(.shorts-flow-control[data-theme="dark"], .shorts-flow-control-tooltip[data-theme="dark"])',
+})}
 .shorts-flow-control {
   position: relative;
 }
 :where(.shorts-flow-control) {
-  --shorts-flow-ink: #0f0f0f;
-  --shorts-flow-tonal: rgba(0, 0, 0, 0.05);
-  --shorts-flow-tonal-hover: rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 0 0 8px;
-}
-:where(.shorts-flow-control[data-theme="dark"]) {
-  --shorts-flow-ink: #f1f1f1;
-  --shorts-flow-tonal: rgba(255, 255, 255, 0.1);
-  --shorts-flow-tonal-hover: rgba(255, 255, 255, 0.2);
 }
 :where(.shorts-flow-control-column) {
   display: flex;
@@ -234,6 +206,12 @@ const SHORTS_CONTROL_CSS = `
 :where(.shorts-flow-control-icon) {
   width: 24px;
   height: 24px;
+}
+.shorts-flow-control-icon > svg {
+  display: inherit;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 :where(.shorts-flow-control-caption) {
   margin-top: 4px;
@@ -265,21 +243,14 @@ const SHORTS_CONTROL_CSS = `
   padding: 0;
   border: 0;
   border-radius: 11px;
-  background: #e5e5e5;
-  color: #0f0f0f;
+  background: var(--shorts-flow-raised);
+  color: var(--shorts-flow-ink);
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.1s;
 }
-.shorts-flow-control[data-theme="dark"] .shorts-flow-quick-settings-button {
-  background: #3f3f3f;
-  color: #f1f1f1;
-}
 .shorts-flow-quick-settings-button:hover {
-  background: #d9d9d9;
-}
-.shorts-flow-control[data-theme="dark"] .shorts-flow-quick-settings-button:hover {
-  background: #535353;
+  background: var(--shorts-flow-raised-hover);
 }
 .shorts-flow-control:hover .shorts-flow-quick-settings-button,
 .shorts-flow-control:focus-within .shorts-flow-quick-settings-button,
@@ -311,8 +282,8 @@ const SHORTS_CONTROL_CSS = `
   margin: 8px 0 0;
   padding: 8px;
   border-radius: 4px;
-  background-color: #606060;
-  color: #fff;
+  background-color: var(--shorts-flow-tooltip);
+  color: var(--shorts-flow-tooltip-ink);
   opacity: 0.9;
   font-family: Roboto, Arial, sans-serif;
   font-size: 12px;
