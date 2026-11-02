@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { aMomentLater, expectTimeline, mountShortsFeed } from './support/shorts-feed';
 import { createTestSettingsStore } from './support/stores';
-import { testPages } from './support/test-pages';
+import { hasNextShort, testPages } from './support/test-pages';
 
 // Longer than Shorts Flow takes to notice YouTube has changed pages.
 const A_SECOND = 1000;
 
-describe.each(testPages)('on $name', (page) => {
+describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
   it.each([
     ['Home', '/'],
     ['a watch page', '/watch'],

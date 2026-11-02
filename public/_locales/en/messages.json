@@ -71,5 +71,13 @@
   "popupSupport": {
     "message": "Support",
     "description": "Popup link to the Support Page on the Shorts Flow website, to rate, share or donate."
+  },
+  "stallNotice": {
+    "message": "Couldn't find the next Short",
+    "description": "Stall notice: a small toast on the Shorts Feed when Shorts Flow asked YouTube for the next Short and none came. Keep it short and calm."
+  },
+  "stallRetry": {
+    "message": "Retry",
+    "description": "Button on the Stall notice that asks YouTube for the next Short again."
   }
 }

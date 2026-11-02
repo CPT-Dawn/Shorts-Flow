@@ -19,9 +19,13 @@ export interface Clock {
 
 /**
  * The keys in the locale files (public/_locales) of the text the engine shows
- * on the Shorts Feed. None yet: features that show text add their keys here.
+ * on the Shorts Feed. Features that show text add their keys here.
  */
-export type EngineMessage = never;
+export type EngineMessage =
+  /** The Stall notice. */
+  | 'stallNotice'
+  /** Its retry button. */
+  | 'stallRetry';
 
 /** Looks up user-facing text in the locale files: `browser.i18n.getMessage` in the extension. */
 export type GetMessage = (name: EngineMessage, substitutions?: string | string[]) => string;
