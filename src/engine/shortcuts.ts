@@ -1,6 +1,7 @@
 import type { Settings, ShortcutAction } from '@/settings/settings';
 import { shortcutKey } from '@/settings/shortcut-key';
 import type { Feature, Feed } from './feed';
+import { isTyping } from './holds';
 import { createToast } from './toast';
 
 /** How long a Shortcut's confirmation shows, in ms: about as long as YouTube's own. */
@@ -23,7 +24,7 @@ export const shortcuts: Feature = (feed) => {
   const confirmation = createToast(feed, 'shortcut-confirmation');
 
   const onKeyDown = (event: KeyboardEvent) => {
-    if (!event.isTrusted || event.isComposing || isTyping(event)) return;
+    if (!event.isTrusted || event.isComposing || isTyping(feed.document)) return;
     const settings = feed.settings();
     const key = shortcutKey(event);
     if (!settings || !key) return;
@@ -51,14 +52,3 @@ function confirm({ getMessage }: Pick<Feed, 'getMessage'>, settings: Settings, a
   if (action === 'toggleAutoScroll') return getMessage(settings.autoScroll ? 'shortcutAutoScrollOn' : 'shortcutAutoScrollOff');
   return settings.speedOn ? getMessage('shortcutSpeedOn', String(settings.preferredSpeed)) : getMessage('shortcutSpeedOff');
 }
-
-/** Whether the key went somewhere the viewer types: YouTube's search box, a comment. */
-function isTyping(event: KeyboardEvent): boolean {
-  const target = event.composedPath()[0] as HTMLElement | undefined;
-  if (!target || typeof target.tagName !== 'string') return false;
-  if (target.isContentEditable || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return true;
-  return target.tagName === 'INPUT' && !NOT_TYPED_INPUTS.includes((target as HTMLInputElement).type);
-}
-
-/** Inputs nobody types into. */
-const NOT_TYPED_INPUTS = ['button', 'checkbox', 'radio', 'range', 'reset', 'submit', 'image', 'color', 'file'];

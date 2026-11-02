@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { aMomentLater, expectTimeline, mountShortsFeed } from './support/shorts-feed';
 import { createTestSettingsStore } from './support/stores';
-import { hasNextShort, testPages } from './support/test-pages';
+import { feedPages, hasNextShort } from './support/test-pages';
 
-describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
+describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
   it('plays the Current Short at the Preferred Speed while Speed is on', async () => {
     const shortsFeed = await mountShortsFeed(page, {
       settings: createTestSettingsStore({ speedOn: true, preferredSpeed: 1.75 }),

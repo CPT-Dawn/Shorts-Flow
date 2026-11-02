@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { aMomentLater, expectTimeline, mountShortsFeed } from './support/shorts-feed';
 import { createTestSettingsStore } from './support/stores';
-import { hasNextShort, testPages } from './support/test-pages';
+import { feedPages, hasNextShort } from './support/test-pages';
 
-describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
+describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
   it('A switches Auto-Scroll off and on, with a confirmation each time', async () => {
     const settings = createTestSettingsStore({ autoScroll: true });
     const shortsFeed = await mountShortsFeed(page, { settings });
