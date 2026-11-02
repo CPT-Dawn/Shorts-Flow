@@ -49,6 +49,44 @@
     "description": "Status line, after whether the tab is on the Shorts Feed: how many Shorts the viewer has watched in the current Session, one continuous stretch of watching that ends after 30 minutes with no Short playing.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
+  "popupSessionLimit": {
+    "message": "Session limit",
+    "description": "Popup label of the optional Session Limit: a Break Nudge after a number of Shorts or minutes in one Session, one continuous stretch of watching the Shorts Feed."
+  },
+  "popupSessionLimitHintOff": {
+    "message": "Pause for a break after a while",
+    "description": "Under the Session Limit while it is off: what setting one does."
+  },
+  "popupSessionLimitOff": {
+    "message": "Off",
+    "description": "Popup choice for the Session Limit: no limit."
+  },
+  "popupSessionLimitShorts": {
+    "message": "Shorts",
+    "description": "Popup choice for the Session Limit: a number of Shorts watched."
+  },
+  "popupSessionLimitMinutes": {
+    "message": "Minutes",
+    "description": "Popup choice for the Session Limit: a number of minutes of Shorts playing."
+  },
+  "popupSessionLimitShortsValue": {
+    "message": "Shorts before a break",
+    "description": "What screen readers call the Popup's number field for a Session Limit in Shorts."
+  },
+  "popupSessionLimitMinutesValue": {
+    "message": "Minutes before a break",
+    "description": "What screen readers call the Popup's number field for a Session Limit in minutes."
+  },
+  "popupSessionLimitProgressShorts": {
+    "message": "$COUNT$ of $LIMIT$ Shorts before a break",
+    "description": "Under the Session Limit: Shorts watched towards a limit in Shorts, since the last Break Nudge.",
+    "placeholders": { "count": { "content": "$1", "example": "12" }, "limit": { "content": "$2", "example": "30" } }
+  },
+  "popupSessionLimitProgressMinutes": {
+    "message": "$COUNT$ of $LIMIT$ minutes before a break",
+    "description": "Under the Session Limit: minutes of Shorts playing towards a limit in minutes, since the last Break Nudge.",
+    "placeholders": { "count": { "content": "$1", "example": "12" }, "limit": { "content": "$2", "example": "30" } }
+  },
   "popupHostAccessLost": {
     "message": "Shorts Flow can't reach YouTube",
     "description": "Firefox only: heading of the notice shown when the viewer turned off Shorts Flow's access to youtube.com."
