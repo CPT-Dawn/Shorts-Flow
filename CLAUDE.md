@@ -1,6 +1,6 @@
 # Shorts Flow
 
-Project overview and architecture notes live in `GEMINI.md`.
+Domain language lives in `GLOSSARY.md`; decisions in `docs/adr/`.
 
 ## Agent skills
 
