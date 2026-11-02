@@ -14,5 +14,13 @@
   "popupTitle": {
     "message": "Shorts Flow",
     "description": "Document title and heading of the Popup, the panel that opens from the toolbar icon."
+  },
+  "stallNotice": {
+    "message": "Couldn't find the next Short",
+    "description": "Stall notice: a small toast on the Shorts Feed when Shorts Flow asked YouTube for the next Short and none came. Keep it short and calm."
+  },
+  "stallRetry": {
+    "message": "Retry",
+    "description": "Button on the Stall notice that asks YouTube for the next Short again."
   }
 }
