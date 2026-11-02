@@ -31,7 +31,8 @@ export type ShortsFeed = {
   clock: TestClock;
   /**
    * What the viewer has seen so far, in order:
-   * - `Short <n> started over` when the nth Short loops back to its start;
+   * - `Short <n> started over` when the nth Short loops back to its start,
+   *   counting from the Short the page opened on as Short 1;
    * - `Short <n> is current` when YouTube has moved the feed on to it;
    * - `page scrolled by script` if anything scrolled the page other than
    *   YouTube's own next-Short navigation;
@@ -131,11 +132,13 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
   const renderer = shorts.querySelector('#reel-overlay-container')!;
   const container = shorts.querySelector('#shorts-container')!;
   let current = page.shorts.findIndex((short) => page.path.endsWith(short.id));
+  // The timeline counts Shorts from the one the page opens on.
+  const opening = current;
 
   video.muted = true;
   video.play().catch(() => {});
   video.addEventListener('seeking', () => {
-    if (video.currentTime < 0.5) push(`Short ${current + 1} started over`);
+    if (video.currentTime < 0.5) push(`Short ${current - opening + 1} started over`);
   });
 
   const next = () => {
@@ -152,7 +155,7 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
       window.history.pushState(null, '', `/shorts/${following.id}`);
       video.src = following.clip;
       video.play().catch(() => {});
-      push(`Short ${current + 1} is current`);
+      push(`Short ${current - opening + 1} is current`);
     }, 100);
   };
   shorts.querySelector('#navigation-button-down button')!.addEventListener('click', next);

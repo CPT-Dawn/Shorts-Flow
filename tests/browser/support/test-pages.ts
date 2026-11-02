@@ -16,6 +16,12 @@ export const testPages: TestPage[] = Object.entries(
   import.meta.glob<Omit<TestPage, 'name'>>('../../pages/*/test-page.json', { eager: true, import: 'default' }),
 ).map(([file, page]) => ({ ...page, name: file.split('/').at(-2)! }));
 
+/** Pages that open with the comments or description panel open: a Hold applies from the start. */
+export const panelOpenPages = testPages.filter((page) => ['shorts-comments', 'shorts-description'].includes(page.name));
+
+/** Pages where nothing holds the feed until the viewer steps in. */
+export const feedPages = testPages.filter((page) => !panelOpenPages.includes(page));
+
 /** The page exactly as committed, for scanning. */
 export async function pageSource(page: TestPage) {
   const response = await fetch(`${page.path}?test-page=${page.name}`);
