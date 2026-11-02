@@ -8,8 +8,8 @@ export type TestPage = {
   path: string;
   /** The window size it was captured in. */
   viewport: { width: number; height: number };
-  /** Every Short slot, top to bottom, with the clip it plays. */
-  shorts: { id: string; clip: string }[];
+  /** Every Short slot, top to bottom, with the clip it plays, and `sponsored` on a Sponsored Short. */
+  shorts: { id: string; clip: string; sponsored?: true }[];
 };
 
 export const testPages: TestPage[] = Object.entries(
@@ -20,6 +20,12 @@ export const testPages: TestPage[] = Object.entries(
 export function hasNextShort(page: TestPage): boolean {
   const current = page.shorts.findIndex((short) => page.path.endsWith(short.id));
   return current >= 0 && current < page.shorts.length - 1;
+}
+
+/** The number (from 1) of the first Sponsored Short on `page`, or undefined if it has none. */
+export function sponsoredShort(page: TestPage): number | undefined {
+  const index = page.shorts.findIndex((short) => short.sponsored);
+  return index >= 0 ? index + 1 : undefined;
 }
 
 /** The page exactly as committed, for scanning. */

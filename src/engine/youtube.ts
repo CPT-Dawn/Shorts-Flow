@@ -67,6 +67,74 @@ export function advanceFeed(document: Document): void {
   );
 }
 
+/**
+ * What marks a Sponsored Short: YouTube's ad slot inside a slot of the Shorts
+ * Feed. UNCONFIRMED: no live capture has met a Sponsored Short yet (see
+ * docs/reference/youtube-shorts-sponsored-2026-11). The element name comes
+ * from public filter lists, whose rules hide a Shorts slot that holds
+ * `.ytd-reel-video-renderer > ytd-ad-slot-renderer`. The test-page tool
+ * reads this too, to mark the Sponsored Short in a test page.
+ */
+export const SPONSORED_SHORT_MARK = 'ytd-ad-slot-renderer';
+
+const SHORT_SLOT = '.reel-video-in-sequence-new';
+
+/**
+ * Whether the Current Short is a Sponsored Short. Where YouTube puts an ad
+ * in the feed is unconfirmed, so this looks in both places it may be: the slot
+ * that holds the Shorts renderer (YouTube moves it to the Current Short), and
+ * the slot on screen in the middle of the Shorts Feed, in case an ad brings
+ * markup of its own instead.
+ */
+export function isSponsoredShort(document: Document): boolean {
+  const shorts = document.querySelector('ytd-shorts');
+  if (!shorts) return false;
+  const renderer = shorts.querySelector('ytd-reel-video-renderer');
+  const current = new Set<Element>();
+  const holding = renderer?.closest(SHORT_SLOT) ?? renderer;
+  if (holding) current.add(holding);
+  const container = shorts.querySelector('#shorts-container');
+  if (container) {
+    const box = container.getBoundingClientRect();
+    const middle = box.top + box.height / 2;
+    for (const slot of container.querySelectorAll(SHORT_SLOT)) {
+      const { top, bottom } = slot.getBoundingClientRect();
+      if (box.height > 0 && top <= middle && middle < bottom) current.add(slot);
+    }
+  }
+  return [...current].some((slot) => slot.querySelector(SPONSORED_SHORT_MARK) !== null);
+}
+
+/**
+ * Calls `changed` whenever the Shorts Feed may have moved to another Short or
+ * filled one in: something added or moved inside it, or it scrolled. Until
+ * YouTube has built the Shorts Feed, it waits for it. Stops when `signal` aborts.
+ */
+export function watchShortsFeed(document: Document, changed: () => void, signal: AbortSignal): void {
+  const view = document.defaultView!;
+  let observed: Element | undefined;
+  const observer = new view.MutationObserver(() => {
+    const shorts = document.querySelector('ytd-shorts') ?? undefined;
+    if (shorts !== observed) observe(shorts);
+    changed();
+  });
+  const observe = (shorts: Element | undefined) => {
+    observer.disconnect();
+    observed = shorts;
+    // Until YouTube builds the Shorts Feed, watch the whole page for it.
+    observer.observe(shorts ?? document.documentElement, { childList: true, subtree: true });
+  };
+  observe(document.querySelector('ytd-shorts') ?? undefined);
+  document.addEventListener(
+    'scroll',
+    (event) => {
+      if ((event.target as Element | null)?.id === 'shorts-container') changed();
+    },
+    { capture: true, passive: true, signal },
+  );
+  signal.addEventListener('abort', () => observer.disconnect(), { once: true });
+}
+
 /** Whether YouTube is showing its dark theme. */
 export function isDarkTheme(document: Document): boolean {
   return document.documentElement.hasAttribute('dark');

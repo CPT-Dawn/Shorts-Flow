@@ -9,6 +9,7 @@ Anonymised copies of youtube.com/shorts that the browser tests in `tests/browser
 |---|---|
 | `shorts-dark` | The Shorts Feed in the dark theme, on the first Short (YouTube hides the up arrow), logged out. Base page for every engine test. |
 | `shorts-last` | The same capture with every Short slot after the first removed by hand (YouTube's feed never runs out live), so there is no next Short. For Stall. Tests that need a next Short skip it with `hasNextShort(page)`; the test support's `loadNextShort()` stands in for YouTube finally fetching one. |
+| `shorts-sponsored` | **Unconfirmed markup.** The same capture with YouTube's ad slot added by hand to the sixth slot, so Short 6 is a Sponsored Short (`"sponsored": true` in its `test-page.json`; `sponsoredShort(page)` in the test support). No live capture has met a Sponsored Short yet: see `docs/reference/youtube-shorts-sponsored-2026-11/README.md`. It sits sixth so tests on every page never reach it by surprise. |
 
 ## Using a test page
 
