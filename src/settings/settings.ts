@@ -10,6 +10,11 @@ export type Settings = {
   autoScroll: boolean;
   /** Whether the Shorts Control shows in YouTube's action rail beside each Short. */
   shortsControlShown: boolean;
+  /**
+   * Whether a Sponsored Short (an ad slot in the Shorts Feed) is skipped as
+   * soon as it becomes the Current Short, whether Auto-Scroll is on or off.
+   */
+  skipSponsoredShorts: boolean;
   /** Whether every new Current Short plays at the Preferred Speed. */
   speedOn: boolean;
   /** The Preferred Speed, one of `PREFERRED_SPEEDS`. */
@@ -19,6 +24,7 @@ export type Settings = {
 export const DEFAULT_SETTINGS: Settings = {
   autoScroll: true,
   shortsControlShown: true,
+  skipSponsoredShorts: true,
   speedOn: false,
   preferredSpeed: 1.5,
 };

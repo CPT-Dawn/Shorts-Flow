@@ -7,6 +7,7 @@
 import { load, type CheerioAPI } from 'cheerio';
 import type { AnyNode, Element } from 'domhandler';
 import postcss, { type Root } from 'postcss';
+import { SPONSORED_SHORT_MARK } from '../../src/engine/youtube';
 import { findLeaks, PLACEHOLDER } from './leaks';
 import { isYouTubeText } from './youtube-text';
 
@@ -21,8 +22,11 @@ export type TestPage = {
   html: string;
   /** The page's own Shorts address. */
   path: string;
-  /** Every Short slot on the page, top to bottom, with the clip it plays. */
-  shorts: { id: string; clip: string }[];
+  /**
+   * Every Short slot on the page, top to bottom, with the clip it plays.
+   * `sponsored` is set on a Sponsored Short.
+   */
+  shorts: { id: string; clip: string; sponsored?: true }[];
   /** The capture's text that became placeholders, for a person to skim. Never write it to the repo. */
   replacedText: string[];
 };
@@ -362,10 +366,12 @@ function replaceIds($: CheerioAPI, names: Names) {
 // --- 8. Give the Shorts video a generated clip; leave the hidden watch-page player alone.
 
 function assignClips($: CheerioAPI, slotIds: (string | undefined)[], names: Names, clips: string[]) {
+  const slots = $('.reel-video-in-sequence-new').toArray();
   const shorts = slotIds.map((original, i) => ({
     // A slot YouTube had not filled yet still gets an id of its own.
     id: names.shortId.of(original ?? `empty slot ${i}`),
     clip: clips[i % clips.length]!,
+    ...($(slots[i]).find(SPONSORED_SHORT_MARK).length > 0 && { sponsored: true as const }),
   }));
   $('ytd-reel-video-renderer video').each((_, video) => {
     video.attribs.src = shorts[currentSlot($)]?.clip ?? clips[0]!;

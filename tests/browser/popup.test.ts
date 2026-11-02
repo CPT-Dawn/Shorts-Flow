@@ -75,6 +75,40 @@ describe('Auto-Scroll', () => {
   });
 });
 
+describe('Skip Sponsored Shorts', () => {
+  const skipSponsored = () => page.getByRole('list', { name: 'Settings' }).getByRole('switch', { name: 'Skip sponsored Shorts' });
+
+  it('is on from the start, and says it skips rather than blocks', async () => {
+    openPopup();
+
+    await expect.element(skipSponsored()).toBeChecked();
+    await expect.element(skipSponsored()).toHaveAccessibleDescription('Moves past them as soon as one comes up');
+  });
+
+  it('switches skipping for every Shorts tab at once, and stays in step with changes made elsewhere', async () => {
+    const settings = createTestSettingsStore({ skipSponsoredShorts: true });
+    openPopup({ settings });
+    await expect.element(skipSponsored()).toBeChecked();
+
+    await skipSponsored().click();
+    await expect.poll(async () => (await settings.get()).skipSponsoredShorts).toBe(false);
+    await expect.element(skipSponsored()).toHaveAccessibleDescription('They play like any other Short');
+
+    await settings.set({ skipSponsoredShorts: true });
+    await expect.element(skipSponsored()).toBeChecked();
+  });
+
+  it('leaves Auto-Scroll alone', async () => {
+    const settings = createTestSettingsStore({ autoScroll: true, skipSponsoredShorts: true });
+    openPopup({ settings });
+
+    await skipSponsored().click();
+
+    await expect.poll(async () => (await settings.get()).skipSponsoredShorts).toBe(false);
+    expect((await settings.get()).autoScroll).toBe(true);
+  });
+});
+
 describe('status line', () => {
   it('says so when the tab the Popup opened over is on the Shorts Feed', async () => {
     openPopup({ isOnShortsFeed: async () => true });
@@ -168,6 +202,8 @@ describe('keyboard', () => {
     await expect.poll(async () => (await settings.get()).autoScroll).toBe(false);
 
     await userEvent.tab();
+    await expect.element(page.getByRole('switch', { name: 'Skip sponsored Shorts' })).toHaveFocus();
+    await userEvent.tab();
     await expect.element(page.getByRole('switch', { name: 'Show button on Shorts' })).toHaveFocus();
     await userEvent.tab();
     await expect.element(page.getByRole('combobox', { name: 'Preferred Speed' })).toHaveFocus();
@@ -185,7 +221,7 @@ describe('keyboard', () => {
     openPopup();
     await expect.element(page.getByRole('switch', { name: 'Auto-Scroll' })).toBeEnabled();
 
-    for (const name of ['Auto-Scroll', 'Show button on Shorts', 'Preferred Speed', 'Speed', "What's new", 'Report a problem', 'Support']) {
+    for (const name of ['Auto-Scroll', 'Skip sponsored Shorts', 'Show button on Shorts', 'Preferred Speed', 'Speed', "What's new", 'Report a problem', 'Support']) {
       await userEvent.tab();
       const focused = document.activeElement!;
       expect(focused.matches(':focus-visible'), name).toBe(true);

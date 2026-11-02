@@ -5,6 +5,7 @@ import { autoScroll } from './auto-scroll';
 import { speed } from './speed';
 import type { Feature, Feed } from './feed';
 import { whileOnShortsFeed } from './route';
+import { skipSponsoredShorts } from './skip-sponsored';
 import { shortsControl } from './shorts-control';
 
 /** Time as the engine sees it, so tests can move it forward by hand. */
@@ -53,7 +54,7 @@ export type EngineOptions = {
  * Every feature, each mounted once per visit to the Shorts Feed. A new
  * feature is a module exporting a `Feature`, added to this list.
  */
-const FEATURES: Feature[] = [autoScroll, shortsControl, speed];
+const FEATURES: Feature[] = [autoScroll, skipSponsoredShorts, shortsControl, speed];
 
 /**
  * Mounts the Shorts Flow engine onto `document` and returns its teardown.

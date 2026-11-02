@@ -2,6 +2,7 @@ import type { SessionStore } from '@/settings/session';
 import type { Settings } from '@/settings/settings';
 import type { PopupMessage } from './messages';
 import { shortsControlRow } from './shorts-control-row';
+import { skipSponsoredRow } from './skip-sponsored-row';
 import { speedRow } from './speed-row';
 
 /** The settings that are on or off, which a switch row can show. */
@@ -56,7 +57,7 @@ export type StatusPart = (popup: PopupContext) => Node;
  * Planned order: Skip Sponsored Shorts, Show button on Shorts, Speed, Session
  * Limit, Shortcuts.
  */
-export const POPUP_ROWS: PopupRow[] = [shortsControlRow, speedRow];
+export const POPUP_ROWS: PopupRow[] = [skipSponsoredRow, shortsControlRow, speedRow];
 
 /** What the status line says after the Shorts Feed, in order. */
 export const STATUS_PARTS: StatusPart[] = [];

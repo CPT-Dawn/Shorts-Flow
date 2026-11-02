@@ -13,6 +13,15 @@ it('has Auto-Scroll on after a fresh install', async () => {
   expect(DEFAULT_SETTINGS.autoScroll).toBe(true);
 });
 
+it('skips Sponsored Shorts from a fresh install, and remembers being told not to', async () => {
+  expect((await createSettingsStore().get()).skipSponsoredShorts).toBe(true);
+
+  await createSettingsStore().set({ skipSponsoredShorts: false });
+
+  expect((await createSettingsStore().get()).skipSponsoredShorts).toBe(false);
+  expect(await fakeBrowser.storage.local.get(null)).toEqual({ skipSponsoredShorts: false });
+});
+
 it('remembers Auto-Scroll across a browser restart, in local storage', async () => {
   await createSettingsStore().set({ autoScroll: false });
 

@@ -8,8 +8,8 @@ export type TestPage = {
   path: string;
   /** The window size it was captured in. */
   viewport: { width: number; height: number };
-  /** Every Short slot, top to bottom, with the clip it plays. */
-  shorts: { id: string; clip: string }[];
+  /** Every Short slot, top to bottom, with the clip it plays, and `sponsored` on a Sponsored Short. */
+  shorts: { id: string; clip: string; sponsored?: true }[];
 };
 
 export const testPages: TestPage[] = Object.entries(
@@ -27,6 +27,17 @@ export const panelOpenPages = testPages.filter((page) => ['shorts-comments', 'sh
 
 /** Pages where nothing holds the feed until the viewer steps in. */
 export const feedPages = testPages.filter((page) => !panelOpenPages.includes(page));
+
+/**
+ * The number of the first Sponsored Short ahead on `page`, counted as the
+ * timeline counts (the Short the page opens on is Short 1), or undefined if
+ * none lies ahead.
+ */
+export function sponsoredShort(page: TestPage): number | undefined {
+  const opening = Math.max(0, page.shorts.findIndex((short) => page.path.endsWith(short.id)));
+  const index = page.shorts.findIndex((short, i) => i >= opening && short.sponsored);
+  return index >= 0 ? index - opening + 1 : undefined;
+}
 
 /** The page exactly as committed, for scanning. */
 export async function pageSource(page: TestPage) {

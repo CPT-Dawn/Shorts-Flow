@@ -143,6 +143,20 @@ describe('making a test page from a capture', () => {
     expect(page.path).toBe('/shorts/vid00000001');
   });
 
+  it('marks the Sponsored Short, and only that one', async () => {
+    const withAd = CAPTURE.replace(
+      /(<div id="2" class="reel-video-in-sequence-new style-scope ytd-shorts">\n<div class="reel-video-in-sequence-thumbnail[^>]*><\/div>)/,
+      '$1<div class="overlay style-scope ytd-reel-video-renderer"><ytd-ad-slot-renderer class="style-scope ytd-reel-video-renderer"></ytd-ad-slot-renderer></div>',
+    );
+    expect(withAd).not.toBe(CAPTURE);
+
+    const page = await makeFromCapture(withAd);
+
+    expect(page.shorts.map((short) => short.sponsored ?? false)).toEqual([false, false, true]);
+    expect(page.html).toContain('<ytd-ad-slot-renderer class="style-scope ytd-reel-video-renderer"></ytd-ad-slot-renderer>');
+    expect((await makeFromCapture()).shorts.some((short) => short.sponsored)).toBe(false);
+  });
+
   it('plays a generated clip in the Shorts video and leaves the hidden player alone', async () => {
     const page = await makeFromCapture();
 
