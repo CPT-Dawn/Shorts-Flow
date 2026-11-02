@@ -20,6 +20,12 @@
  * classes, for the same reason.
  */
 
+/**
+ * Every page of YouTube's, as a match pattern: where the content script runs,
+ * and all the host access Shorts Flow asks for.
+ */
+export const YOUTUBE_PAGES = 'https://www.youtube.com/*';
+
 /** Whether `pathname` is a Shorts Feed address: /shorts/ or /shorts/<id>. */
 export function isShortsFeed(pathname: string): boolean {
   return /^\/shorts(\/[^/]+)?\/?$/.test(pathname);

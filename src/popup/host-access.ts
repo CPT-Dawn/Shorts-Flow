@@ -1,4 +1,5 @@
 import { browser } from 'wxt/browser';
+import { YOUTUBE_PAGES } from '@/engine/youtube';
 
 /**
  * Shorts Flow's access to youtube.com. Firefox lets the viewer turn it off in
@@ -18,7 +19,7 @@ export interface HostAccess {
 }
 
 /** The content script's match, which is all the host access Shorts Flow asks for. */
-const YOUTUBE = { origins: ['https://www.youtube.com/*'] };
+const YOUTUBE = { origins: [YOUTUBE_PAGES] };
 
 /**
  * The browser's own record of the access, in the Firefox build. Undefined in

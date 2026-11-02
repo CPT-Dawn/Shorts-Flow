@@ -158,7 +158,8 @@ export function mountEngine(
   return teardown;
 }
 
-function windowClock(window: Window): Clock {
+/** The clock of `window`: its time since the epoch, and its own timers. */
+export function windowClock(window: Window): Clock {
   return {
     now: () => window.performance.timeOrigin + window.performance.now(),
     setTimeout: (callback, ms) => window.setTimeout(callback, ms),

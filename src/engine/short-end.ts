@@ -8,8 +8,6 @@ import { currentShortId, isShortsVideo } from './youtube';
  */
 const END_TOLERANCE = 0.25;
 
-const HAVE_FUTURE_DATA = 3;
-
 /** The last time the Shorts video reported where it was. */
 type Report = {
   /** Which Short it was playing. */
@@ -50,7 +48,7 @@ export function watchShortEnds(feed: Feed, onEnd: () => void): void {
     const { currentTime: time, duration } = video;
     if (!(duration > 0)) return;
 
-    const speed = !video.paused && video.readyState >= HAVE_FUTURE_DATA ? video.playbackRate : 0;
+    const speed = !video.paused && video.readyState >= video.HAVE_FUTURE_DATA ? video.playbackRate : 0;
     // Media plays in real time, so this is the page's clock, not the engine's.
     const at = event.timeStamp;
     const jumpedBack = last !== undefined && time < last.time;

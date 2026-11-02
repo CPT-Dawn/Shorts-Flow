@@ -19,8 +19,6 @@ const SAVE_EVERY = 10_000;
  */
 const LONGEST_TICK = 60_000;
 
-const HAVE_FUTURE_DATA = 3;
-
 /** What this page has seen of the Session since it last stored it. */
 type Unsaved = Pick<Session, 'shortsWatched' | 'playingMs'> & {
   /** When the viewer was first and last watching, if they were. */
@@ -213,5 +211,5 @@ function trackSession(feed: Feed) {
 /** Whether the Current Short is playing: not paused, nor waiting for data. */
 function aShortPlays(document: Document) {
   const video = shortsVideo(document);
-  return !!video && !video.paused && !video.ended && video.readyState >= HAVE_FUTURE_DATA;
+  return !!video && !video.paused && !video.ended && video.readyState >= video.HAVE_FUTURE_DATA;
 }
