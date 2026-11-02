@@ -1,0 +1,14 @@
+{
+  "description": "Shorts Feed, dark theme, on the only Short there is: no next Short, for Stall. Made from the 2026-11 capture with every later Short slot removed (YouTube never runs out live), logged out",
+  "path": "/shorts/vid00000001",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "shorts": [
+    {
+      "id": "vid00000001",
+      "clip": "/tests/pages/clips/clip-a.webm"
+    }
+  ]
+}
