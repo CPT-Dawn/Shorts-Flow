@@ -1,4 +1,5 @@
 import { defineConfig } from 'wxt';
+import { siteUrl } from './src/site/site-links';
 
 /**
  * Shorts Flow's icons, drawn by `bun run icons` from the Tideline brand SVGs in
@@ -34,7 +35,7 @@ export default defineConfig({
     short_name: '__MSG_extensionShortName__',
     description: '__MSG_extensionDescription__',
     default_locale: 'en',
-    homepage_url: 'https://shortsflow.cptdawn.dev/',
+    homepage_url: siteUrl('home', {}),
     // Host access comes from the content script's match alone.
     permissions: ['storage'],
     icons: browser === 'firefox' ? SVG_ICONS : PNG_ICONS,
