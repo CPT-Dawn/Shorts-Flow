@@ -8,6 +8,7 @@ Anonymised copies of youtube.com/shorts that the browser tests in `tests/browser
 | Test page | What it shows |
 |---|---|
 | `shorts-dark` | The Shorts Feed in the dark theme, on the first Short (YouTube hides the up arrow), logged out. Base page for every engine test. |
+| `shorts-light` | The same Shorts Feed in the light theme. No light capture of the page exists, so it is made from an edited copy of the dark capture: YouTube's dark flags removed (`dark` on `<html>` and the masthead, `is-dark`, `is-dark-theme`) and `light` set on `<html>`, the attribute YouTube's stylesheet keys its light colours to. For the Native Look in both themes. |
 | `shorts-last` | The same capture with every Short slot after the first removed by hand (YouTube's feed never runs out live), so there is no next Short. For Stall. Tests that need a next Short skip it with `hasNextShort(page)`; the test support's `loadNextShort()` stands in for YouTube finally fetching one. |
 
 ## Using a test page
