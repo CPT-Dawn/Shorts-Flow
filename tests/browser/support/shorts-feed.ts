@@ -63,6 +63,8 @@ export type ShortsFeed = {
   loadNextShort(): void;
   /** Clicks YouTube's Next video control, as the viewer does to move on by hand. */
   pressNextVideo(): void;
+  /** Clicks YouTube's Previous video control, as the viewer does to go back a Short by hand. */
+  pressPreviousVideo(): void;
   /** Switches YouTube between its dark and light themes, as its Appearance setting does. */
   setTheme(theme: 'dark' | 'light'): void;
   /**
@@ -87,6 +89,8 @@ export type ShortsFeed = {
   pressKey(key: string, options?: { holding?: 'Control' | 'Alt' | 'Meta' | 'Shift' }): Promise<void>;
   /** Clicks into YouTube's search box and types `text` there, leaving the focus in it. */
   typeInSearch(text: string): Promise<void>;
+  /** What YouTube's search box says, as the viewer sees it. */
+  searchText(): string;
   /** A script on the page makes up a keydown of `key`, as Shorts Flow's own ArrowDown fallback does. */
   pressKeyByScript(key: string): void;
   /**
@@ -141,6 +145,8 @@ export type ShortsFeed = {
   clickNextVideoByHand(): Promise<void>;
   /** Switches to another tab, leaving this one playing in the background. */
   moveToBackground(): void;
+  /** Switches back to this tab. */
+  moveToForeground(): void;
   /** Tears the engine down, leaving the page playing. */
   unmountEngine(): void;
   /** The Shorts Control's quick-settings opener, as the viewer finds it by its name, if it is there. */
@@ -241,6 +247,7 @@ export async function mountShortsFeed(
     pressNextVideo() {
       document.querySelector<HTMLButtonElement>('#navigation-button-down button')!.click();
     },
+    pressPreviousVideo: youtube.previous,
     setTheme(theme) {
       document.documentElement.toggleAttribute('dark', theme === 'dark');
     },
@@ -267,9 +274,10 @@ export async function mountShortsFeed(
     },
     async typeInSearch(text) {
       focusPage(window);
-      document.querySelector<HTMLInputElement>('input[name="search_query"]')!.focus();
+      searchBox().focus();
       await userEvent.keyboard(text);
     },
+    searchText: () => searchBox().value,
     pressKeyByScript(key) {
       (document.activeElement ?? document.body).dispatchEvent(
         new (window as Window & typeof globalThis).KeyboardEvent('keydown', { key, bubbles: true, composed: true, cancelable: true }),
@@ -347,7 +355,7 @@ export async function mountShortsFeed(
     },
     clickSearchBox() {
       window.focus();
-      document.querySelector<HTMLInputElement>('input[name="search_query"]')!.focus();
+      searchBox().focus();
     },
     leaveSearchBox() {
       (document.activeElement as HTMLElement | null)?.blur();
@@ -368,6 +376,12 @@ export async function mountShortsFeed(
       Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
       document.dispatchEvent(new (window as Window & typeof globalThis).Event('visibilitychange'));
       window.dispatchEvent(new (window as Window & typeof globalThis).Event('blur'));
+    },
+    moveToForeground() {
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' });
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+      document.dispatchEvent(new (window as Window & typeof globalThis).Event('visibilitychange'));
+      window.dispatchEvent(new (window as Window & typeof globalThis).Event('focus'));
     },
     unmountEngine,
     quickSettingsButton: () => findByName(document, QUICK_SETTINGS),
@@ -391,6 +405,10 @@ export async function mountShortsFeed(
       await browserPage.elementLocator(window.frameElement!).click({ position: { x: 5, y: 5 } });
     },
   };
+
+  function searchBox() {
+    return document.querySelector<HTMLInputElement>('input[name="search_query"]')!;
+  }
 
   /** The page as the viewer's mouse and keyboard reach it: their events are trusted. */
   function frame() {
@@ -445,12 +463,12 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
     if (video.currentTime < 0.5) push(`Short ${current - opening + 1} started over`);
   });
 
-  const next = () => {
+  const moveTo = (step: 1 | -1) => {
     // YouTube takes a moment to fetch and swap in the next Short.
     setTimeout(() => {
-      const following = feed[current + 1];
+      const following = feed[current + step];
       if (!following) return;
-      current += 1;
+      current += step;
       const slot = shorts.querySelector(`.reel-video-in-sequence-new[id="${current}"]`)!;
       slot.append(renderer);
       renderer.querySelector('reel-action-bar-view-model')!.replaceWith(freshRail.cloneNode(true));
@@ -463,6 +481,7 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
       push(`Short ${current - opening + 1} is current`);
     }, 100);
   };
+  const next = () => moveTo(1);
   shorts.querySelector('#navigation-button-down button')!.addEventListener('click', next);
   document.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowDown' && !event.defaultPrevented) next();
@@ -473,6 +492,7 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
 
   return {
     video,
+    previous: () => moveTo(-1),
     loadNextShort() {
       const slots = shorts.querySelectorAll('.reel-video-in-sequence-new');
       const last = slots[slots.length - 1]!;

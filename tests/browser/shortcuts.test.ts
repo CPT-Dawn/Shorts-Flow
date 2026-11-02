@@ -59,7 +59,7 @@ describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
 
     expect(await settings.get()).toMatchObject({ autoScroll: true, speedOn: false });
     expect(shortsFeed.notice()).toBeUndefined();
-    expect(shortsFeed.document.querySelector<HTMLInputElement>('input[name="search_query"]')!.value).toBe('a sad story');
+    expect(shortsFeed.searchText()).toBe('a sad story');
   });
 
   it.each(['Control', 'Alt', 'Meta'] as const)('does nothing with %s held', async (holding) => {
