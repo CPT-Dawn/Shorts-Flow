@@ -67,6 +67,37 @@ export function advanceFeed(document: Document): void {
   );
 }
 
+/**
+ * YouTube's own single keys on the Shorts Feed and its player, as
+ * `shortcutKey` gives them (letters in lower case), so no Shortcut ever takes
+ * one. From YouTube Help's "Keyboard shortcuts for YouTube" (answer 7631406,
+ * read 2026-11) and the player's own shortcut list (Shift+?), plus the keys
+ * the Shorts Feed moves between Shorts with:
+ * - ArrowUp, ArrowDown, PageUp, PageDown: previous and next Short.
+ * - Space, k: play/pause. m: mute. j, l, ArrowLeft, ArrowRight: seek.
+ * - `,` `.`: frame by frame. `<` `>`: playback speed. 0–9, Home, End: seek to a point.
+ * - f: full screen. c: captions. `+` `-` `o` `w` `b`: caption styling. t: theater. i: miniplayer.
+ * - `/`: search box. `?`: the shortcut list. Escape, Enter, Tab: dialogs and focus.
+ * - The media keys.
+ * YouTube's W/A/S/D pan 360° videos only, which the Shorts Feed never shows,
+ * so A and S stay free for the default Shortcuts. Combinations (Shift+N,
+ * Ctrl+arrows) never reach a Shortcut, since Shortcuts take no modifier.
+ */
+const YOUTUBE_KEYS = new Set([
+  'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End',
+  ' ', 'k', 'm', 'j', 'l', ',', '.', '<', '>',
+  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+  'f', 'c', '+', '-', '=', 'o', 'w', 'b', 't', 'i', '/', '?',
+  'Escape', 'Enter', 'Tab', 'Backspace',
+  'MediaPlayPause', 'MediaPlay', 'MediaPause', 'MediaStop', 'MediaTrackNext', 'MediaTrackPrevious',
+  'AudioVolumeUp', 'AudioVolumeDown', 'AudioVolumeMute',
+]);
+
+/** Whether `key` (as `shortcutKey` gives it) is one of YouTube's own keys, which no Shortcut may take. */
+export function isYouTubeKey(key: string): boolean {
+  return YOUTUBE_KEYS.has(key);
+}
+
 /** Whether YouTube is showing its dark theme. */
 export function isDarkTheme(document: Document): boolean {
   return document.documentElement.hasAttribute('dark');

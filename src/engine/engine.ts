@@ -2,6 +2,7 @@ import type { SessionStore } from '@/settings/session';
 import type { Settings, SettingsStore } from '@/settings/settings';
 import { createAdvance } from './advance';
 import { autoScroll } from './auto-scroll';
+import { shortcuts } from './shortcuts';
 import { speed } from './speed';
 import type { Feature, Feed } from './feed';
 import { whileOnShortsFeed } from './route';
@@ -26,7 +27,12 @@ export type EngineMessage =
   /** The Stall notice. */
   | 'stallNotice'
   /** Its retry button. */
-  | 'stallRetry';
+  | 'stallRetry'
+  /** The confirmations of the Shortcuts. */
+  | 'shortcutAutoScrollOn'
+  | 'shortcutAutoScrollOff'
+  | 'shortcutSpeedOn'
+  | 'shortcutSpeedOff';
 
 /** Looks up user-facing text in the locale files: `browser.i18n.getMessage` in the extension. */
 export type GetMessage = (name: EngineMessage, substitutions?: string | string[]) => string;
@@ -46,7 +52,7 @@ export type EngineOptions = {
  * Every feature, each mounted once per visit to the Shorts Feed. A new
  * feature is a module exporting a `Feature`, added to this list.
  */
-const FEATURES: Feature[] = [autoScroll, speed];
+const FEATURES: Feature[] = [autoScroll, speed, shortcuts];
 
 /**
  * Mounts the Shorts Flow engine onto `document` and returns its teardown.

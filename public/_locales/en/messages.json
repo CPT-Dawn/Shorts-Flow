@@ -100,5 +100,22 @@
   "stallRetry": {
     "message": "Retry",
     "description": "Button on the Stall notice that asks YouTube for the next Short again."
+  },
+  "shortcutAutoScrollOn": {
+    "message": "Auto-Scroll on",
+    "description": "Brief confirmation on the Shorts Feed after the viewer turned Auto-Scroll on with its Shortcut (A by default)."
+  },
+  "shortcutAutoScrollOff": {
+    "message": "Auto-Scroll off",
+    "description": "Brief confirmation on the Shorts Feed after the viewer turned Auto-Scroll off with its Shortcut."
+  },
+  "shortcutSpeedOn": {
+    "message": "Speed on · $SPEED$×",
+    "description": "Brief confirmation on the Shorts Feed after the viewer turned Speed on with its Shortcut (S by default), with the Preferred Speed Shorts now play at.",
+    "placeholders": { "speed": { "content": "$1", "example": "1.5" } }
+  },
+  "shortcutSpeedOff": {
+    "message": "Speed off",
+    "description": "Brief confirmation on the Shorts Feed after the viewer turned Speed off with its Shortcut: Shorts play at YouTube's own speed again."
   }
 }
