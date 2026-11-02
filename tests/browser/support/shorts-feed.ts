@@ -1,4 +1,5 @@
 import { expect, onTestFinished } from 'vitest';
+import { page as browserPage, userEvent } from 'vitest/browser';
 import { mountEngine } from '@/engine/engine';
 import type { SessionStore } from '@/settings/session';
 import type { SettingsStore } from '@/settings/settings';
@@ -63,6 +64,32 @@ export type ShortsFeed = {
   notice(): { text: string; actions: string[]; element: HTMLElement } | undefined;
   /** Presses the notice's button labelled `label`, as the viewer does. */
   pressNoticeAction(label: string): void;
+  /** Plays the Current Short on from where it is, as YouTube's play control does. */
+  play(): void;
+  /** Drags the Current Short's progress to its very end, as the viewer can while it is paused. */
+  scrubToEnd(): void;
+  /** Closes the open comments or description panel with its ✕, as the viewer does. */
+  closePanel(): void;
+  /** Opens a YouTube menu on the page (a dropdown, as the overflow ⋮ opens), as the viewer does. */
+  openMenu(): void;
+  /** Closes the menu `openMenu` opened. */
+  closeMenu(): void;
+  /** Opens the player's Share dialog, as the viewer does. */
+  openShareDialog(): void;
+  /** Closes the Share dialog. */
+  closeShareDialog(): void;
+  /** Puts focus in YouTube's search box, as the viewer does to type in it. */
+  clickSearchBox(): void;
+  /** Moves focus out of the search box, as the viewer does by clicking away. */
+  leaveSearchBox(): void;
+  /** Turns the mouse wheel over the Short, by hand: YouTube moves to the next Short. */
+  scrollByHand(): Promise<void>;
+  /** Presses ArrowDown on the keyboard, by hand: YouTube moves to the next Short. */
+  pressArrowDownByHand(): Promise<void>;
+  /** Clicks YouTube's Next video control with the mouse, by hand. */
+  clickNextVideoByHand(): Promise<void>;
+  /** Switches to another tab, leaving this one playing in the background. */
+  moveToBackground(): void;
   /** Tears the engine down, leaving the page playing. */
   unmountEngine(): void;
 };
@@ -142,8 +169,77 @@ export async function mountShortsFeed(
       if (!button) throw new Error(`No notice with a "${label}" button is showing`);
       button.click();
     },
+    play() {
+      youtube.video.play().catch(() => {});
+    },
+    scrubToEnd() {
+      youtube.video.currentTime = youtube.video.duration;
+    },
+    closePanel() {
+      // What YouTube does when the panel's ✕ is pressed.
+      for (const panel of document.querySelectorAll('ytd-engagement-panel-section-list-renderer')) {
+        if (panel.getAttribute('visibility') === 'ENGAGEMENT_PANEL_VISIBILITY_EXPANDED') {
+          panel.setAttribute('visibility', 'ENGAGEMENT_PANEL_VISIBILITY_HIDDEN');
+        }
+      }
+      for (const element of document.querySelectorAll('[is-watch-while-mode]')) {
+        element.removeAttribute('is-watch-while-mode');
+      }
+    },
+    openMenu() {
+      // YouTube puts the overflow ⋮ menu in a dropdown in its popup container.
+      const dropdown = document.createElement('tp-yt-iron-dropdown');
+      dropdown.style.cssText = 'position: fixed; top: 120px; right: 200px; display: block;';
+      dropdown.innerHTML =
+        '<div id="contentWrapper"><yt-sheet-view-model style="display: block; width: 240px;">' +
+        '<yt-list-view-model role="listbox"><yt-list-item-view-model role="option" style="display: block; height: 40px;">' +
+        'Description</yt-list-item-view-model></yt-list-view-model></yt-sheet-view-model></div>';
+      document.querySelector('ytd-popup-container')!.append(dropdown);
+    },
+    closeMenu() {
+      // YouTube keeps the dropdown, hidden.
+      for (const dropdown of document.querySelectorAll<HTMLElement>('ytd-popup-container tp-yt-iron-dropdown')) {
+        dropdown.style.display = 'none';
+        dropdown.setAttribute('aria-hidden', 'true');
+      }
+    },
+    openShareDialog() {
+      document.querySelector<HTMLElement>('#shorts-player .ytp-share-panel')!.style.display = '';
+    },
+    closeShareDialog() {
+      document.querySelector<HTMLElement>('#shorts-player .ytp-share-panel')!.style.display = 'none';
+    },
+    clickSearchBox() {
+      window.focus();
+      document.querySelector<HTMLInputElement>('input[name="search_query"]')!.focus();
+    },
+    leaveSearchBox() {
+      (document.activeElement as HTMLElement | null)?.blur();
+    },
+    async scrollByHand() {
+      await frame().getByRole('button', { name: 'Next video' }).wheel({ direction: 'down' });
+    },
+    async pressArrowDownByHand() {
+      window.focus();
+      await userEvent.keyboard('{ArrowDown}');
+    },
+    async clickNextVideoByHand() {
+      await frame().getByRole('button', { name: 'Next video' }).click();
+    },
+    moveToBackground() {
+      // What the browser does when the viewer switches tabs.
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+      document.dispatchEvent(new (window as Window & typeof globalThis).Event('visibilitychange'));
+      window.dispatchEvent(new (window as Window & typeof globalThis).Event('blur'));
+    },
     unmountEngine,
   };
+
+  /** The page as the viewer's mouse and keyboard reach it: their events are trusted. */
+  function frame() {
+    return browserPage.frameLocator(browserPage.elementLocator(window.frameElement!));
+  }
 }
 
 /**
@@ -190,6 +286,9 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
   shorts.querySelector('#navigation-button-down button')!.addEventListener('click', next);
   document.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowDown' && !event.defaultPrevented) next();
+  });
+  shorts.addEventListener('wheel', (event) => {
+    if ((event as WheelEvent).deltaY > 0) next();
   });
 
   return {

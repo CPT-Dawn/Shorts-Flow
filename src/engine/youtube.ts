@@ -82,3 +82,51 @@ export function watchTheme(document: Document, changed: (dark: boolean) => void,
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['dark'] });
   signal.addEventListener('abort', () => observer.disconnect(), { once: true });
 }
+
+const EXPANDED_PANEL =
+  'ytd-shorts ytd-engagement-panel-section-list-renderer[visibility="ENGAGEMENT_PANEL_VISIBILITY_EXPANDED"]';
+
+/**
+ * Whether one of the Shorts Feed's side panels is open: comments, the
+ * description, or the sound's other Shorts. YouTube keeps every panel in the
+ * page and marks the open one ENGAGEMENT_PANEL_VISIBILITY_EXPANDED (and
+ * `ytd-shorts` `is-watch-while-mode`). Open panels stay open across Shorts.
+ */
+export function isPanelOpen(document: Document): boolean {
+  return document.querySelector(EXPANDED_PANEL) !== null;
+}
+
+/**
+ * Menus and dialogs: the overflow ⋮ menu and other dropdowns YouTube shows in
+ * `tp-yt-iron-dropdown`, its share and report dialogs, the player's own
+ * `role=dialog` panels, and any page dialog or menu.
+ */
+const MENU_OR_DIALOG =
+  'tp-yt-iron-dropdown, tp-yt-paper-dialog, dialog, [role="dialog"], [role="alertdialog"], [role="menu"], [aria-modal="true"]';
+
+/**
+ * Whether a YouTube menu or dialog is open. YouTube keeps closed ones in the
+ * page, hidden (several player dialogs and an empty dropdown sit there all
+ * along), so only one the viewer can see counts.
+ */
+export function isMenuOrDialogOpen(document: Document): boolean {
+  for (const element of document.querySelectorAll(MENU_OR_DIALOG)) {
+    if (isShown(element)) return true;
+  }
+  return false;
+}
+
+function isShown(element: Element): boolean {
+  if (!element.checkVisibility({ opacityProperty: true, visibilityProperty: true })) return false;
+  if (element.getAttribute('aria-hidden') === 'true') return false;
+  const box = element.getBoundingClientRect();
+  return box.width > 0 && box.height > 0;
+}
+
+const FEED_NAVIGATION = 'ytd-shorts #navigation-button-up, ytd-shorts #navigation-button-down';
+
+/** Whether `target` is inside the Shorts Feed's Previous video or Next video control. */
+export function isFeedNavigation(target: EventTarget | null): boolean {
+  const element = target as Element | null;
+  return typeof element?.closest === 'function' && element.closest(FEED_NAVIGATION) !== null;
+}
