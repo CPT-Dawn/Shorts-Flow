@@ -1,0 +1,18 @@
+{
+  "extensionName": {
+    "message": "Shorts Flow: Auto-Scroll for YouTube Shorts",
+    "description": "Full extension name shown in the browser and on the stores. Keep \"for YouTube Shorts\": never suggest YouTube made Shorts Flow."
+  },
+  "extensionShortName": {
+    "message": "Shorts Flow",
+    "description": "Short extension name, also the toolbar button tooltip."
+  },
+  "extensionDescription": {
+    "message": "Watch YouTube Shorts hands-free: Shorts Flow moves to the next Short when the current one finishes. Not affiliated with YouTube.",
+    "description": "Extension description shown in the browser and on the stores (at most 132 characters)."
+  },
+  "popupTitle": {
+    "message": "Shorts Flow",
+    "description": "Document title and heading of the Popup, the panel that opens from the toolbar icon."
+  }
+}
