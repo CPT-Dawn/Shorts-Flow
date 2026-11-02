@@ -50,14 +50,14 @@ export const speed: Feature = (feed) => {
     const video = event.target;
     if (!isShortsVideo(video) || !wanted?.speedOn) return;
     const short = currentShortId(document);
-    if (current?.short !== short) current = { short, picked: false };
-    if (current.picked) return;
+    const shown = current?.short === short && current ? current : (current = { short, picked: false });
+    if (shown.picked) return;
 
     if (event.type === 'ratechange') {
       // Not the Preferred Speed, while the Short is under way: the viewer's pick in YouTube's menu.
       const underWay = video.readyState >= HAVE_CURRENT_DATA && video.currentTime > 0 && !video.seeking;
       if (video.playbackRate !== wanted.preferredSpeed && underWay) {
-        current.picked = true;
+        shown.picked = true;
         return;
       }
     }
