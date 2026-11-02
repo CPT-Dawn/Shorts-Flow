@@ -14,5 +14,62 @@
   "popupTitle": {
     "message": "Shorts Flow",
     "description": "Document title and heading of the Popup, the panel that opens from the toolbar icon."
+  },
+  "popupVersion": {
+    "message": "Version $VERSION$",
+    "description": "Accessible name of the version chip in the Popup's header.",
+    "placeholders": { "version": { "content": "$1", "example": "3.0" } }
+  },
+  "popupWhatsNewUnread": {
+    "message": "New in this version",
+    "description": "Accessible name of the dot on the Popup's version chip, shown after an update until the viewer opens What's new."
+  },
+  "popupAutoScroll": {
+    "message": "Auto-Scroll",
+    "description": "Name of the Auto-Scroll switch: Shorts Flow moves to the next Short when the current one ends."
+  },
+  "popupAutoScrollOn": {
+    "message": "Moves on when a Short ends",
+    "description": "Under the Auto-Scroll switch while it is on."
+  },
+  "popupAutoScrollOff": {
+    "message": "Each Short loops until you swipe",
+    "description": "Under the Auto-Scroll switch while it is off."
+  },
+  "popupOnShortsFeed": {
+    "message": "On the Shorts Feed",
+    "description": "Status line: the tab the Popup opened over is on the Shorts Feed, so Shorts Flow is at work there."
+  },
+  "popupOffShortsFeed": {
+    "message": "Not on the Shorts Feed",
+    "description": "Status line: the tab the Popup opened over is not on the Shorts Feed, so Shorts Flow does nothing there."
+  },
+  "popupHostAccessLost": {
+    "message": "Shorts Flow can't reach YouTube",
+    "description": "Firefox only: heading of the notice shown when the viewer turned off Shorts Flow's access to youtube.com."
+  },
+  "popupHostAccessHint": {
+    "message": "Its access to youtube.com is turned off, so it can't move Shorts on.",
+    "description": "Firefox only: explains the notice about access to youtube.com."
+  },
+  "popupHostAccessRestore": {
+    "message": "Allow on YouTube",
+    "description": "Firefox only: button that asks Firefox to give Shorts Flow its access to youtube.com back."
+  },
+  "popupSettings": {
+    "message": "Settings",
+    "description": "Accessible name of the Popup's list of settings."
+  },
+  "popupWhatsNew": {
+    "message": "What's new",
+    "description": "Popup link to news about recent versions on the Shorts Flow website."
+  },
+  "popupReportProblem": {
+    "message": "Report a problem",
+    "description": "Popup link to the Report Page on the Shorts Flow website."
+  },
+  "popupSupport": {
+    "message": "Support",
+    "description": "Popup link to the Support Page on the Shorts Flow website, to rate, share or donate."
   }
 }

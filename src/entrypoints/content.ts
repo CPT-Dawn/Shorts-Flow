@@ -1,6 +1,7 @@
 import { browser } from 'wxt/browser';
 import type { ContentScriptContext } from 'wxt/utils/content-script-context';
 import { type Clock, mountEngine } from '@/engine/engine';
+import { answerFeedStatus } from '@/messaging/feed-status';
 import { createSessionStore } from '@/settings/session';
 import { createSettingsStore } from '@/settings/settings';
 
@@ -19,6 +20,8 @@ export default defineContentScript({
       clock: contextClock(ctx),
       signal: ctx.signal,
     });
+    // The Popup asks whether this tab is on the Shorts Feed.
+    answerFeedStatus(window, ctx.signal);
   },
 });
 
