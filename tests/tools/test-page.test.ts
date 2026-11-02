@@ -185,6 +185,21 @@ describe('making a test page from a capture', () => {
     expect($('#shorts-player > video')).toHaveLength(1);
   });
 
+  it("makes a page when a hashtag shares its name with YouTube's own markup", async () => {
+    // #shorts and #top are everyday hashtags, and also words in YouTube's
+    // addresses and stylesheet selectors, which stay as captured.
+    const capture = CAPTURE.replace(
+      '<a href="/hashtag/nightsailing/shorts">#NightSailing</a>',
+      '<a href="/hashtag/shorts/shorts">#shorts</a><a href="/hashtag/top/shorts">#top</a>',
+    ).replace('</head>', '<style>#top, #shorts-player { color: inherit; }</style></head>');
+
+    const { html } = await makeFromCapture(capture);
+
+    expect(html).toContain('href="/hashtag/tag1/shorts"');
+    expect(html).toContain('href="/hashtag/tag2/shorts"');
+    expect(html).not.toMatch(/>#(shorts|top)</);
+  });
+
   it('refuses to make the page when creator content hides somewhere it does not know', async () => {
     const capture = CAPTURE.replace('<ytd-shorts ', '<ytd-shorts data-headline="Moonlit Harbour Secrets" ');
 
