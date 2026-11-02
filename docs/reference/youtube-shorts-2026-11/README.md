@@ -82,3 +82,7 @@ required, because the rail element is replaced on every Short. Re-inject when
 Advance by clicking `#navigation-button-down button` or dispatching ArrowDown. Both worked.
 Re-bind on URL change (`/shorts/<id>`). The `<video>` element itself persists, so a single
 listener with a URL/`duration` guard is enough.
+
+## Local only
+
+The screenshots (`*.png`) and the page snapshot (`page-dark.html`) show other creators' videos as YouTube served them, so they are not committed. They live only on the maintainer's machine; this README and `rail.md` are the shared record. To regenerate them, rerun a logged-out Playwright capture of youtube.com/shorts at 1440×900 in dark and light.
