@@ -57,6 +57,55 @@ describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
     expect(await shortsWatched(shortsFeed)).toBe(1);
   });
 
+  it('counts a Short again each time the viewer goes back to it', async () => {
+    const shortsFeed = await mount(page);
+    await playing(shortsFeed);
+    shortsFeed.clock.advance(OVER_A_SECOND);
+    await expect.poll(() => shortsWatched(shortsFeed)).toBe(1);
+
+    await moveOnByHand(shortsFeed, 2);
+    shortsFeed.clock.advance(OVER_A_SECOND);
+    await expect.poll(() => shortsWatched(shortsFeed)).toBe(2);
+
+    shortsFeed.pressPreviousVideo();
+    await expect.poll(() => shortsFeed.timeline).toContain('Short 1 is current');
+    await playing(shortsFeed);
+    shortsFeed.clock.advance(OVER_A_SECOND);
+
+    await expect.poll(() => shortsWatched(shortsFeed)).toBe(3);
+  });
+
+  it('counts the Current Short again when the viewer comes back to the Shorts Feed on it', async () => {
+    const shortsFeed = await mount(page);
+    await playing(shortsFeed);
+    shortsFeed.clock.advance(OVER_A_SECOND);
+    await expect.poll(() => shortsWatched(shortsFeed)).toBe(1);
+
+    shortsFeed.navigate('/feed/subscriptions');
+    shortsFeed.clock.advance(ROUTE_CHECK);
+    shortsFeed.navigate(page.path);
+    shortsFeed.clock.advance(ROUTE_CHECK);
+    shortsFeed.clock.advance(OVER_A_SECOND);
+
+    await expect.poll(() => shortsWatched(shortsFeed)).toBe(2);
+  });
+
+  it('counts the Current Short once when the viewer switches tabs and back', async () => {
+    const shortsFeed = await mount(page);
+    await playing(shortsFeed);
+    shortsFeed.clock.advance(OVER_A_SECOND);
+    await expect.poll(() => shortsWatched(shortsFeed)).toBe(1);
+
+    shortsFeed.pause();
+    shortsFeed.moveToBackground();
+    shortsFeed.clock.advance(OVER_A_SECOND);
+    shortsFeed.moveToForeground();
+    shortsFeed.clock.advance(OVER_A_SECOND);
+    await aMomentLater();
+
+    expect(await shortsWatched(shortsFeed)).toBe(1);
+  });
+
   it('counts a Short once, however many times it loops', async () => {
     const shortsFeed = await mount(page);
     await playing(shortsFeed);

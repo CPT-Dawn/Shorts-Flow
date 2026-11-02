@@ -31,9 +31,12 @@ type Unsaved = Pick<Session, 'shortsWatched' | 'playingMs'> & {
 /**
  * The Session and the Break Nudge, while the page is on the Shorts Feed.
  *
- * Shorts Watched counts each Short once it has been the Current Short for
- * `COUNT_AFTER` while the Shorts Feed is in front of the viewer or playing,
- * whether an Advance or the viewer brought it there. Playing time adds up
+ * Shorts Watched counts a Short each time it becomes the Current Short and
+ * stays so for `COUNT_AFTER` while the Shorts Feed is in front of the viewer
+ * or playing, whether an Advance or the viewer brought it there: going back
+ * to a Short seen before counts it again, and so does coming back to the
+ * Shorts Feed on it. A Short looping in place, or waiting in a background
+ * tab, stays the same Current Short and counts once. Playing time adds up
  * while a Short plays. A Session ends after `SESSION_GAP` with no Short
  * playing in any tab.
  *
@@ -71,13 +74,12 @@ type Tick = {
 function trackSession(feed: Feed) {
   const { document, clock } = feed;
   const store = feed.session;
-  // Shorts counted this Session, by id: YouTube plays every Short in one
-  // `<video>`, and a Short that loops, or that the viewer comes back to,
-  // counts once.
-  let counted = new Set<string>();
-  // The Current Short, and since when, while the Shorts Feed is in view.
+  // The Current Short, by id (YouTube plays every Short in one `<video>`,
+  // so a loop is no new Short); since when it has been in view; and whether
+  // it has counted since it became the Current Short.
   let currentShort: string | undefined;
-  let currentSince = 0;
+  let currentSince = clock.now();
+  let currentCounted = false;
   let lastTick = clock.now();
   let wasPlaying = false;
   let lastWatchingAt: number | undefined;
@@ -146,29 +148,31 @@ function trackSession(feed: Feed) {
 
     if (playing) {
       // Playing again after long enough that, as far as this page knows, the
-      // Session has ended: the Shorts it counted count again.
-      if (lastWatchingAt !== undefined && now - lastWatchingAt >= SESSION_GAP) counted = new Set();
+      // Session has ended: the Current Short is the new Session's first.
+      if (lastWatchingAt !== undefined && now - lastWatchingAt >= SESSION_GAP) {
+        currentSince = now;
+        currentCounted = false;
+      }
       watched(now);
       // Only time a Short played all through: one that has just started, or
       // just stopped, may not have played for most of it.
       if (wasPlaying) unsaved.playingMs += sinceLastTick;
     }
 
-    if (playing || document.visibilityState === 'visible') {
-      const short = currentShortId(document);
-      if (short !== currentShort) {
-        currentShort = short;
-        currentSince = now;
-      }
-      if (short !== undefined && !counted.has(short) && now - currentSince >= COUNT_AFTER) {
-        counted.add(short);
-        unsaved.shortsWatched++;
-        watched(now);
-        save();
-      }
-    } else {
+    const short = currentShortId(document);
+    if (short !== currentShort) {
+      currentShort = short;
+      currentSince = now;
+      currentCounted = false;
+    }
+    if (!playing && document.visibilityState !== 'visible') {
       // In another tab: a Short must be in view a while once they're back.
-      currentShort = undefined;
+      currentSince = now;
+    } else if (short !== undefined && !currentCounted && now - currentSince >= COUNT_AFTER) {
+      currentCounted = true;
+      unsaved.shortsWatched++;
+      watched(now);
+      save();
     }
 
     for (const listener of tickListeners) listener({ playing, live: live() });
