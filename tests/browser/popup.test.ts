@@ -157,7 +157,7 @@ describe("Firefox's access to youtube.com", () => {
 });
 
 describe('keyboard', () => {
-  it('reaches Auto-Scroll first, switches it with Space, then moves on to the links', async () => {
+  it('reaches Auto-Scroll first, switches it with Space, then moves on to the settings and links', async () => {
     const settings = createTestSettingsStore({ autoScroll: true });
     openPopup({ settings });
     await expect.element(page.getByRole('switch', { name: 'Auto-Scroll' })).toBeEnabled();
@@ -167,6 +167,14 @@ describe('keyboard', () => {
     await userEvent.keyboard(' ');
     await expect.poll(async () => (await settings.get()).autoScroll).toBe(false);
 
+    await userEvent.tab();
+    await expect.element(page.getByRole('switch', { name: 'Show button on Shorts' })).toHaveFocus();
+    await userEvent.tab();
+    await expect.element(page.getByRole('combobox', { name: 'Preferred Speed' })).toHaveFocus();
+    await userEvent.tab();
+    await expect.element(page.getByRole('switch', { name: 'Speed' })).toHaveFocus();
+    await userEvent.tab();
+    await expect.element(page.getByRole('combobox', { name: 'Session limit' })).toHaveFocus();
     await userEvent.tab();
     await expect.element(page.getByRole('link', { name: "What's new" })).toHaveFocus();
     await userEvent.tab();
@@ -179,7 +187,7 @@ describe('keyboard', () => {
     openPopup();
     await expect.element(page.getByRole('switch', { name: 'Auto-Scroll' })).toBeEnabled();
 
-    for (const name of ['Auto-Scroll', "What's new", 'Report a problem', 'Support']) {
+    for (const name of ['Auto-Scroll', 'Show button on Shorts', 'Preferred Speed', 'Speed', 'Session limit', "What's new", 'Report a problem', 'Support']) {
       await userEvent.tab();
       const focused = document.activeElement!;
       expect(focused.matches(':focus-visible'), name).toBe(true);
@@ -202,6 +210,27 @@ describe('privacy', () => {
       .map(({ name }) => new URL(name))
       .filter(({ origin }) => origin !== location.origin);
     expect(elsewhere).toEqual([]);
+  });
+});
+
+describe('Show button on Shorts', () => {
+  it('is on from the start', async () => {
+    openPopup();
+
+    await expect.element(page.getByRole('switch', { name: 'Show button on Shorts' })).toBeChecked();
+  });
+
+  it('hides the Shorts Control from every Shorts tab, and shows it again', async () => {
+    const settings = createTestSettingsStore();
+    openPopup({ settings });
+    const shown = page.getByRole('list', { name: 'Settings' }).getByRole('switch', { name: 'Show button on Shorts' });
+    await expect.element(shown).toBeChecked();
+
+    await shown.click();
+    await expect.poll(async () => (await settings.get()).shortsControlShown).toBe(false);
+
+    await shown.click();
+    await expect.poll(async () => (await settings.get()).shortsControlShown).toBe(true);
   });
 });
 

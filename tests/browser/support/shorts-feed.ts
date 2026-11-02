@@ -42,12 +42,16 @@ export type ShortsFeed = {
   navigate(path: string): void;
   /** Sets the playback speed as YouTube's own speed menu does. */
   setPlaybackSpeed(rate: number): void;
+  /** How fast the Current Short plays, as the viewer sees it: 1 is normal speed. */
+  playbackSpeed(): number;
+  /** How fast the hidden watch-page player behind the Shorts Feed would play. */
+  hiddenPlayerSpeed(): number;
   /** Pauses the Current Short where it is, as YouTube's pause control does. */
   pause(): void;
-  /** Plays the Current Short from where it is, as YouTube's play control does. */
-  play(): void;
   /** Whether the Current Short is playing, as the viewer sees: not paused, nor waiting for data. */
   playing(): boolean;
+  /** Plays the Current Short on from where it was paused, as YouTube's play control does. */
+  resume(): void;
   /**
    * Plays a clip to its end in the hidden watch-page player YouTube keeps
    * behind the Shorts Feed. Resolves once it has ended.
@@ -73,6 +77,32 @@ export type ShortsFeed = {
   dialog(): { title: string; text: string; actions: string[]; element: HTMLDialogElement } | undefined;
   /** Presses the open dialog's button labelled `label`, as the viewer does. */
   pressDialogAction(label: string): void;
+  /**
+   * The accessible names of the controls in YouTube's action rail beside the
+   * Current Short, top to bottom, as a screen reader would list them.
+   */
+  railLabels(): string[];
+  /** The rail control named `label`, as the viewer finds it, if the rail has one. */
+  railControl(label: string): HTMLElement | undefined;
+  /**
+   * The rail item whose control is named `label`: the control, the whole
+   * item (control and caption), and the caption under the control, if any.
+   */
+  railItem(label: string): { button: HTMLElement; item: Element; caption: HTMLElement | undefined } | undefined;
+  /**
+   * The tooltip showing on the page, if one is: its text and the element a
+   * viewer sees.
+   */
+  tooltip(): { text: string; element: HTMLElement } | undefined;
+  /**
+   * Takes away every style YouTube's page has, as if YouTube had renamed all
+   * its classes, leaving only what Shorts Flow brings.
+   */
+  dropYouTubeStyles(): void;
+  /** Points at `element` with the mouse, as the viewer does before clicking. */
+  hover(element: Element): void;
+  /** Moves the mouse away from `element` again. */
+  unhover(element: Element): void;
   /** Tears the engine down, leaving the page playing. */
   unmountEngine(): void;
 };
@@ -134,13 +164,15 @@ export async function mountShortsFeed(
       youtube.video.defaultPlaybackRate = rate;
       youtube.video.playbackRate = rate;
     },
+    playbackSpeed: () => youtube.video.playbackRate,
+    hiddenPlayerSpeed: () => document.querySelector<HTMLVideoElement>('#movie_player video')!.playbackRate,
     pause() {
       youtube.video.pause();
     },
-    play() {
-      youtube.video.play().catch(() => {});
-    },
     playing: () => !youtube.video.paused && youtube.video.readyState >= youtube.video.HAVE_FUTURE_DATA,
+    resume() {
+      void youtube.video.play().catch(() => {});
+    },
     playHiddenWatchPlayer: youtube.playHiddenWatchPlayer,
     loadNextShort: youtube.loadNextShort,
     pressNextVideo() {
@@ -163,15 +195,60 @@ export async function mountShortsFeed(
       if (!button) throw new Error(`No dialog with a "${label}" button is open`);
       button.click();
     },
+    railLabels: () => railControls(document).map(({ label }) => label),
+    railControl: (label) => railControls(document).find((control) => control.label === label)?.element,
+    railItem(label) {
+      const control = railControls(document).find((control) => control.label === label);
+      if (!control) return undefined;
+      const caption = control.item.querySelector<HTMLElement>('.ytSpecButtonShapeWithLabelLabel') ?? undefined;
+      return { button: control.element, item: control.item, caption };
+    },
+    tooltip() {
+      const tooltip = [...document.querySelectorAll<HTMLElement>('[role="tooltip"]')].find(
+        (element) =>
+          element.getBoundingClientRect().width > 0 && element.checkVisibility({ visibilityProperty: true, opacityProperty: true }),
+      );
+      return tooltip && { text: (tooltip.textContent ?? '').trim(), element: tooltip };
+    },
+    dropYouTubeStyles() {
+      for (const style of document.querySelectorAll('style, link[rel="stylesheet"]')) {
+        if (!style.closest('[data-shorts-flow]') && !(style as HTMLElement).dataset.shortsFlow) style.remove();
+      }
+    },
+    hover(element) {
+      for (const type of ['pointerover', 'pointerenter', 'mouseover', 'mouseenter']) {
+        element.dispatchEvent(new (window as Window & typeof globalThis).PointerEvent(type, { bubbles: !type.endsWith('enter'), composed: true }));
+      }
+    },
+    unhover(element) {
+      for (const type of ['pointerout', 'pointerleave', 'mouseout', 'mouseleave']) {
+        element.dispatchEvent(new (window as Window & typeof globalThis).PointerEvent(type, { bubbles: !type.endsWith('leave'), composed: true }));
+      }
+    },
     unmountEngine,
   };
 }
 
 /**
+ * The controls in the action rail of the Current Short, as a screen reader
+ * finds them: each rail item's button (or link acting as one), named by its
+ * aria-label.
+ */
+function railControls(document: Document) {
+  const rail = document.querySelector('ytd-reel-video-renderer reel-action-bar-view-model');
+  if (!rail) return [];
+  return [...rail.children].flatMap((item) => {
+    const element = item.querySelector<HTMLElement>('button, [role="button"]');
+    const label = element?.getAttribute('aria-label');
+    return element && label ? [{ label, element, item }] : [];
+  });
+}
+
+/**
  * Stands in for YouTube's Shorts player and feed. The Shorts Feed keeps one
  * renderer and one looping `<video>` for every Short: moving on puts the
- * renderer into the next slot, gives the video the next Short's clip, and
- * changes the address to the next Short's. YouTube never moves on by itself.
+ * renderer into the next slot, builds its action rail afresh, gives the video
+ * the next Short's clip, and changes the address to the next Short's. YouTube never moves on by itself.
  */
 function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) => void) {
   const { document } = window;
@@ -179,6 +256,8 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
   const video = shorts.querySelector<HTMLVideoElement>('#shorts-player video')!;
   const renderer = shorts.querySelector('#reel-overlay-container')!;
   const container = shorts.querySelector('#shorts-container')!;
+  // YouTube builds the action rail afresh for every Short.
+  const freshRail = shorts.querySelector('reel-action-bar-view-model')!.cloneNode(true);
   // YouTube adds Shorts to the end of the feed as it fetches them.
   const feed = [...page.shorts];
   let current = feed.findIndex((short) => page.path.endsWith(short.id));
@@ -197,6 +276,7 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
       current += 1;
       const slot = shorts.querySelector(`.reel-video-in-sequence-new[id="${current}"]`)!;
       slot.append(renderer);
+      renderer.querySelector('reel-action-bar-view-model')!.replaceWith(freshRail.cloneNode(true));
       container.scrollTop = (slot as HTMLElement).offsetTop;
       shorts.removeAttribute('is-up-arrow-hidden');
       shorts.querySelector('#navigation-button-up')?.removeAttribute('aria-hidden');

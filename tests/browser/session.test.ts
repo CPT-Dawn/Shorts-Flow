@@ -95,7 +95,7 @@ describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
 
     shortsFeed.pause();
     shortsFeed.clock.advance(SESSION_GAP - MINUTE);
-    shortsFeed.play();
+    shortsFeed.resume();
     await playing(shortsFeed);
     await moveOnByHand(shortsFeed, 2);
     shortsFeed.clock.advance(OVER_A_SECOND);
@@ -108,7 +108,7 @@ describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
 
     shortsFeed.pause();
     shortsFeed.clock.advance(SESSION_GAP);
-    shortsFeed.play();
+    shortsFeed.resume();
     await playing(shortsFeed);
     shortsFeed.clock.advance(OVER_A_SECOND);
 
@@ -169,7 +169,7 @@ describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
 
     tabA.pause();
     shared.clock.advance(SESSION_GAP);
-    tabA.play();
+    tabA.resume();
     await playing(tabA);
     await moveOnByHand(tabA, 2);
     shared.clock.advance(OVER_A_SECOND);

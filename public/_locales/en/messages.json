@@ -103,6 +103,35 @@
     "message": "Settings",
     "description": "Accessible name of the Popup's list of settings."
   },
+  "popupShortsControlShown": {
+    "message": "Show button on Shorts",
+    "description": "Popup switch: whether the Shorts Control, Shorts Flow's Auto-Scroll button beside each Short on YouTube, is shown."
+  },
+  "popupShortsControlShownHint": {
+    "message": "An Auto-Scroll button beside each Short",
+    "description": "Under the \"Show button on Shorts\" switch: what the button is."
+  },
+  "popupSpeed": {
+    "message": "Speed",
+    "description": "Name of the Speed switch in the Popup: every Short plays at the Preferred Speed while it is on."
+  },
+  "popupSpeedOn": {
+    "message": "Every Short at your speed",
+    "description": "Under the Speed switch while it is on: each new Short plays at the Preferred Speed picked beside it."
+  },
+  "popupSpeedOff": {
+    "message": "YouTube's own speed",
+    "description": "Under the Speed switch while it is off: Shorts play at whatever speed YouTube sets."
+  },
+  "popupPreferredSpeed": {
+    "message": "Preferred Speed",
+    "description": "Accessible name of the picker for the Preferred Speed, the playback speed Speed keeps across reloads."
+  },
+  "popupSpeedValue": {
+    "message": "$SPEED$×",
+    "description": "One playback speed in the Preferred Speed picker, such as 1.5×.",
+    "placeholders": { "speed": { "content": "$1", "example": "1.5" } }
+  },
   "popupWhatsNew": {
     "message": "What's new",
     "description": "Popup link to news about recent versions on the Shorts Flow website."
@@ -134,5 +163,17 @@
   "breakNudgeKeepWatching": {
     "message": "Keep watching",
     "description": "The Break Nudge's only button, also chosen by Space, Enter or Escape: the Short plays on, and the next Break Nudge comes only after another full Session Limit."
+  },
+  "shortsControlName": {
+    "message": "Auto-Scroll",
+    "description": "Shorts Control: name of the Auto-Scroll button Shorts Flow adds to YouTube's row of buttons beside each Short, shown under it like YouTube's \"Share\". Keep it very short: it has about 64 px."
+  },
+  "shortsControlTurnOff": {
+    "message": "Turn Auto-Scroll off",
+    "description": "Shorts Control: tooltip while Auto-Scroll is on, saying what a click does."
+  },
+  "shortsControlTurnOn": {
+    "message": "Turn Auto-Scroll on",
+    "description": "Shorts Control: tooltip while Auto-Scroll is off, saying what a click does."
   }
 }

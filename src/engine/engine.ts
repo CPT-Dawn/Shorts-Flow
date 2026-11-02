@@ -3,8 +3,10 @@ import type { Settings, SettingsStore } from '@/settings/settings';
 import { createAdvance } from './advance';
 import { autoScroll } from './auto-scroll';
 import { watchSession } from './session';
+import { speed } from './speed';
 import type { Feature, Feed } from './feed';
 import { whileOnShortsFeed } from './route';
+import { shortsControl } from './shorts-control';
 
 /** Time as the engine sees it, so tests can move it forward by hand. */
 export interface Clock {
@@ -30,7 +32,13 @@ export type EngineMessage =
   /** The Break Nudge's title, text and button. */
   | 'breakNudgeTitle'
   | 'breakNudgeText'
-  | 'breakNudgeKeepWatching';
+  | 'breakNudgeKeepWatching'
+  /** The Shorts Control's accessible name and the text under it. */
+  | 'shortsControlName'
+  /** Its tooltip while Auto-Scroll is on. */
+  | 'shortsControlTurnOff'
+  /** Its tooltip while Auto-Scroll is off. */
+  | 'shortsControlTurnOn';
 
 /** Looks up user-facing text in the locale files: `browser.i18n.getMessage` in the extension. */
 export type GetMessage = (name: EngineMessage, substitutions?: string | string[]) => string;
@@ -50,7 +58,7 @@ export type EngineOptions = {
  * Every feature, each mounted once per visit to the Shorts Feed. A new
  * feature is a module exporting a `Feature`, added to this list.
  */
-const FEATURES: Feature[] = [autoScroll, watchSession];
+const FEATURES: Feature[] = [autoScroll, shortsControl, speed, watchSession];
 
 /**
  * Mounts the Shorts Flow engine onto `document` and returns its teardown.
