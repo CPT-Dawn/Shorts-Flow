@@ -1,5 +1,5 @@
 import type { SessionStore } from '@/settings/session';
-import type { Settings } from '@/settings/settings';
+import type { Settings, SwitchSetting } from '@/settings/settings';
 import type { PopupMessage } from './messages';
 import { shortsWatched } from './session';
 import { sessionLimitRow } from './session-limit-row';
@@ -7,9 +7,6 @@ import { shortcutsRow } from './shortcuts-row';
 import { shortsControlRow } from './shorts-control-row';
 import { skipSponsoredRow } from './skip-sponsored-row';
 import { speedRow } from './speed-row';
-
-/** The settings that are on or off, which a switch row can show. */
-export type SwitchSetting = { [K in keyof Settings]: Settings[K] extends boolean ? K : never }[keyof Settings];
 
 /**
  * What a row of the Popup gets to build itself with. The Popup builds one for

@@ -1,6 +1,6 @@
-import type { Settings, ShortcutAction } from '@/settings/settings';
+import type { Settings, ShortcutAction, SwitchSetting } from '@/settings/settings';
 import { shortcutKey } from '@/settings/shortcut-key';
-import type { Feature, Feed } from './feed';
+import { toggleSetting, type Feature, type Feed } from './feed';
 import { isTyping } from './holds';
 import { createToast } from './toast';
 
@@ -34,17 +34,17 @@ export const shortcuts: Feature = (feed) => {
     event.preventDefault();
     event.stopImmediatePropagation();
     if (event.repeat) return;
-    const changes = TOGGLES[action](settings);
-    feed.changeSettings(changes);
-    confirmation.show(confirm(feed, { ...settings, ...changes }, action), { duration: CONFIRMATION_MS });
+    const switched = toggleSetting(feed, SWITCHES[action]);
+    if (switched) confirmation.show(confirm(feed, switched, action), { duration: CONFIRMATION_MS });
   };
 
   window.addEventListener('keydown', onKeyDown, { capture: true, signal: feed.signal });
 };
 
-const TOGGLES: Record<ShortcutAction, (settings: Settings) => Partial<Settings>> = {
-  toggleAutoScroll: ({ autoScroll }) => ({ autoScroll: !autoScroll }),
-  toggleSpeed: ({ speedOn }) => ({ speedOn: !speedOn }),
+/** The setting each Shortcut switches. */
+const SWITCHES: Record<ShortcutAction, SwitchSetting> = {
+  toggleAutoScroll: 'autoScroll',
+  toggleSpeed: 'speedOn',
 };
 
 /** What the confirmation says once `action` has changed the settings to `settings`. */

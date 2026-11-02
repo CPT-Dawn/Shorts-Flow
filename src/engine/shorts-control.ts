@@ -1,5 +1,5 @@
 import type { Settings } from '@/settings/settings';
-import type { Feature, Feed } from './feed';
+import { toggleSetting, type Feature, type Feed } from './feed';
 import { drawIcon } from './icon';
 import { quickSettings } from './quick-settings';
 import { createRailButton, watchActionRail, type RailButton } from './youtube';
@@ -65,14 +65,7 @@ export const shortsControl: Feature = (feed) => {
     icon.replaceChildren(drawIcon(document, on ? ICON_ON : ICON_OFF));
     tooltip.text(feed.getMessage(on ? 'shortsControlTurnOff' : 'shortsControlTurnOn'));
   };
-  button.addEventListener(
-    'click',
-    () => {
-      const settings = feed.settings();
-      if (settings) feed.changeSettings({ autoScroll: !settings.autoScroll });
-    },
-    { signal },
-  );
+  button.addEventListener('click', () => toggleSetting(feed, 'autoScroll'), { signal });
   for (const extra of SHORTS_CONTROL_EXTRAS) extra(control, feed);
 
   // Nothing shows until the settings are known: it might be hidden.

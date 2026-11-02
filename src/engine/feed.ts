@@ -1,5 +1,5 @@
 import type { SessionStore } from '@/settings/session';
-import type { Settings } from '@/settings/settings';
+import type { Settings, SwitchSetting } from '@/settings/settings';
 import type { Clock, GetMessage } from './engine';
 
 /**
@@ -43,3 +43,17 @@ export type Feed = {
  * through `feed.signal`.
  */
 export type Feature = (feed: Feed) => void;
+
+/**
+ * Switches `setting` from where it stands now, for every tab, as the Shorts
+ * Control, its menu and the Shortcuts do. Returns the settings as they are
+ * once switched, or undefined while they are still unknown, when nothing
+ * changes.
+ */
+export function toggleSetting(feed: Pick<Feed, 'settings' | 'changeSettings'>, setting: SwitchSetting): Settings | undefined {
+  const settings = feed.settings();
+  if (!settings) return undefined;
+  const changes = { [setting]: !settings[setting] };
+  feed.changeSettings(changes);
+  return { ...settings, ...changes };
+}

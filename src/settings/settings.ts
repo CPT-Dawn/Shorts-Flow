@@ -25,6 +25,9 @@ export type Settings = {
   shortcuts: Shortcuts;
 };
 
+/** The settings that are on or off. */
+export type SwitchSetting = { [K in keyof Settings]: Settings[K] extends boolean ? K : never }[keyof Settings];
+
 /** The Session Limit: off, or a number of Shorts Watched or of minutes, counted from the last Break Nudge. */
 export type SessionLimit = { kind: 'off' } | { kind: 'shorts' | 'minutes'; value: number };
 

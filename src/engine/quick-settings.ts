@@ -1,5 +1,5 @@
 import { PREFERRED_SPEEDS, type Settings } from '@/settings/settings';
-import type { Feed } from './feed';
+import { toggleSetting, type Feed } from './feed';
 import { holdWhile } from './holds';
 import { drawIcon } from './icon';
 import { placeOnPage } from './on-page';
@@ -119,14 +119,8 @@ export function quickSettings(control: ShortsControl, feed: Feed): void {
     event.preventDefault();
     openMenu(control.button);
   });
-  on(skipSponsored, 'click', () => {
-    const settings = feed.settings();
-    if (settings) feed.changeSettings({ skipSponsoredShorts: !settings.skipSponsoredShorts });
-  });
-  on(speedOn, 'click', () => {
-    const settings = feed.settings();
-    if (settings) feed.changeSettings({ speedOn: !settings.speedOn });
-  });
+  on(skipSponsored, 'click', () => toggleSetting(feed, 'skipSponsoredShorts'));
+  on(speedOn, 'click', () => toggleSetting(feed, 'speedOn'));
   on(preferredSpeed, 'click', openSpeeds);
   on(back, 'click', backToMenu);
   for (const choice of speedItems) {
