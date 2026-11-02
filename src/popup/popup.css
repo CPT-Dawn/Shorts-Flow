@@ -400,6 +400,34 @@ label.sf-row {
   font: 11px/1.5 var(--sf-mono);
 }
 
+/* A Shortcut: what it switches, then its key. Pressed, it waits for a new key. */
+.sf-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 4px 2px 6px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--sf-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sf-shortcut:hover {
+  color: var(--sf-ink);
+}
+
+.sf-shortcut:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.sf-shortcut[aria-pressed='true'] .sf-kbd {
+  border-color: var(--sf-ink);
+  font-family: var(--sf-ui);
+}
+
 /* Footer ----------------------------------------------------------------- */
 
 .sf-footer {

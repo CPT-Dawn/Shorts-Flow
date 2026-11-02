@@ -104,8 +104,11 @@ function isPaused(video: HTMLVideoElement | undefined) {
   return video !== undefined && video.paused && !video.ended;
 }
 
-/** Whether focus is in a field the viewer types into, inside shadow roots too. */
-function isTyping(document: Document) {
+/**
+ * Whether focus is in a field the viewer types into, inside shadow roots too.
+ * Shortcuts ask it as well, so a key typed into a comment never toggles anything.
+ */
+export function isTyping(document: Document) {
   let focused = document.activeElement;
   while (focused?.shadowRoot?.activeElement) focused = focused.shadowRoot.activeElement;
   if (!focused) return false;

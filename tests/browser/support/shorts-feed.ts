@@ -80,6 +80,16 @@ export type ShortsFeed = {
   /** Presses the open dialog's button labelled `label`, as the viewer does. */
   pressDialogAction(label: string): void;
   /**
+   * Presses `key` (a `KeyboardEvent.key` value) on the page as the viewer
+   * does on a real keyboard, optionally while holding `holding` down. The
+   * key goes wherever the focus is on the page.
+   */
+  pressKey(key: string, options?: { holding?: 'Control' | 'Alt' | 'Meta' | 'Shift' }): Promise<void>;
+  /** Clicks into YouTube's search box and types `text` there, leaving the focus in it. */
+  typeInSearch(text: string): Promise<void>;
+  /** A script on the page makes up a keydown of `key`, as Shorts Flow's own ArrowDown fallback does. */
+  pressKeyByScript(key: string): void;
+  /**
    * The accessible names of the controls in YouTube's action rail beside the
    * Current Short, top to bottom, as a screen reader would list them.
    */
@@ -223,6 +233,21 @@ export async function mountShortsFeed(
       if (!button) throw new Error(`No dialog with a "${label}" button is open`);
       button.click();
     },
+    async pressKey(key, { holding } = {}) {
+      focusPage(window);
+      const name = key === ' ' ? '{Space}' : key.length === 1 ? key : `{${key}}`;
+      await userEvent.keyboard(holding ? `{${holding}>}${name}{/${holding}}` : name);
+    },
+    async typeInSearch(text) {
+      focusPage(window);
+      document.querySelector<HTMLInputElement>('input[name="search_query"]')!.focus();
+      await userEvent.keyboard(text);
+    },
+    pressKeyByScript(key) {
+      (document.activeElement ?? document.body).dispatchEvent(
+        new (window as Window & typeof globalThis).KeyboardEvent('keydown', { key, bubbles: true, composed: true, cancelable: true }),
+      );
+    },
     railLabels: () => railControls(document).map(({ label }) => label),
     railControl: (label) => railControls(document).find((control) => control.label === label)?.element,
     railItem(label) {
@@ -324,6 +349,12 @@ export async function mountShortsFeed(
   function frame() {
     return browserPage.frameLocator(browserPage.elementLocator(window.frameElement!));
   }
+}
+
+/** Puts the keyboard focus into the test page's frame, where a viewer's keys would go. */
+function focusPage(window: Window) {
+  (window.frameElement as HTMLIFrameElement).focus();
+  window.focus();
 }
 
 /**

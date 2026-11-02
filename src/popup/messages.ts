@@ -35,6 +35,13 @@ export type PopupMessage =
   | 'popupSpeedOff'
   | 'popupPreferredSpeed'
   | 'popupSpeedValue'
+  | 'popupShortcuts'
+  | 'popupShortcutsHint'
+  | 'popupShortcutsListening'
+  | 'popupShortcutKey'
+  | 'popupPressKey'
+  | 'popupKeyTaken'
+  | 'popupKeyYouTube'
   | 'popupWhatsNew'
   | 'popupReportProblem'
   | 'popupSupport';

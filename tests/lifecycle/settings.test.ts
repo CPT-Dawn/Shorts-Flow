@@ -61,3 +61,12 @@ it('remembers Speed and the Preferred Speed across a browser restart', async () 
   expect(afterRestart.speedOn).toBe(true);
   expect(afterRestart.preferredSpeed).toBe(2.25);
 });
+
+it('has A for Auto-Scroll and S for Speed after a fresh install, and remembers a rebinding', async () => {
+  expect((await createSettingsStore().get()).shortcuts).toEqual({ toggleAutoScroll: 'a', toggleSpeed: 's' });
+
+  await createSettingsStore().set({ shortcuts: { toggleAutoScroll: 'x', toggleSpeed: 's' } });
+
+  const afterRestart = await createSettingsStore().get();
+  expect(afterRestart.shortcuts).toEqual({ toggleAutoScroll: 'x', toggleSpeed: 's' });
+});

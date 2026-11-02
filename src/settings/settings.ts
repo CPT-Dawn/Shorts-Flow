@@ -21,10 +21,18 @@ export type Settings = {
   speedOn: boolean;
   /** The Preferred Speed, one of `PREFERRED_SPEEDS`. */
   preferredSpeed: number;
+  /** The key of each Shortcut on the Shorts Feed. */
+  shortcuts: Shortcuts;
 };
 
 /** The Session Limit: off, or a number of Shorts Watched or of minutes, counted from the last Break Nudge. */
 export type SessionLimit = { kind: 'off' } | { kind: 'shorts' | 'minutes'; value: number };
+
+/** What a Shortcut does on the Shorts Feed. */
+export type ShortcutAction = 'toggleAutoScroll' | 'toggleSpeed';
+
+/** Each Shortcut's key: a `KeyboardEvent.key` value, letters in lower case (see `shortcutKey`). */
+export type Shortcuts = Record<ShortcutAction, string>;
 
 export const DEFAULT_SETTINGS: Settings = {
   autoScroll: true,
@@ -33,6 +41,7 @@ export const DEFAULT_SETTINGS: Settings = {
   skipSponsoredShorts: true,
   speedOn: false,
   preferredSpeed: 1.5,
+  shortcuts: { toggleAutoScroll: 'a', toggleSpeed: 's' },
 };
 
 /** Every Preferred Speed there is to pick: 0.5× to 3× in steps of 0.25. */
