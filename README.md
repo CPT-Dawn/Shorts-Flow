@@ -19,11 +19,12 @@ bunx playwright install chromium firefox   # once, for the browser tests
 | `bun run build` | Chrome and Firefox builds in `.output/chrome-mv3` and `.output/firefox-mv3` (`build:chrome`, `build:firefox` for one) |
 | `bun run zip` | Store zips for both, plus the Firefox source bundle, in `.output/` |
 | `bun run typecheck` | Strict TypeScript check |
-| `bun run test` | Both Vitest projects; `test:lifecycle` (Node, WXT fake browser) or `test:browser` (Playwright, Chromium and Firefox) for one |
+| `bun run test` | All three Vitest projects; `test:lifecycle` (Node, WXT fake browser), `test:tools` (Node, the test-page tool) or `test:browser` (Playwright, Chromium and Firefox) for one |
+| `bun run test-page` | Makes an anonymised Shorts Feed test page from a local capture (see `tests/pages/README.md`; needs `ffmpeg` the first time) |
 | `bun run lint:firefox` | `web-ext lint` on the Firefox build (run `build:firefox` first) |
 | `bun run icons` | Redraws `public/icon/` from `docs/design/brand` (needs `rsvg-convert`) |
 
-CI runs typecheck, both test projects, both builds and `web-ext lint` on every push and pull request.
+CI runs typecheck, all test projects, both builds and `web-ext lint` on every push and pull request.
 
 ## Layout
 
@@ -31,7 +32,9 @@ CI runs typecheck, both test projects, both builds and `web-ext lint` on every p
 - `src/popup/`: the Popup, which takes its collaborators (such as the message lookup) as arguments so browser tests can mount it.
 - `public/_locales/en/messages.json`: every user-facing string, including the manifest name and description.
 - `tests/lifecycle/`: Node tests with WXT's fake browser, including checks on both built manifests.
-- `tests/browser/`: tests in real headless Chromium and Firefox.
+- `tests/browser/`: tests in real headless Chromium and Firefox, against the test pages.
+- `tests/pages/`: anonymised Shorts Feed test pages and their clips. How to add one is in its README.
+- `scripts/test-pages/` and `scripts/test-page.ts`: the tool that makes a test page from a capture, tested in `tests/tools/`.
 
 ## License
 
