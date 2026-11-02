@@ -1,5 +1,6 @@
 import type { Feed } from './feed';
 import { placeOnPage } from './on-page';
+import { lookVariables } from './youtube-look';
 
 export type ToastOptions = {
   /** One button beside the message, as YouTube's "Undo" or "Retry". */
@@ -75,21 +76,11 @@ export function createToast(feed: Pick<Feed, 'document' | 'signal' | 'setTimeout
 /**
  * YouTube's snackbar, from its 2026-11 stylesheets (`snackbarViewModel*`,
  * `ytSnackbarContainer*`, `ytSpecButtonShapeNext*`): inverted colours, so
- * light on the dark theme and dark on the light one, with its blue text button.
+ * light on the dark theme and dark on the light one, with its blue text
+ * button; the colours are YouTube's (youtube-look.ts).
  */
 const TOAST_CSS = `
-:host {
-  --toast-background: #0f0f0f;
-  --toast-text: #fff;
-  --toast-action: #3ea6ff;
-  --toast-action-hover: rgba(255, 255, 255, 0.2);
-}
-:host([data-theme="dark"]) {
-  --toast-background: #f1f1f1;
-  --toast-text: #0f0f0f;
-  --toast-action: #065fd4;
-  --toast-action-hover: rgba(0, 0, 0, 0.1);
-}
+${lookVariables({ light: ':host', dark: ':host([data-theme="dark"])' })}
 .toast {
   position: fixed;
   left: 0;
@@ -105,8 +96,8 @@ const TOAST_CSS = `
   max-height: 64px;
   margin: 16px;
   border-radius: 8px;
-  background-color: var(--toast-background);
-  color: var(--toast-text);
+  background-color: var(--shorts-flow-snackbar);
+  color: var(--shorts-flow-snackbar-ink);
   font-family: Roboto, Arial, sans-serif;
   font-size: 14px;
   font-weight: 400;
@@ -139,7 +130,7 @@ button {
   border: none;
   border-radius: 20px;
   background: none;
-  color: var(--toast-action);
+  color: var(--shorts-flow-snackbar-action);
   font: inherit;
   font-weight: 500;
   line-height: 40px;
@@ -149,10 +140,10 @@ button {
 }
 button:hover,
 button:focus-visible {
-  background-color: var(--toast-action-hover);
+  background-color: var(--shorts-flow-snackbar-action-hover);
 }
 button:focus-visible {
-  outline: 2px solid var(--toast-action);
+  outline: 2px solid var(--shorts-flow-snackbar-action);
   outline-offset: -2px;
 }
 @keyframes slide-in {

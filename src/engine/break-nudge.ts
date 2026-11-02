@@ -1,6 +1,7 @@
 import type { Feed } from './feed';
 import { placeOnPage } from './on-page';
 import { shortsVideo } from './youtube';
+import { lookVariables, YOUTUBE_LOOK } from './youtube-look';
 
 /** The Break Nudge's notice over the player. */
 export type BreakNudge = {
@@ -98,25 +99,12 @@ export function createBreakNudge(feed: Pick<Feed, 'document' | 'signal' | 'getMe
 /**
  * YouTube's dialog, from its 2026-11 stylesheets (`ytDialogViewModel*`,
  * `ytSpecButtonShapeNextFilled`): a rounded card on YouTube's raised surface
- * over a dim backdrop, Roboto, and its filled pill button, in each theme.
+ * over a dim backdrop, Roboto, and its filled pill button, in each theme's
+ * colours (youtube-look.ts). The backdrop takes its colour from the dialog,
+ * which only newer browsers let it inherit.
  */
 const BREAK_NUDGE_CSS = `
-:host {
-  --dialog-background: #fff;
-  --dialog-text: #0f0f0f;
-  --dialog-secondary: #606060;
-  --button-background: #0f0f0f;
-  --button-text: #fff;
-  --button-hover: #272727;
-}
-:host([data-theme="dark"]) {
-  --dialog-background: #212121;
-  --dialog-text: #f1f1f1;
-  --dialog-secondary: #aaa;
-  --button-background: #f1f1f1;
-  --button-text: #0f0f0f;
-  --button-hover: #d9d9d9;
-}
+${lookVariables({ light: ':host', dark: ':host([data-theme="dark"])' })}
 dialog {
   box-sizing: border-box;
   width: 400px;
@@ -124,13 +112,16 @@ dialog {
   padding: 24px;
   border: 0;
   border-radius: 12px;
-  background: var(--dialog-background);
-  color: var(--dialog-text);
+  background: var(--shorts-flow-dialog);
+  color: var(--shorts-flow-ink);
   font-family: Roboto, Arial, sans-serif;
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shorts-flow-dialog-shadow);
 }
 dialog::backdrop {
-  background: rgba(0, 0, 0, 0.5);
+  background: ${YOUTUBE_LOOK.light.backdrop};
+}
+:host([data-theme="dark"]) dialog::backdrop {
+  background: ${YOUTUBE_LOOK.dark.backdrop};
 }
 h2 {
   margin: 0;
@@ -142,7 +133,7 @@ p {
   margin: 8px 0 0;
   font-size: 14px;
   line-height: 20px;
-  color: var(--dialog-secondary);
+  color: var(--shorts-flow-secondary);
 }
 .actions {
   display: flex;
@@ -154,16 +145,16 @@ button {
   padding: 0 16px;
   border: none;
   border-radius: 18px;
-  background: var(--button-background);
-  color: var(--button-text);
+  background: var(--shorts-flow-filled-button);
+  color: var(--shorts-flow-filled-button-ink);
   font: 500 14px/36px Roboto, Arial, sans-serif;
   cursor: pointer;
 }
 button:hover {
-  background: var(--button-hover);
+  background: var(--shorts-flow-filled-button-hover);
 }
 button:focus-visible {
-  outline: 2px solid var(--dialog-text);
+  outline: 2px solid var(--shorts-flow-ink);
   outline-offset: 2px;
 }
 @media (forced-colors: active) {

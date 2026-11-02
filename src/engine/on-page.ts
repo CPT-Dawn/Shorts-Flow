@@ -1,5 +1,5 @@
 import type { Feed } from './feed';
-import { isDarkTheme, watchTheme } from './youtube';
+import { followTheme } from './youtube-look';
 
 /** Something of Shorts Flow's own placed on YouTube's page. */
 export type OnPage = {
@@ -34,9 +34,7 @@ export function placeOnPage(
   style.textContent = css;
   root.append(style);
 
-  const setTheme = (dark: boolean) => (host.dataset.theme = dark ? 'dark' : 'light');
-  setTheme(isDarkTheme(document));
-  watchTheme(document, setTheme, signal);
+  followTheme(document, host, signal);
 
   for (const type of ['keydown', 'keyup', 'keypress', 'click', 'dblclick']) {
     host.addEventListener(type, (event) => event.stopPropagation(), { signal });
