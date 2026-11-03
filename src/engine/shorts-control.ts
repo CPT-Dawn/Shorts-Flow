@@ -189,7 +189,10 @@ ${lookVariables({
 :where(.shorts-flow-control-button:hover) {
   background: var(--shorts-flow-tonal-hover);
 }
-:where(.shorts-flow-control-button:focus-visible) {
+/* The one rule outside :where(): YouTube's button class sets outline-width: 0
+   and draws no focus style of its own, so a zero-specificity ring would never
+   show to keyboard users (WCAG 2.4.7). */
+.shorts-flow-control-button:focus-visible {
   outline: 2px solid var(--shorts-flow-ink);
   outline-offset: 2px;
 }

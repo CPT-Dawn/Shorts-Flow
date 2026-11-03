@@ -111,6 +111,16 @@ describe.each(testPages)('on $name', (page) => {
     }
   });
 
+  it("shows a focus ring from the keyboard over YouTube's own button styles", async () => {
+    const { control } = await withControl();
+
+    control().focus();
+
+    expect(control().matches(':focus-visible')).toBe(true);
+    const style = getComputedStyle(control());
+    expect([style.outlineStyle, style.outlineWidth]).toEqual(['solid', '2px']);
+  });
+
   it('shows a focus ring from the keyboard even if YouTube renames its button classes', async () => {
     const { shortsFeed, control } = await withControl();
     shortsFeed.dropYouTubeStyles();
