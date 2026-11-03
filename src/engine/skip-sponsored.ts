@@ -27,22 +27,21 @@ export const skipSponsoredShorts: Feature = (feed) => {
   let position: FeedPosition | undefined;
   // Which way the feed last moved between slots: down until known otherwise.
   let cameUp = false;
-  // The slot a skip was asked from, until the feed moves to another.
-  let skippedAt: number | undefined;
+  // Where a skip was asked from, until the feed moves elsewhere.
+  let skippedAt: Place | undefined;
   // Only switching this setting on, not a change to any other, overrides the way up.
   let wasOn: boolean | undefined;
 
   const skip = () => {
     if (!position || !isSponsoredShort(position)) return;
-    skippedAt = slotIndex(position);
+    skippedAt = place(position);
     feed.advance();
   };
 
   /** Skips the Current Short if it is sponsored, reached on the way down, and not skipped from already. */
   const check = () => {
     if (!feed.settings()?.skipSponsoredShorts || cameUp) return;
-    const at = position && slotIndex(position);
-    if (at === undefined || at !== skippedAt) skip();
+    if (position && place(position) !== skippedAt) skip();
   };
 
   watchFeedPosition(
@@ -50,10 +49,8 @@ export const skipSponsoredShorts: Feature = (feed) => {
     (now) => {
       const from = position && slotIndex(position);
       const to = slotIndex(now);
-      if (from !== undefined && to !== undefined && from !== to) {
-        cameUp = to < from;
-        skippedAt = undefined;
-      }
+      if (from !== undefined && to !== undefined && from !== to) cameUp = to < from;
+      if (position && place(position) !== place(now)) skippedAt = undefined;
       position = now;
       check();
     },
@@ -67,3 +64,8 @@ export const skipSponsoredShorts: Feature = (feed) => {
     else if (firstKnown) check();
   });
 };
+
+/** Where in the feed a position is: no place at all still counts as one, so a feed YouTube rebuilt beyond recognition is skipped from once, not on every frame. */
+type Place = number | Element | string | typeof NOWHERE;
+const NOWHERE = Symbol('nowhere');
+const place = (position: FeedPosition): Place => slotIndex(position) ?? position.holding ?? position.short ?? NOWHERE;
