@@ -1,6 +1,7 @@
 import type { Settings, ShortcutAction, SwitchSetting } from '@/settings/settings';
 import { shortcutKey } from '@/settings/shortcut-key';
 import { toggleSetting, type Feature, type Feed } from './feed';
+import { formatSpeed } from './format-speed';
 import { isTyping } from './holds';
 import { isDialogOpen } from './on-page';
 import { createToast } from './toast';
@@ -57,5 +58,5 @@ const SWITCHES: Record<ShortcutAction, SwitchSetting> = {
 /** What the confirmation says once `action` has changed the settings to `settings`. */
 function confirm({ getMessage }: Pick<Feed, 'getMessage'>, settings: Settings, action: ShortcutAction): string {
   if (action === 'toggleAutoScroll') return getMessage(settings.autoScroll ? 'shortcutAutoScrollOn' : 'shortcutAutoScrollOff');
-  return settings.speedOn ? getMessage('shortcutSpeedOn', String(settings.preferredSpeed)) : getMessage('shortcutSpeedOff');
+  return settings.speedOn ? getMessage('shortcutSpeedOn', formatSpeed(settings.preferredSpeed)) : getMessage('shortcutSpeedOff');
 }

@@ -1,6 +1,7 @@
 import { PREFERRED_SPEEDS, type Settings } from '@/settings/settings';
 import { toggleSetting, type Feed } from './feed';
 import { holdWhile } from './holds';
+import { formatSpeed } from './format-speed';
 import { drawIcon } from './icon';
 import { placeOnPage } from './on-page';
 import type { ShortsControl } from './shorts-control';
@@ -66,7 +67,7 @@ export function quickSettings(control: ShortsControl, feed: Feed): void {
   back.classList.add('back');
   back.setAttribute('aria-label', getMessage('quickSettingsBack'));
   const speedItems = PREFERRED_SPEEDS.map((speed) => {
-    const choice = speeds.add(item(document, 'menuitemradio', CHECK, getMessage('quickSettingsSpeedValue', String(speed))));
+    const choice = speeds.add(item(document, 'menuitemradio', CHECK, getMessage('quickSettingsSpeedValue', formatSpeed(speed))));
     choice.dataset.speed = String(speed);
     return choice;
   });
@@ -175,7 +176,7 @@ export function quickSettings(control: ShortsControl, feed: Feed): void {
   const render = (settings: Settings) => {
     skipSponsored.setAttribute('aria-checked', String(settings.skipSponsoredShorts));
     speedOn.setAttribute('aria-checked', String(settings.speedOn));
-    speedValue.textContent = getMessage('quickSettingsSpeedValue', String(settings.preferredSpeed));
+    speedValue.textContent = getMessage('quickSettingsSpeedValue', formatSpeed(settings.preferredSpeed));
     for (const choice of speedItems) {
       choice.setAttribute('aria-checked', String(Number(choice.dataset.speed) === settings.preferredSpeed));
     }
