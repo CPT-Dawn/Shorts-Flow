@@ -85,62 +85,175 @@ export function advanceFeed(document: Document): void {
  */
 export const SPONSORED_SHORT_MARK = 'ytd-ad-slot-renderer';
 
+const SHORTS_ELEMENT = 'ytd-shorts';
 const SHORT_SLOT = '.reel-video-in-sequence-new';
+const SHORTS_CONTAINER = 'ytd-shorts #shorts-container';
 
 /**
- * Whether the Current Short is a Sponsored Short. Where YouTube puts an ad
- * in the feed is unconfirmed, so this looks in both places it may be: the slot
- * that holds the Shorts renderer (YouTube moves it to the Current Short), and
- * the slot on screen in the middle of the Shorts Feed, in case an ad brings
- * markup of its own instead.
+ * Where the Shorts Feed stands, as far as the page shows it. YouTube keeps
+ * one numbered slot per Short (`.reel-video-in-sequence-new#0`, `#1`, …) and
+ * moves its one renderer into the Current Short's. Where it puts a Sponsored
+ * Short, and whether the address follows one there, is unconfirmed, so a
+ * position keeps every sign there is.
  */
-export function isSponsoredShort(document: Document): boolean {
-  const shorts = document.querySelector('ytd-shorts');
-  if (!shorts) return false;
-  const renderer = shorts.querySelector('ytd-reel-video-renderer');
-  const current = new Set<Element>();
-  const holding = renderer?.closest(SHORT_SLOT) ?? renderer;
-  if (holding) current.add(holding);
-  const container = shorts.querySelector('#shorts-container');
-  if (container) {
-    const box = container.getBoundingClientRect();
-    const middle = box.top + box.height / 2;
-    for (const slot of container.querySelectorAll(SHORT_SLOT)) {
-      const { top, bottom } = slot.getBoundingClientRect();
-      if (box.height > 0 && top <= middle && middle < bottom) current.add(slot);
-    }
-  }
-  return [...current].some((slot) => slot.querySelector(SPONSORED_SHORT_MARK) !== null);
+export type FeedPosition = {
+  /** The Short's id in the address. */
+  readonly short: string | undefined;
+  /** The slot holding YouTube's renderer (or the renderer itself, should it ever leave the slots). */
+  readonly holding: Element | undefined;
+  /** The slot across the middle of the Shorts Feed on screen, in case an ad brings markup of its own. */
+  readonly onScreen: Element | undefined;
+};
+
+/**
+ * Where the Shorts Feed stands right now. It measures the slots on screen,
+ * so it is for the odd moment (an Advance asking, its wait running out), not
+ * for every change to the page: `watchFeedPosition` is for that.
+ */
+export function feedPosition(document: Document): FeedPosition {
+  return { short: currentShortId(document), holding: holdingSlot(document), onScreen: slotOnScreen(document) };
+}
+
+/** Whether the Shorts Feed has moved between `from` and `to`: another address, or another slot held or on screen. */
+export function hasMoved(from: FeedPosition, to: FeedPosition): boolean {
+  return from.short !== to.short || from.holding !== to.holding || from.onScreen !== to.onScreen;
 }
 
 /**
- * Calls `changed` whenever the Shorts Feed may have moved to another Short or
- * filled one in: something added or moved inside it, or it scrolled. Until
- * YouTube has built the Shorts Feed, it waits for it. Stops when `signal` aborts.
+ * How far down the Shorts Feed `position` is, in slots from the top, or
+ * undefined with no slot to count. The slot on screen counts first, since
+ * that is what the viewer sees. Comparing two tells which way the feed moved.
  */
-export function watchShortsFeed(document: Document, changed: () => void, signal: AbortSignal): void {
+export function slotIndex({ onScreen, holding }: FeedPosition): number | undefined {
+  const slot = [onScreen, holding].find((each) => each?.matches(SHORT_SLOT));
+  if (!slot) return undefined;
+  // YouTube numbers its slots; their order in the page stands in, should it stop.
+  const numbered = Number.parseInt(slot.id, 10);
+  return Number.isFinite(numbered) ? numbered : [...(slot.parentElement?.children ?? [])].indexOf(slot);
+}
+
+/**
+ * Whether the Short at `position` is a Sponsored Short: either slot it names
+ * holds the mark. It reads no layout, so it may be asked as often as needed.
+ */
+export function isSponsoredShort({ holding, onScreen }: FeedPosition): boolean {
+  return [holding, onScreen].some((slot) => slot?.querySelector(SPONSORED_SHORT_MARK) != null);
+}
+
+function holdingSlot(document: Document): Element | undefined {
+  const renderer = document.querySelector('ytd-shorts ytd-reel-video-renderer');
+  return renderer?.closest(SHORT_SLOT) ?? renderer ?? undefined;
+}
+
+/** The slot across the middle of the Shorts Feed on screen. Measures every slot until it finds it. */
+function slotOnScreen(document: Document): Element | undefined {
+  const container = document.querySelector(SHORTS_CONTAINER);
+  if (!container) return undefined;
+  const box = container.getBoundingClientRect();
+  if (box.height === 0) return undefined;
+  const middle = box.top + box.height / 2;
+  for (const slot of container.querySelectorAll(SHORT_SLOT)) {
+    const { top, bottom } = slot.getBoundingClientRect();
+    if (top <= middle && middle < bottom) return slot;
+  }
+  return undefined;
+}
+
+/**
+ * Calls `changed` with the Shorts Feed's position whenever the feed may have
+ * moved to another Short or filled one in (something added or moved inside
+ * it, or it scrolled), once as it starts, and until `signal` aborts.
+ *
+ * YouTube changes a lot of markup as it moves on, and the feed scrolls in
+ * many small steps, so this looks at most once per animation frame, however
+ * many changes the frame brought. It measures the slot on screen only after
+ * the feed scrolled or the renderer changed slot: markup rebuilt in place
+ * costs no layout.
+ */
+export function watchFeedPosition(document: Document, changed: (position: FeedPosition) => void, signal: AbortSignal): void {
   const view = document.defaultView!;
-  let observed: Element | undefined;
-  const observer = new view.MutationObserver(() => {
-    const shorts = document.querySelector('ytd-shorts') ?? undefined;
-    if (shorts !== observed) observe(shorts);
-    changed();
-  });
-  const observe = (shorts: Element | undefined) => {
-    observer.disconnect();
-    observed = shorts;
-    // Until YouTube builds the Shorts Feed, watch the whole page for it.
-    observer.observe(shorts ?? document.documentElement, { childList: true, subtree: true });
+  let frame: number | undefined;
+  let scrolled = false;
+  let last: FeedPosition | undefined;
+
+  const look = () => {
+    frame = undefined;
+    if (signal.aborted) return;
+    const holding = holdingSlot(document);
+    const measure = !last || scrolled || holding !== last.holding || !last.onScreen?.isConnected;
+    scrolled = false;
+    last = { short: currentShortId(document), holding, onScreen: measure ? slotOnScreen(document) : last!.onScreen };
+    changed(last);
   };
-  observe(document.querySelector('ytd-shorts') ?? undefined);
+  const lookSoon = () => {
+    if (!signal.aborted) frame ??= view.requestAnimationFrame(look);
+  };
+
+  watchShortsElement(document, lookSoon, signal);
   document.addEventListener(
     'scroll',
     (event) => {
-      if ((event.target as Element | null)?.id === 'shorts-container') changed();
+      if ((event.target as Element | null)?.id !== 'shorts-container') return;
+      scrolled = true;
+      lookSoon();
     },
     { capture: true, passive: true, signal },
   );
-  signal.addEventListener('abort', () => observer.disconnect(), { once: true });
+  signal.addEventListener('abort', () => frame !== undefined && view.cancelAnimationFrame(frame), { once: true });
+  lookSoon();
+}
+
+/** One observer on a document's `ytd-shorts`, and every feature listening to it. */
+type ShortsWatch = { listeners: Set<() => void>; observer: MutationObserver };
+
+const shortsWatches = new WeakMap<Document, ShortsWatch>();
+
+/**
+ * Calls `changed` after each batch of elements added or removed anywhere
+ * inside `ytd-shorts`, until `signal` aborts. Every feature shares the one
+ * observer per document, so YouTube rebuilding a Short is observed once.
+ *
+ * Until YouTube builds `ytd-shorts`, it watches the whole page for it (and
+ * calls `changed` on every batch there, so a feature finds the element the
+ * moment it comes). It watches the element's parent too, so should YouTube
+ * swap `ytd-shorts` for a new one, it follows the new one.
+ */
+function watchShortsElement(document: Document, changed: () => void, signal: AbortSignal): void {
+  if (signal.aborted) return;
+  let watch = shortsWatches.get(document);
+  if (!watch) {
+    const listeners = new Set<() => void>();
+    let observed: Element | null = null;
+    const observe = () => {
+      observer.disconnect();
+      observed = document.querySelector(SHORTS_ELEMENT);
+      if (!observed) {
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        return;
+      }
+      observer.observe(observed, { childList: true, subtree: true });
+      if (observed.parentNode) observer.observe(observed.parentNode, { childList: true });
+    };
+    const observer = new document.defaultView!.MutationObserver(() => {
+      if (document.querySelector(SHORTS_ELEMENT) !== observed) observe();
+      for (const listener of listeners) listener();
+    });
+    observe();
+    watch = { listeners, observer };
+    shortsWatches.set(document, watch);
+  }
+  const { listeners, observer } = watch;
+  listeners.add(changed);
+  signal.addEventListener(
+    'abort',
+    () => {
+      listeners.delete(changed);
+      if (listeners.size > 0) return;
+      observer.disconnect();
+      shortsWatches.delete(document);
+    },
+    { once: true },
+  );
 }
 
 /**
@@ -194,7 +307,6 @@ export function watchTheme(document: Document, changed: (dark: boolean) => void,
 // Short holds Like, Comments, Share, Remix and the sound thumbnail
 // (`pivot-button-view-model`), in that order. YouTube builds it afresh for
 // every Short, inside the one renderer, inside `ytd-shorts`.
-const SHORTS_ELEMENT = 'ytd-shorts';
 const ACTION_RAIL = 'ytd-reel-video-renderer reel-action-bar-view-model';
 const SOUND_THUMBNAIL = ':scope > pivot-button-view-model';
 
@@ -205,41 +317,22 @@ const SOUND_THUMBNAIL = ':scope > pivot-button-view-model';
  * `signal` aborts. `place` must leave a rail it is happy with untouched,
  * since its own changes are watched too.
  *
- * One observer, scoped to the Shorts element (it waits for that element
- * first, when YouTube has yet to build it). Returns a function that calls
- * `place` again on demand.
+ * It listens on the Shorts Feed's one shared observer (see
+ * `watchShortsElement`), so it follows `ytd-shorts` as the Sponsored Short
+ * check does, waiting for it first when YouTube has yet to build it.
+ * Returns a function that calls `place` again on demand.
  */
 export function watchActionRail(
   document: Document,
   place: (rail: Element, before: Element | null) => void,
   signal: AbortSignal,
 ): () => void {
-  const view = document.defaultView!;
   const sync = () => {
     if (signal.aborted) return;
     const rail = document.querySelector(ACTION_RAIL);
     if (rail) place(rail, rail.querySelector(SOUND_THUMBNAIL));
   };
-  const railObserver = new view.MutationObserver(sync);
-  const observeShorts = () => {
-    const shorts = document.querySelector(SHORTS_ELEMENT);
-    if (shorts) railObserver.observe(shorts, { childList: true, subtree: true });
-    return Boolean(shorts);
-  };
-  const waiting = new view.MutationObserver(() => {
-    if (!observeShorts()) return;
-    waiting.disconnect();
-    sync();
-  });
-  if (!observeShorts()) waiting.observe(document.documentElement, { childList: true, subtree: true });
-  signal.addEventListener(
-    'abort',
-    () => {
-      railObserver.disconnect();
-      waiting.disconnect();
-    },
-    { once: true },
-  );
+  watchShortsElement(document, sync, signal);
   sync();
   return sync;
 }

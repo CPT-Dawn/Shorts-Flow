@@ -178,6 +178,17 @@ describe.each(testPages)('on $name', (page) => {
     expect(shortsFeed.railLabels()).not.toContain('Auto-Scroll');
   });
 
+  it('follows YouTube should it build the whole Shorts Feed element afresh', async () => {
+    const { shortsFeed } = await withControl();
+    const old = shortsFeed.document.querySelector('ytd-shorts')!;
+    const fresh = old.cloneNode(true) as Element;
+    fresh.querySelector('[data-shorts-flow="shorts-control"]')!.remove();
+
+    old.replaceWith(fresh);
+
+    await expect.poll(() => shortsFeed.railLabels().slice(-2)).toEqual(['Auto-Scroll', SOUND]);
+  });
+
   it('goes with the engine when it is torn down', async () => {
     const { shortsFeed } = await withControl();
 

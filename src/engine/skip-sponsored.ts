@@ -1,5 +1,5 @@
 import type { Feature } from './feed';
-import { isSponsoredShort, watchShortsFeed } from './youtube';
+import { isSponsoredShort, watchFeedPosition, type FeedPosition } from './youtube';
 
 /**
  * Skip Sponsored Shorts: a Sponsored Short is Advanced past as soon as it
@@ -10,9 +10,17 @@ import { isSponsoredShort, watchShortsFeed } from './youtube';
  * Switching the setting on while a Sponsored Short is current skips it too.
  */
 export const skipSponsoredShorts: Feature = (feed) => {
+  let position: FeedPosition | undefined;
   const check = () => {
-    if (feed.settings()?.skipSponsoredShorts && isSponsoredShort(feed.document)) feed.advance();
+    if (feed.settings()?.skipSponsoredShorts && position && isSponsoredShort(position)) feed.advance();
   };
-  watchShortsFeed(feed.document, check, feed.signal);
+  watchFeedPosition(
+    feed.document,
+    (now) => {
+      position = now;
+      check();
+    },
+    feed.signal,
+  );
   feed.watchSettings(check);
 };
