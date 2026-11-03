@@ -23,6 +23,7 @@ bunx playwright install chromium firefox   # once, for the browser tests
 | `bun run test-page` | Makes an anonymised Shorts Feed test page from a local capture (see `tests/pages/README.md`; needs `ffmpeg` the first time) |
 | `bun run lint:firefox` | `web-ext lint` on the Firefox build (run `build:firefox` first) |
 | `bun run icons` | Redraws `public/icon/` from `docs/design/brand` (needs `rsvg-convert`) |
+| `bun run store-art` | Makes the store screenshots, promo tiles and promo video in `docs/release/store-art/` from the Chrome build (see `scripts/store-art/README.md`) |
 
 CI runs typecheck, all test projects, both builds and `web-ext lint` on every push and pull request.
 

@@ -13,3 +13,8 @@ web-ext.config.ts
 .vitest-attachments
 .vitest
 __screenshots__
+
+# Store art work files (scripts/store-art/make.mjs)
+.store-art
+# Agent worktrees
+.claude/worktrees/

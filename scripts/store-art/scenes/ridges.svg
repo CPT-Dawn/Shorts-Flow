@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe3ef"/><stop offset=".5" stop-color="#f3dccb"/><stop offset=".7" stop-color="#f6c9a8"/></linearGradient>
+<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .06 0"/></filter>
+<filter id="mist" x="-50%" y="-200%" width="200%" height="500%"><feGaussianBlur stdDeviation="40"/></filter>
+</defs>
+<rect width="1080" height="1920" fill="url(#sky)"/>
+<circle cx="760" cy="760" r="90" fill="#fff6ea"/>
+<path d="M0 1040l140-90 120 60 170-170 160 140 120-80 200 150 170-90v960H0z" fill="#b9c3d8"/>
+<ellipse cx="540" cy="1040" rx="760" ry="70" fill="#f3e3d6" opacity=".7" filter="url(#mist)"/>
+<path d="M0 1220l200-160 130 90 190-200 210 220 140-90 210 160v680H0z" fill="#8292b4"/>
+<ellipse cx="540" cy="1230" rx="760" ry="70" fill="#efe1d8" opacity=".55" filter="url(#mist)"/>
+<path d="M0 1420l160-110 220 150 170-210 190 170 150-120 190 140v500H0z" fill="#53628c"/>
+<ellipse cx="540" cy="1430" rx="760" ry="70" fill="#e6dbe0" opacity=".4" filter="url(#mist)"/>
+<path d="M0 1620l240-170 180 120 210-140 220 180 230-110v420H0z" fill="#2c3961"/>
+<path d="M0 1800l300-120 260 90 240-110 280 120v140H0z" fill="#18203d"/>
+<g fill="none" stroke="#3a4468" stroke-width="5" stroke-linecap="round" opacity=".7"><path d="M300 520q20-16 40 0q20-16 40 0"/><path d="M400 470q14-12 28 0q14-12 28 0"/></g>
+<rect width="1080" height="1920" filter="url(#grain)"/>
+</svg>

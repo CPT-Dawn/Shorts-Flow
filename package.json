@@ -24,6 +24,7 @@
     "test:tools": "vitest run --project tools",
     "test-page": "bun scripts/test-page.ts",
     "icons": "bun scripts/icons.ts",
+    "store-art": "bun scripts/store-art/make.mjs",
     "postinstall": "wxt prepare"
   },
   "devDependencies": {
