@@ -46,6 +46,8 @@ export type ShortsFeed = {
   setPlaybackSpeed(rate: number): void;
   /** How fast the Current Short plays, as the viewer sees it: 1 is normal speed. */
   playbackSpeed(): number;
+  /** How fast the Shorts player will play the next Short it loads: its default speed. */
+  nextLoadSpeed(): number;
   /** How fast the hidden watch-page player behind the Shorts Feed would play. */
   hiddenPlayerSpeed(): number;
   /** Pauses the Current Short where it is, as YouTube's pause control does. */
@@ -234,6 +236,7 @@ export async function mountShortsFeed(
       youtube.video.playbackRate = rate;
     },
     playbackSpeed: () => youtube.video.playbackRate,
+    nextLoadSpeed: () => youtube.video.defaultPlaybackRate,
     hiddenPlayerSpeed: () => document.querySelector<HTMLVideoElement>('#movie_player video')!.playbackRate,
     pause() {
       youtube.video.pause();

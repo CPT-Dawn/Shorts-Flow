@@ -3,6 +3,9 @@ import { aMomentLater, expectTimeline, mountShortsFeed } from './support/shorts-
 import { createTestSettingsStore } from './support/stores';
 import { feedPages, hasNextShort } from './support/test-pages';
 
+// Longer than Shorts Flow takes to notice YouTube has changed pages.
+const A_SECOND = 1000;
+
 describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
   it('plays the Current Short at the Preferred Speed while Speed is on', async () => {
     const shortsFeed = await mountShortsFeed(page, {
@@ -43,6 +46,23 @@ describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
     await settings.set({ speedOn: false });
 
     await expect.poll(() => shortsFeed.playbackSpeed()).toBe(1);
+  });
+
+  it('goes back to 1× when Speed was turned off while the viewer was elsewhere on YouTube', async () => {
+    const settings = createTestSettingsStore({ speedOn: true, preferredSpeed: 1.5 });
+    const shortsFeed = await mountShortsFeed(page, { settings });
+    await expect.poll(() => shortsFeed.playbackSpeed()).toBe(1.5);
+
+    // YouTube keeps the Shorts player, and its speed, on Home.
+    shortsFeed.navigate('/');
+    shortsFeed.clock.advance(A_SECOND);
+    expect(shortsFeed.nextLoadSpeed()).toBe(1);
+    await settings.set({ speedOn: false });
+    shortsFeed.navigate(page.path);
+    shortsFeed.clock.advance(A_SECOND);
+
+    await expect.poll(() => shortsFeed.playbackSpeed()).toBe(1);
+    expect(shortsFeed.nextLoadSpeed()).toBe(1);
   });
 
   it('plays at a new Preferred Speed as soon as it is picked', async () => {
