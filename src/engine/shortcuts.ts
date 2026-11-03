@@ -58,5 +58,5 @@ const SWITCHES: Record<ShortcutAction, SwitchSetting> = {
 /** What the confirmation says once `action` has changed the settings to `settings`. */
 function confirm({ getMessage }: Pick<Feed, 'getMessage'>, settings: Settings, action: ShortcutAction): string {
   if (action === 'toggleAutoScroll') return getMessage(settings.autoScroll ? 'shortcutAutoScrollOn' : 'shortcutAutoScrollOff');
-  return settings.speedOn ? getMessage('shortcutSpeedOn', formatSpeed(settings.preferredSpeed)) : getMessage('shortcutSpeedOff');
+  return settings.speedOn ? getMessage('shortcutSpeedOn', formatSpeed(settings.preferredSpeed, getMessage('localeCode'))) : getMessage('shortcutSpeedOff');
 }

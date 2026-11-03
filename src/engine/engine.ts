@@ -35,6 +35,8 @@ export interface Clock {
  * on the Shorts Feed. Features that show text add their keys here.
  */
 export type EngineMessage =
+  /** The translation's language, for writing numbers (not shown). */
+  | 'localeCode'
   /** The Stall notice. */
   | 'stallNotice'
   /** Its retry button. */

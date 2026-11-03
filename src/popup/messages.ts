@@ -5,8 +5,8 @@
  * direction (`ltr` or `rtl`).
  */
 export type PopupMessage =
-  | '@@ui_locale'
-  | '@@bidi_dir'
+  | 'localeCode'
+  | 'localeDirection'
   | 'popupTitle'
   | 'popupVersion'
   | 'popupWhatsNewUnread'

@@ -74,11 +74,11 @@ it('leaves Speed alone when the viewer picks a Preferred Speed', async () => {
   await expect.element(speedSwitch()).not.toBeChecked();
 });
 
-it('writes speeds the way the browser language does', async () => {
+it("writes speeds the way the translation's language does", async () => {
   unmount = mountPopup(document, {
     settings: createTestSettingsStore(),
     session: createTestSessionStore(),
-    getMessage: (key, substitutions) => (key === '@@ui_locale' ? 'de' : getMessage(key, substitutions)),
+    getMessage: (key, substitutions) => (key === 'localeCode' ? 'de' : getMessage(key, substitutions)),
     version: '3.0.0',
     whatsNew: { isUnread: async () => false, markUnread: async () => {}, markRead: async () => {} },
     readBrowser: async () => ({}),

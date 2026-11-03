@@ -51,10 +51,13 @@ export function mountPopup(
   const popup = new AbortController();
   const { signal } = popup;
 
-  // The browser's UI language and its direction; the page's own lang="en" stays
-  // as the fallback when the browser gives neither (in tests, say).
-  const locale = getMessage('@@ui_locale').replaceAll('_', '-');
-  const direction = getMessage('@@bidi_dir');
+  // The language and direction of the translation the browser picked, as the
+  // translation itself states them. Not @@ui_locale: that is the browser's own
+  // language even when no translation for it exists, which would read English
+  // text with a German voice, or mirror it right to left. The page's own
+  // lang="en" stays as the fallback.
+  const locale = getMessage('localeCode');
+  const direction = getMessage('localeDirection');
   if (locale) document.documentElement.lang = locale;
   if (direction === 'ltr' || direction === 'rtl') document.documentElement.dir = direction;
   const numbers = new Intl.NumberFormat(locale || undefined, { maximumFractionDigits: 2 });

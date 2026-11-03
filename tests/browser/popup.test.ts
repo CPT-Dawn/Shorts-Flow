@@ -120,8 +120,8 @@ describe('Skip Sponsored Shorts', () => {
 });
 
 describe('language', () => {
-  it("speaks the browser's UI language, in its direction", async () => {
-    const browserMessages: Record<string, string> = { '@@ui_locale': 'ar_EG', '@@bidi_dir': 'rtl' };
+  it("speaks its translation's language, in its direction", async () => {
+    const browserMessages: Record<string, string> = { localeCode: 'ar-EG', localeDirection: 'rtl' };
     openPopup({
       getMessage: (key, substitutions) => browserMessages[key] ?? getMessage(key, substitutions),
       session: createTestSessionStore({ lastSeenAt: Date.now(), shortsWatched: 1234 }),
@@ -134,12 +134,21 @@ describe('language', () => {
     expect(document.documentElement.dir).toBe('rtl');
   });
 
-  it('stays in English, left to right, when the browser does not say', async () => {
-    openPopup();
+  it('stays in English, left to right, when the translation does not say', async () => {
+    const unsaid: Record<string, string> = { localeCode: '', localeDirection: '' };
+    openPopup({ getMessage: (key, substitutions) => unsaid[key] ?? getMessage(key, substitutions) });
 
     await expect.element(page.getByRole('heading', { name: 'Shorts Flow' })).toBeVisible();
     expect(document.documentElement.lang).toBe('en');
     expect(document.documentElement.dir).toBe('');
+  });
+
+  it("follows the English translation, not the browser's own language", async () => {
+    openPopup();
+
+    await expect.element(page.getByRole('heading', { name: 'Shorts Flow' })).toBeVisible();
+    expect(document.documentElement.lang).toBe('en');
+    expect(document.documentElement.dir).toBe('ltr');
   });
 });
 

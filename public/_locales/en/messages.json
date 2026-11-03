@@ -1,4 +1,12 @@
 {
+  "localeCode": {
+    "message": "en",
+    "description": "BCP 47 code of this translation's language, such as \"de\" or \"pt-BR\". Not shown: it sets the Popup's language for screen readers and how numbers are written (1.5 or 1,5), so it must match the language of these messages, not the reader's browser."
+  },
+  "localeDirection": {
+    "message": "ltr",
+    "description": "Text direction of this translation: \"ltr\", or \"rtl\" for languages such as Arabic and Hebrew. Not shown: it sets which way the Popup lays out."
+  },
   "extensionName": {
     "message": "Shorts Flow: Auto-Scroll for YouTube Shorts",
     "description": "Full extension name shown in the browser and on the stores. Keep \"for YouTube Shorts\": never suggest YouTube made Shorts Flow."
