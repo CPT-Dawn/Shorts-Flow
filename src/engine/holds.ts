@@ -24,8 +24,12 @@ export type Hold = () => boolean;
 /** How long a manual scroll holds the feed, in ms on the engine's monotonic clock. */
 const MANUAL_SCROLL_HOLD = 3000;
 
-/** Keys that move the Shorts Feed or scroll the page. */
-const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
+/**
+ * Keys that move the Shorts Feed or scroll the page. Not Space: on the Shorts
+ * Feed it plays and pauses the Current Short, and a pause is a Hold of its
+ * own, while playing on must not hold anything.
+ */
+const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End']);
 
 /** Inputs that take a click or a choice, not typing. */
 const NOT_TYPED = new Set(['button', 'checkbox', 'color', 'file', 'image', 'radio', 'range', 'reset', 'submit']);
@@ -83,7 +87,7 @@ function holdsOf(feed: Feed): Set<Hold> {
  * and Next video controls, whether or not there is a Short to move to. Only
  * the viewer's own (trusted) events count, so Shorts Flow's own Advance,
  * which clicks Next video or sends ArrowDown from script, never does; nor
- * does a key pressed in Shorts Flow's own interface (Space on a button).
+ * does a key pressed in Shorts Flow's own interface (ArrowDown in its menu).
  */
 export function watchManualNavigation(feed: Pick<Feed, 'document' | 'signal'>, moved: () => void): void {
   const onEvent = (event: Event) => {

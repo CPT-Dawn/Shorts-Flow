@@ -89,6 +89,15 @@ describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
     ]);
   });
 
+  it('still Advances right after the viewer presses Space, which plays and pauses, not scrolls', async () => {
+    const shortsFeed = await mountShortsFeed(page);
+
+    await shortsFeed.pressKey(' ');
+
+    // No time passes on the engine's clock: a Hold from the key would never end.
+    await expectTimeline(shortsFeed, ['Short 1 started over', 'Short 2 is current']);
+  });
+
   it('still Advances in a background tab', async () => {
     const shortsFeed = await mountShortsFeed(page);
 
