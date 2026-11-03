@@ -15,13 +15,13 @@ const SAVE_EVERY = 10_000;
 /**
  * The longest stretch between two looks that counts towards playing time, in
  * ms: browsers slow timers down in a background tab, and stop them while the
- * computer sleeps.
+ * computer sleeps (when most, not all, stop the monotonic clock too).
  */
 const LONGEST_TICK = 60_000;
 
 /** What this page has seen of the Session since it last stored it. */
 type Unsaved = Pick<Session, 'shortsWatched' | 'playingMs'> & {
-  /** When the viewer was first and last watching, if they were. */
+  /** When the viewer was first and last watching, if they were, on the wall clock. */
   firstWatchingAt?: number;
   lastWatchingAt?: number;
 };
@@ -72,14 +72,21 @@ type Tick = {
 function trackSession(feed: Feed) {
   const { document, clock } = feed;
   const store = feed.session;
+  // Two clocks. When the viewer watched is stored, and compared with other
+  // tabs and the Popup, so it is wall-clock time (`clock.now()`), which also
+  // moves on while the computer sleeps, as a Session's end must. How long
+  // something took here is monotonic (`clock.monotonic()`), so playing time
+  // never jumps with the system clock.
+  //
   // The Current Short, by id (YouTube plays every Short in one `<video>`,
   // so a loop is no new Short); since when it has been in view; and whether
   // it has counted since it became the Current Short.
   let currentShort: string | undefined;
-  let currentSince = clock.now();
+  let currentSince = clock.monotonic();
   let currentCounted = false;
-  let lastTick = clock.now();
+  let lastTick = clock.monotonic();
   let wasPlaying = false;
+  /** On the wall clock. */
   let lastWatchingAt: number | undefined;
   let savedAt = -Infinity;
   let unsaved: Unsaved = { shortsWatched: 0, playingMs: 0 };
@@ -113,7 +120,7 @@ function trackSession(feed: Feed) {
   const save = (limitFrom?: Session['limitFrom']) => {
     const { firstWatchingAt, lastWatchingAt, shortsWatched, playingMs } = unsaved;
     unsaved = { shortsWatched: 0, playingMs: 0 };
-    savedAt = clock.now();
+    savedAt = clock.monotonic();
     const seen = firstWatchingAt !== undefined && lastWatchingAt !== undefined;
     if (!seen && !limitFrom) return;
     const change = (stored: Session): Session => {
@@ -139,19 +146,23 @@ function trackSession(feed: Feed) {
   };
 
   const tick = () => {
-    const now = clock.now();
+    const now = clock.monotonic();
+    const wallNow = clock.now();
     const sinceLastTick = Math.min(Math.max(now - lastTick, 0), LONGEST_TICK);
     lastTick = now;
     const playing = aShortPlays(document);
 
     if (playing) {
       // Playing again after long enough that, as far as this page knows, the
-      // Session has ended: the Current Short is the new Session's first.
-      if (lastWatchingAt !== undefined && now - lastWatchingAt >= SESSION_GAP) {
+      // Session has ended: the Current Short is the new Session's first. What
+      // was seen before belongs to the old Session, so it is stored first: a
+      // Short still playing as the computer went to sleep was never stopped.
+      if (lastWatchingAt !== undefined && wallNow - lastWatchingAt >= SESSION_GAP) {
+        save();
         currentSince = now;
         currentCounted = false;
       }
-      watched(now);
+      watched(wallNow);
       // Only time a Short played all through: one that has just started, or
       // just stopped, may not have played for most of it.
       if (wasPlaying) unsaved.playingMs += sinceLastTick;
@@ -169,7 +180,7 @@ function trackSession(feed: Feed) {
     } else if (short !== undefined && !currentCounted && now - currentSince >= COUNT_AFTER) {
       currentCounted = true;
       unsaved.shortsWatched++;
-      watched(now);
+      watched(wallNow);
       save();
     }
 

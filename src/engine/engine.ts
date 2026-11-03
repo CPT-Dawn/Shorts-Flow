@@ -13,11 +13,19 @@ import { shortsControl } from './shorts-control';
 /** Time as the engine sees it, so tests can move it forward by hand. */
 export interface Clock {
   /**
-   * Time in ms. In the browser it is ms since the epoch, so other tabs and
-   * later page loads can compare it, yet it never jumps with the system clock
-   * while the page is open.
+   * Wall-clock time, in ms since the epoch: for anything stored or compared
+   * with other tabs, later page loads and the Popup (which reads `Date.now()`),
+   * such as when the viewer was last watching. It moves on while the computer
+   * sleeps, and may jump when the system clock is set.
    */
   now(): number;
+  /**
+   * Time in ms from some fixed point in this page's life: for how long
+   * something took here, such as playing time or a Hold. It never jumps with
+   * the system clock, and stands still while the computer sleeps (in most
+   * browsers), so it means nothing outside this page.
+   */
+  monotonic(): number;
   setTimeout(callback: () => void, ms: number): number;
   clearTimeout(id: number): void;
 }
@@ -164,10 +172,11 @@ export function mountEngine(
   return teardown;
 }
 
-/** The clock of `window`: its time since the epoch, and its own timers. */
+/** The clock of `window`: its wall clock, its monotonic clock, and its own timers. */
 export function windowClock(window: Window): Clock {
   return {
-    now: () => window.performance.timeOrigin + window.performance.now(),
+    now: () => Date.now(),
+    monotonic: () => window.performance.now(),
     setTimeout: (callback, ms) => window.setTimeout(callback, ms),
     clearTimeout: (id) => window.clearTimeout(id),
   };

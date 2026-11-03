@@ -168,6 +168,29 @@ describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
     await expect.poll(() => session(shortsFeed)).toEqual({ shortsWatched: 1, playingMinutes: 0 });
   });
 
+  it('starts a new Session once the computer has slept for 30 minutes mid-Short', async () => {
+    const shortsFeed = await watchAShortForTenMinutes(await mount(page));
+
+    // No pause: the Short simply plays on once the computer wakes.
+    shortsFeed.clock.sleep(SESSION_GAP);
+    shortsFeed.clock.advance(OVER_A_SECOND);
+
+    await expect.poll(() => session(shortsFeed)).toEqual({ shortsWatched: 1, playingMinutes: 0 });
+  });
+
+  it('stores when the viewer was last watching on the wall clock, which moves on during sleep', async () => {
+    const shortsFeed = await watchAShortForTenMinutes(await mount(page));
+    const before = (await shortsFeed.session.get()).lastSeenAt;
+
+    shortsFeed.clock.sleep(5 * MINUTE);
+    shortsFeed.clock.advance(OVER_A_SECOND);
+    shortsFeed.pause();
+    shortsFeed.clock.advance(OVER_A_SECOND);
+
+    // Other tabs and the Popup compare it with their own wall clock.
+    await expect.poll(async () => (await shortsFeed.session.get()).lastSeenAt).toBeGreaterThanOrEqual(before + 5 * MINUTE);
+  });
+
   it('keeps the Session going while the viewer is elsewhere on YouTube for under 30 minutes', async () => {
     const shortsFeed = await watchAShortForTenMinutes(await mount(page));
 

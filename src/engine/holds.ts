@@ -21,7 +21,7 @@ import { isFeedNavigation, isMenuOrDialogOpen, isPanelOpen, shortsVideo } from '
 /** Something the viewer is doing: true while it should hold the feed. */
 export type Hold = () => boolean;
 
-/** How long a manual scroll holds the feed, in ms on the engine's clock. */
+/** How long a manual scroll holds the feed, in ms on the engine's monotonic clock. */
 const MANUAL_SCROLL_HOLD = 3000;
 
 /** Keys that move the Shorts Feed or scroll the page. */
@@ -63,14 +63,14 @@ function holdsOf(feed: Feed): Set<Hold> {
   if (!holds) {
     const { document } = feed;
     let scrolledByHandAt: number | undefined;
-    watchManualNavigation(feed, () => (scrolledByHandAt = feed.clock.now()));
+    watchManualNavigation(feed, () => (scrolledByHandAt = feed.clock.monotonic()));
     holds = new Set<Hold>([
       // YouTube loops Shorts, so a paused one was paused by the viewer.
       () => isPaused(shortsVideo(document)),
       () => isPanelOpen(document),
       () => isMenuOrDialogOpen(document),
       () => isTyping(document),
-      () => scrolledByHandAt !== undefined && feed.clock.now() - scrolledByHandAt < MANUAL_SCROLL_HOLD,
+      () => scrolledByHandAt !== undefined && feed.clock.monotonic() - scrolledByHandAt < MANUAL_SCROLL_HOLD,
     ]);
     holdsByFeed.set(feed, holds);
   }
