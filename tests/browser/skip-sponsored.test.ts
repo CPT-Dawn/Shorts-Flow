@@ -54,7 +54,7 @@ describe.each(withSponsoredShort)('on $name', (page) => {
   });
 
   it('leaves a Sponsored Short the viewer goes back up onto, so the Short before it stays in reach', async () => {
-    const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll: false }) });
+    const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll: false, skipSponsoredShorts: true }) });
     pressNextVideoUntil(shortsFeed, sponsored);
     await expectTimeline(shortsFeed, arrivals(sponsored + 1));
 
@@ -81,7 +81,7 @@ describe.each(withSponsoredShort)('on $name', (page) => {
     // Auto-Scroll Advances onto the Sponsored Short, then the skip Advances
     // again from what is, by the address alone, the same Short.
     const shortsFeed = await mountShortsFeed(page, {
-      settings: createTestSettingsStore({ autoScroll: true }),
+      settings: createTestSettingsStore({ autoScroll: true, skipSponsoredShorts: true }),
       sponsoredKeepsAddress: true,
     });
     pressNextVideoUntil(shortsFeed, sponsored - 1);
