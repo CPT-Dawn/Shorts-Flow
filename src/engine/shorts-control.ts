@@ -189,6 +189,10 @@ ${lookVariables({
 :where(.shorts-flow-control-button:hover) {
   background: var(--shorts-flow-tonal-hover);
 }
+:where(.shorts-flow-control-button:focus-visible) {
+  outline: 2px solid var(--shorts-flow-ink);
+  outline-offset: 2px;
+}
 :where(.shorts-flow-control-icon) {
   width: 24px;
   height: 24px;
@@ -212,7 +216,9 @@ ${lookVariables({
 /*
  * The quick-settings opener: a small round button on the control's top
  * corner, in the rail's own tonal colours, shown while the control is
- * pointed at or focused and while its menu is open.
+ * pointed at or focused and while its menu is open. It looks 22 px across,
+ * as small as YouTube's own badges; its ::before reaches 1 px further all
+ * round, so the target a pointer can hit is 24 px (WCAG 2.2, 2.5.8).
  */
 .shorts-flow-quick-settings-button {
   position: absolute;
@@ -234,6 +240,12 @@ ${lookVariables({
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.1s;
+}
+.shorts-flow-quick-settings-button::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
 }
 .shorts-flow-quick-settings-button:hover {
   background: var(--shorts-flow-raised-hover);

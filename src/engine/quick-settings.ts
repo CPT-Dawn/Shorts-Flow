@@ -33,6 +33,8 @@ export function quickSettings(control: ShortsControl, feed: Feed): void {
   opener.type = 'button';
   opener.className = 'shorts-flow-quick-settings-button';
   opener.setAttribute('aria-label', getMessage('quickSettingsName'));
+  // No aria-controls: the menu sits in a shadow root of its own, and an id
+  // reference can't reach into one from YouTube's page, where the opener is.
   opener.setAttribute('aria-haspopup', 'menu');
   opener.setAttribute('aria-expanded', 'false');
   opener.append(drawIcon(document, OPENER_ICON, { size: 16, filled: true, className: 'shorts-flow-quick-settings-icon' }));

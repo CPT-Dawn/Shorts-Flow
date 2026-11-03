@@ -21,6 +21,19 @@ describe.each(testPages)('on $name', (page) => {
     expect((await settings.get()).autoScroll).toBe(true);
   });
 
+  it('has an opener a pointer can hit 24 px across, though it looks 22 px', async () => {
+    const shortsFeed = await withQuickSettings();
+    const opener = shortsFeed.quickSettingsButton()!;
+    const box = opener.getBoundingClientRect();
+    expect([box.width, box.height]).toEqual([22, 22]);
+
+    const middle = { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+    // Just outside what the eye sees, just inside 24 px.
+    for (const [x, y] of [[11.6, 0], [-11.6, 0], [0, 11.6], [0, -11.6]] as const) {
+      expect(shortsFeed.document.elementFromPoint(middle.x + x, middle.y + y)).toBe(opener);
+    }
+  });
+
   it('lists Skip Sponsored Shorts, Speed and the Preferred Speed, as they are set', async () => {
     const shortsFeed = await withQuickSettings(
       createTestSettingsStore({ skipSponsoredShorts: true, speedOn: false, preferredSpeed: 1.5 }),
