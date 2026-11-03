@@ -192,6 +192,7 @@ export async function mountShortsFeed(
     clock = createTestClock(),
     path = page.path,
     signal,
+    sponsoredKeepsAddress = false,
   }: {
     settings?: SettingsStore;
     session?: SessionStore;
@@ -200,6 +201,12 @@ export async function mountShortsFeed(
     path?: string;
     /** Stands in for WXT's content-script context: the engine tears down when it aborts. */
     signal?: AbortSignal;
+    /**
+     * YouTube leaves the address on the Short before while a Sponsored Short
+     * is current. Unconfirmed either way (docs/reference/youtube-shorts-sponsored-2026-11),
+     * so Shorts Flow must cope with both.
+     */
+    sponsoredKeepsAddress?: boolean;
   } = {},
 ): Promise<ShortsFeed> {
   const { window, document } = await openTestPage(page);
@@ -209,7 +216,7 @@ export async function mountShortsFeed(
   const push = (entry: string) => timeline.push(entry);
   watchForScriptedScrolls(window, () => push('page scrolled by script'));
   window.frameElement!.addEventListener('load', () => push('page reloaded'));
-  const youtube = playLikeYouTube(window, page, push);
+  const youtube = playLikeYouTube(window, page, push, { sponsoredKeepsAddress });
 
   const unmount = mountEngine(document, { settings, session, getMessage, clock, signal });
   let mounted = true;
@@ -444,9 +451,15 @@ function railControls(document: Document) {
  * Stands in for YouTube's Shorts player and feed. The Shorts Feed keeps one
  * renderer and one looping `<video>` for every Short: moving on puts the
  * renderer into the next slot, builds its action rail afresh, gives the video
- * the next Short's clip, and changes the address to the next Short's. YouTube never moves on by itself.
+ * the next Short's clip, and changes the address to the next Short's (unless
+ * told a Sponsored Short keeps the address before it). YouTube never moves on by itself.
  */
-function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) => void) {
+function playLikeYouTube(
+  window: Window,
+  page: TestPage,
+  push: (entry: string) => void,
+  { sponsoredKeepsAddress }: { sponsoredKeepsAddress: boolean },
+) {
   const { document } = window;
   const shorts = document.querySelector('ytd-shorts')!;
   const video = shorts.querySelector<HTMLVideoElement>('#shorts-player video')!;
@@ -478,7 +491,7 @@ function playLikeYouTube(window: Window, page: TestPage, push: (entry: string) =
       container.scrollTop = (slot as HTMLElement).offsetTop;
       shorts.removeAttribute('is-up-arrow-hidden');
       shorts.querySelector('#navigation-button-up')?.removeAttribute('aria-hidden');
-      window.history.pushState(null, '', `/shorts/${following.id}`);
+      if (!(sponsoredKeepsAddress && following.sponsored)) window.history.pushState(null, '', `/shorts/${following.id}`);
       video.src = following.clip;
       video.play().catch(() => {});
       push(`Short ${current - opening + 1} is current`);

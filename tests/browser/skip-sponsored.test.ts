@@ -53,6 +53,27 @@ describe.each(withSponsoredShort)('on $name', (page) => {
     await expectTimeline(shortsFeed, arrivals(sponsored + 1));
   });
 
+  it('skips a Sponsored Short that keeps the address of the Short before it, with no Stall', async () => {
+    // Auto-Scroll Advances onto the Sponsored Short, then the skip Advances
+    // again from what is, by the address alone, the same Short.
+    const shortsFeed = await mountShortsFeed(page, {
+      settings: createTestSettingsStore({ autoScroll: true }),
+      sponsoredKeepsAddress: true,
+    });
+    pressNextVideoUntil(shortsFeed, sponsored - 1);
+
+    await expectTimeline(shortsFeed, [
+      ...arrivals(sponsored - 1),
+      `Short ${sponsored - 1} started over`,
+      `Short ${sponsored} is current`,
+      `Short ${sponsored + 1} is current`,
+    ]);
+    shortsFeed.clock.advance(3000);
+    await aMomentLater();
+
+    expect(shortsFeed.notice()).toBeUndefined();
+  });
+
   it('never skips a Short that is not sponsored', async () => {
     const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll: false, skipSponsoredShorts: true }) });
 

@@ -1,7 +1,7 @@
 import type { Feed } from './feed';
 import { watchManualNavigation } from './holds';
 import { createToast } from './toast';
-import { currentShortId, isShortsVideo } from './youtube';
+import { feedPosition, hasMoved, isShortsVideo, type FeedPosition } from './youtube';
 
 /** The Stall notice: shown when an Advance found no next Short. */
 export type StallNotice = {
@@ -24,14 +24,15 @@ export function createStallNotice(
   feed: Pick<Feed, 'document' | 'signal' | 'setTimeout' | 'clearTimeout' | 'getMessage'>,
 ): StallNotice {
   const toast = createToast(feed, 'stall-notice');
-  let stalledOn: string | undefined;
+  let stalledOn: FeedPosition | undefined;
 
   const hide = () => toast.hide();
 
   // The Shorts video reports as it plays and as it loads another Short, so
-  // these see the feed move on however it does.
+  // these see the feed move on however it does: to another address, or
+  // another slot (as Advance tells, see `FeedPosition`).
   const checkStillStalled = (event: Event) => {
-    if (toast.shown && isShortsVideo(event.target) && currentShortId(feed.document) !== stalledOn) hide();
+    if (toast.shown && isShortsVideo(event.target) && stalledOn && hasMoved(stalledOn, feedPosition(feed.document))) hide();
   };
   for (const type of ['loadstart', 'playing', 'timeupdate']) {
     feed.document.addEventListener(type, checkStillStalled, { capture: true, signal: feed.signal });
@@ -43,7 +44,7 @@ export function createStallNotice(
 
   return {
     show(retry) {
-      stalledOn = currentShortId(feed.document);
+      stalledOn = feedPosition(feed.document);
       toast.show(feed.getMessage('stallNotice'), {
         action: {
           label: feed.getMessage('stallRetry'),
