@@ -70,10 +70,19 @@ export type ShortsFeed = {
   /** Switches YouTube between its dark and light themes, as its Appearance setting does. */
   setTheme(theme: 'dark' | 'light'): void;
   /**
-   * The notice Shorts Flow shows on the page, if one is showing: what it
-   * says, its buttons, and the element a viewer sees (for its looks).
+   * The notice Shorts Flow shows on the page, if one is showing (the top one,
+   * if more are): what it says, its buttons, and the element a viewer sees
+   * (for its looks).
    */
-  notice(): { text: string; actions: string[]; element: HTMLElement } | undefined;
+  notice(): Notice | undefined;
+  /** Every notice showing, top to bottom. */
+  notices(): Notice[];
+  /**
+   * Every live region on the page (`role="status"`), showing or not, as a
+   * screen reader watches them: to check a notice's region was there, empty,
+   * before its message arrived.
+   */
+  liveRegions(): HTMLElement[];
   /** Presses the notice's button labelled `label`, as the viewer does. */
   pressNoticeAction(label: string): void;
   /**
@@ -169,6 +178,9 @@ export type ShortsFeed = {
   clickElsewhere(): Promise<void>;
 };
 
+/** A notice as `notice()` finds it: what it says, its buttons, and the element a viewer sees (for its looks). */
+export type Notice = { text: string; actions: string[]; element: HTMLElement };
+
 /** An open menu as `quickSettings()` finds it. */
 export type QuickSettingsMenu = {
   name: string;
@@ -261,10 +273,13 @@ export async function mountShortsFeed(
     setTheme(theme) {
       document.documentElement.toggleAttribute('dark', theme === 'dark');
     },
-    notice: () => findNotice(document),
+    notice: () => findNotices(document)[0],
+    notices: () => findNotices(document),
+    liveRegions: () => findLiveRegions(document),
     pressNoticeAction(label) {
-      const notice = findNotice(document);
-      const button = notice && [...notice.element.querySelectorAll('button')].find((b) => b.textContent?.trim() === label);
+      const button = findNotices(document)
+        .flatMap((notice) => [...notice.element.querySelectorAll('button')])
+        .find((b) => b.textContent?.trim() === label);
       if (!button) throw new Error(`No notice with a "${label}" button is showing`);
       button.click();
     },
@@ -596,25 +611,35 @@ function findMenu(document: Document): QuickSettingsMenu | undefined {
   return undefined;
 }
 
+/** Every live region on the page (`role="status"`), in the page itself or inside an element's shadow root. */
+function findLiveRegions(document: Document) {
+  return allRoots(document).flatMap((root) => [...root.querySelectorAll<HTMLElement>('[role="status"]')]);
+}
+
 /**
- * A notice on the page as the viewer finds it: a visible status message,
- * whether in the page itself or inside an element's shadow root.
+ * The notices on the page as the viewer finds them, top to bottom: each a
+ * status message showing, whether in the page itself or inside an element's
+ * shadow root. Its element is the one a viewer sees: the region's first
+ * child showing (the card a live region holds), or else the region itself.
  */
-function findNotice(document: Document) {
-  const roots: (Document | ShadowRoot)[] = [document];
-  for (const element of document.querySelectorAll('*')) if (element.shadowRoot) roots.push(element.shadowRoot);
-  for (const root of roots) {
-    for (const element of root.querySelectorAll<HTMLElement>('[role="status"]')) {
-      const box = element.getBoundingClientRect();
-      if (box.width === 0 || box.height === 0 || !element.checkVisibility({ visibilityProperty: true })) continue;
+function findNotices(document: Document): Notice[] {
+  const showing = (element: Element) => {
+    const box = element.getBoundingClientRect();
+    return box.width > 0 && box.height > 0 && element.checkVisibility({ visibilityProperty: true });
+  };
+  return findLiveRegions(document)
+    .flatMap((region) => {
+      const element = [...region.children].find(showing) ?? (showing(region) ? region : undefined);
+      if (!element) return [];
       const actions = [...element.querySelectorAll('button')].map((button) => button.textContent?.trim() ?? '');
       const withoutButtons = element.cloneNode(true) as HTMLElement;
       for (const button of withoutButtons.querySelectorAll('button')) button.remove();
       const text = (withoutButtons.textContent ?? '').replace(/\s+/g, ' ').trim();
-      return { text, actions, element };
-    }
-  }
-  return undefined;
+      // A card up for a frame before its message arrives says nothing yet.
+      if (!text && actions.length === 0) return [];
+      return [{ text, actions, element: element as HTMLElement }];
+    })
+    .sort((a, b) => a.element.getBoundingClientRect().top - b.element.getBoundingClientRect().top);
 }
 
 /** An open dialog on the page, in the page itself or inside an element's shadow root, as the viewer finds it. */

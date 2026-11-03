@@ -31,6 +31,48 @@ describe.each(stallPages)('on $name', (page) => {
     return shortsFeed;
   }
 
+  it('speaks through a live region that was in the page, empty, before the notice showed', async () => {
+    const shortsFeed = await mountShortsFeed(page);
+    await expectTimeline(shortsFeed, ['Short 1 started over']);
+    // Shorts Flow's own, in its shadow roots: YouTube's page has live regions of its own.
+    const regions = shortsFeed.liveRegions().filter((region) => region.getRootNode() !== shortsFeed.document);
+    expect(regions.length).toBeGreaterThan(0);
+    for (const region of regions) {
+      expect(region.checkVisibility()).toBe(true);
+      expect(region.textContent).toBe('');
+    }
+
+    shortsFeed.clock.advance(BOUNDED_WAIT);
+
+    const says = () => regions.map((region) => region.textContent ?? '');
+    await expect.poll(says).toContainEqual(expect.stringContaining("Couldn't find the next Short"));
+
+    shortsFeed.pressNoticeAction('Retry');
+
+    expect(says().every((text) => text === '')).toBe(true);
+    expect(regions.every((region) => region.checkVisibility())).toBe(true);
+  });
+
+  it("stacks a Shortcut's confirmation with the notice, so Retry stays in reach", async () => {
+    const shortsFeed = await stalled();
+
+    await shortsFeed.pressKey('a');
+
+    await expect.poll(() => shortsFeed.notices().map(({ text }) => text)).toEqual([
+      'Auto-Scroll off',
+      "Couldn't find the next Short",
+    ]);
+    // Once both have slid in, as YouTube's toasts do.
+    const gap = () => {
+      const [confirmation, stall] = shortsFeed.notices().map(({ element }) => element.getBoundingClientRect());
+      return stall!.top - confirmation!.bottom;
+    };
+    await expect.poll(gap).toBeGreaterThanOrEqual(0);
+    const retry = shortsFeed.notices()[1]!.element.querySelector('button')!;
+    const { left, top, width, height } = retry.getBoundingClientRect();
+    expect((retry.getRootNode() as ShadowRoot).elementFromPoint(left + width / 2, top + height / 2)).toBe(retry);
+  });
+
   it('never reloads or scrolls the page, and the Current Short plays on', async () => {
     const shortsFeed = await stalled();
     await expectTimeline(shortsFeed, ['Short 1 started over', 'Short 1 started over']);
