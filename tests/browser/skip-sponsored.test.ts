@@ -23,7 +23,7 @@ describe.each(withSponsoredShort)('on $name', (page) => {
   const sponsored = sponsoredShort(page)!;
 
   it.each([true, false])('skips a Sponsored Short as soon as it is current, with Auto-Scroll %s', async (autoScroll) => {
-    const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll }) });
+    const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll, skipSponsoredShorts: true }) });
 
     pressNextVideoUntil(shortsFeed, sponsored);
 
@@ -54,7 +54,7 @@ describe.each(withSponsoredShort)('on $name', (page) => {
   });
 
   it('never skips a Short that is not sponsored', async () => {
-    const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll: false }) });
+    const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll: false, skipSponsoredShorts: true }) });
 
     pressNextVideoUntil(shortsFeed, sponsored - 1);
 
@@ -66,7 +66,7 @@ describe.each(withSponsoredShort)('on $name', (page) => {
 
 describe.each(testPages.filter((page) => sponsoredShort(page) === undefined))('on $name', (page) => {
   it('skips nothing where no Short is sponsored', async () => {
-    const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll: false }) });
+    const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll: false, skipSponsoredShorts: true }) });
 
     await expectTimeline(shortsFeed, ['Short 1 started over']);
     expect(shortsFeed.timeline).not.toContain('Short 2 is current');

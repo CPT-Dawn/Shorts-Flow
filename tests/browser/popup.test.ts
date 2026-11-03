@@ -78,8 +78,16 @@ describe('Auto-Scroll', () => {
 describe('Skip Sponsored Shorts', () => {
   const skipSponsored = () => page.getByRole('list', { name: 'Settings' }).getByRole('switch', { name: 'Skip Sponsored Shorts' });
 
-  it('is on from the start, and says it skips rather than blocks', async () => {
+  it('is off from the start, until the viewer turns it on', async () => {
     openPopup();
+
+    await expect.element(skipSponsored()).toBeEnabled();
+    await expect.element(skipSponsored()).not.toBeChecked();
+    await expect.element(skipSponsored()).toHaveAccessibleDescription('They play like any other Short');
+  });
+
+  it('says it skips rather than blocks', async () => {
+    openPopup({ settings: createTestSettingsStore({ skipSponsoredShorts: true }) });
 
     await expect.element(skipSponsored()).toBeChecked();
     await expect.element(skipSponsored()).toHaveAccessibleDescription('Moves past them as soon as one comes up');

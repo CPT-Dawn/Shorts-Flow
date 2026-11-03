@@ -41,7 +41,8 @@ export const DEFAULT_SETTINGS: Settings = {
   autoScroll: true,
   sessionLimit: { kind: 'off' },
   shortsControlShown: true,
-  skipSponsoredShorts: true,
+  // Off from a fresh install: the viewer opts in.
+  skipSponsoredShorts: false,
   speedOn: false,
   preferredSpeed: 1.5,
   shortcuts: { toggleAutoScroll: 'a', toggleSpeed: 's' },
@@ -85,9 +86,15 @@ export function createSettingsStore(): SettingsStore {
     watch(listener) {
       let watching = true;
       const unwatchers = KEYS.map((key) =>
-        storage.watch(storageKey(key), async () => {
-          const settings = await store.get();
-          if (watching) listener(settings);
+        storage.watch(storageKey(key), () => {
+          store
+            .get()
+            .then((settings) => {
+              if (watching) listener(settings);
+            })
+            // Rejects once the extension context is invalidated (updated or
+            // removed under an open page): nothing left to tell.
+            .catch(() => {});
         }),
       );
       return () => {
