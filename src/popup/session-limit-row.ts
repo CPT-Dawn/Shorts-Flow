@@ -52,7 +52,10 @@ export const sessionLimitRow: PopupRow = (popup) => {
       const limit = popup.settings()?.sessionLimit;
       if (!limit || limit.kind === 'off') return;
       const typed = Math.round(value.valueAsNumber);
-      setLimit({ kind: limit.kind, value: Number.isNaN(typed) ? limit.value : Math.min(Math.max(typed, 1), LIMIT_MAX) });
+      const taken = Number.isNaN(typed) ? limit.value : Math.min(Math.max(typed, 1), LIMIT_MAX);
+      // Show what was saved, not what was typed: 0 becomes 1, 5000 becomes 999.
+      value.value = String(taken);
+      setLimit({ kind: limit.kind, value: taken });
     },
     { signal },
   );
@@ -88,8 +91,8 @@ export const sessionLimitRow: PopupRow = (popup) => {
       ? session.shortsWatched - from.shortsWatched
       : Math.floor((session.playingMs - from.playingMs) / 60_000);
     hint.textContent = getMessage(shorts ? 'popupSessionLimitProgressShorts' : 'popupSessionLimitProgressMinutes', [
-      String(Math.min(Math.max(sofar, 0), limit.value)),
-      String(limit.value),
+      popup.formatNumber(Math.min(Math.max(sofar, 0), limit.value)),
+      popup.formatNumber(limit.value),
     ]);
   };
 

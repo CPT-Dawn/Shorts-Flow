@@ -27,7 +27,7 @@ export const shortsWatched: StatusPart = (popup) => {
   count.className = 'sf-status-watched';
   // It changes every few seconds while Shorts play: not worth announcing each time.
   count.setAttribute('aria-live', 'off');
-  const show = (session: Session) => (count.textContent = popup.getMessage('popupShortsWatched', [String(session.shortsWatched)]));
+  const show = (session: Session) => (count.textContent = popup.getMessage('popupShortsWatched', [popup.formatNumber(session.shortsWatched)]));
   show(NO_SESSION);
   watchSession(popup, show);
   return count;

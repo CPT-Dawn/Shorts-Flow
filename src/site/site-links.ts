@@ -12,8 +12,11 @@ const V3_ANCHOR = 'whats-new';
 /** The values each page on the site takes. Nothing else gets into its URL. */
 interface Params {
   home: Record<never, never>;
-  /** `v3` opens the page at its "What's new in 3.0" section. */
-  welcome: { v3?: boolean };
+  /**
+   * `v3` opens the page at its "What's new in 3.0" section; `version`, the
+   * version the viewer runs, lets the page say what is new to them.
+   */
+  welcome: { v3?: boolean; version?: string };
   report: { version: string; browser?: string; browserVersion?: string };
   goodbye: { version: string };
   support: Record<never, never>;
@@ -26,7 +29,7 @@ export type SitePage = keyof Params;
 /** Each page's path, and the query parameters it takes, in order. */
 const PAGES = {
   home: { path: '/', query: [] },
-  welcome: { path: '/welcome', query: [] },
+  welcome: { path: '/welcome', query: ['version'] },
   report: { path: '/report', query: ['version', 'browser', 'browserVersion'] },
   goodbye: { path: '/goodbye', query: ['version'] },
   support: { path: '/support', query: [] },

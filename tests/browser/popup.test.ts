@@ -19,6 +19,8 @@ afterEach(() => {
   unmount?.();
   unmount = undefined;
   document.body.replaceChildren();
+  document.documentElement.lang = 'en';
+  document.documentElement.removeAttribute('dir');
 });
 
 /** Opens the Popup as the toolbar button would, with test stand-ins for the browser. */
@@ -117,6 +119,30 @@ describe('Skip Sponsored Shorts', () => {
   });
 });
 
+describe('language', () => {
+  it("speaks the browser's UI language, in its direction", async () => {
+    const browserMessages: Record<string, string> = { '@@ui_locale': 'ar_EG', '@@bidi_dir': 'rtl' };
+    openPopup({
+      getMessage: (key, substitutions) => browserMessages[key] ?? getMessage(key, substitutions),
+      session: createTestSessionStore({ lastSeenAt: Date.now(), shortsWatched: 1234 }),
+    });
+
+    await expect
+      .element(page.getByText(/^Shorts Watched/))
+      .toHaveTextContent(`Shorts Watched: ${new Intl.NumberFormat('ar-EG').format(1234)}`);
+    expect(document.documentElement.lang).toBe('ar-EG');
+    expect(document.documentElement.dir).toBe('rtl');
+  });
+
+  it('stays in English, left to right, when the browser does not say', async () => {
+    openPopup();
+
+    await expect.element(page.getByRole('heading', { name: 'Shorts Flow' })).toBeVisible();
+    expect(document.documentElement.lang).toBe('en');
+    expect(document.documentElement.dir).toBe('');
+  });
+});
+
 describe('status line', () => {
   it('says so when the tab the Popup opened over is on the Shorts Feed', async () => {
     openPopup({ isOnShortsFeed: async () => true });
@@ -177,6 +203,17 @@ describe("Firefox's access to youtube.com", () => {
     await expect.element(notice()).not.toBeInTheDocument();
   });
 
+  it('hides the status line meanwhile, which could not know where the tab is', async () => {
+    const access = youtubeAccess(false);
+    openPopup({ hostAccess: access, isOnShortsFeed: async () => false });
+    await expect.element(notice()).toBeVisible();
+
+    await expect.element(page.getByRole('status')).not.toBeInTheDocument();
+
+    access.set(true);
+    await expect.element(page.getByRole('status')).toMatchTextContent(/^Not on the Shorts Feed/);
+  });
+
   it('keeps saying so when the viewer turns the request down', async () => {
     const access = youtubeAccess(false, { grantsOnRequest: false });
     openPopup({ hostAccess: access });
@@ -220,9 +257,9 @@ describe('keyboard', () => {
     await userEvent.tab();
     await expect.element(page.getByRole('combobox', { name: 'Session Limit' })).toHaveFocus();
     await userEvent.tab();
-    await expect.element(page.getByRole('button', { name: 'Auto-Scroll Shortcut: A' })).toHaveFocus();
+    await expect.element(page.getByRole('button', { name: 'Auto-Scroll A, Shortcut' })).toHaveFocus();
     await userEvent.tab();
-    await expect.element(page.getByRole('button', { name: 'Speed Shortcut: S' })).toHaveFocus();
+    await expect.element(page.getByRole('button', { name: 'Speed S, Shortcut' })).toHaveFocus();
     await userEvent.tab();
     await expect.element(page.getByRole('link', { name: "What's new" })).toHaveFocus();
     await userEvent.tab();
@@ -347,7 +384,39 @@ describe("What's new", () => {
 
     await expect
       .element(page.getByRole('link', { name: "What's new" }))
-      .toHaveAttribute('href', 'https://shortsflow.cptdawn.dev/welcome#whats-new');
+      .toHaveAttribute('href', 'https://shortsflow.cptdawn.dev/welcome?version=3.0.0#whats-new');
+  });
+
+  it('tells the Welcome Page which version the viewer runs', async () => {
+    openPopup({ version: '3.1.2' });
+
+    await expect
+      .element(page.getByRole('link', { name: "What's new" }))
+      .toHaveAttribute('href', 'https://shortsflow.cptdawn.dev/welcome?version=3.1.2#whats-new');
+  });
+
+  it("clears the dot when the viewer middle-clicks What's new into a background tab", async () => {
+    const whatsNew = whatsNewFlag(true);
+    openPopup({ whatsNew });
+    await expect.element(dot()).toBeVisible();
+    const link = page.getByRole('link', { name: "What's new" }).element();
+
+    link.dispatchEvent(new MouseEvent('auxclick', { button: 1, bubbles: true, cancelable: true }));
+
+    await expect.element(dot()).not.toBeInTheDocument();
+    expect(await whatsNew.isUnread()).toBe(false);
+  });
+
+  it('keeps the dot after a right-click', async () => {
+    const whatsNew = whatsNewFlag(true);
+    openPopup({ whatsNew });
+    await expect.element(dot()).toBeVisible();
+    const link = page.getByRole('link', { name: "What's new" }).element();
+
+    link.dispatchEvent(new MouseEvent('auxclick', { button: 2, bubbles: true, cancelable: true }));
+
+    await expect.element(dot()).toBeVisible();
+    expect(await whatsNew.isUnread()).toBe(true);
   });
 });
 

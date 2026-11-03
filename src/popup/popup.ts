@@ -51,6 +51,14 @@ export function mountPopup(
   const popup = new AbortController();
   const { signal } = popup;
 
+  // The browser's UI language and its direction; the page's own lang="en" stays
+  // as the fallback when the browser gives neither (in tests, say).
+  const locale = getMessage('@@ui_locale').replaceAll('_', '-');
+  const direction = getMessage('@@bidi_dir');
+  if (locale) document.documentElement.lang = locale;
+  if (direction === 'ltr' || direction === 'rtl') document.documentElement.dir = direction;
+  const numbers = new Intl.NumberFormat(locale || undefined, { maximumFractionDigits: 2 });
+
   const element = <K extends keyof HTMLElementTagNameMap>(tag: K, className: string, ...children: (Node | string)[]) => {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -70,13 +78,28 @@ export function mountPopup(
     return input;
   };
 
-  /** One item of the settings list: label, and a hint if it has one, on the left; `control` on the right. */
-  const listRow = (tag: 'div' | 'label', id: string, label: string, control: Node, { withHint }: { withHint: boolean }) => {
+  /**
+   * One item of the settings list: label, and a hint if it has one, on the
+   * left; `control` on the right. With `labelFor`, the label and hint are
+   * that control's label, so a click on them switches it.
+   */
+  const listRow = (
+    tag: 'div' | 'label',
+    id: string,
+    label: string,
+    control: Node,
+    { withHint, labelFor }: { withHint: boolean; labelFor?: HTMLInputElement },
+  ) => {
     const labelNode = element('span', 'sf-row-label', label);
     labelNode.id = id;
     const hint = element('span', 'sf-row-hint');
     hint.id = `${id}-hint`;
-    const text = element('span', 'sf-row-text', labelNode, ...(withHint ? [hint] : []));
+    const textParts = [labelNode, ...(withHint ? [hint] : [])];
+    const text = labelFor ? element('label', 'sf-row-text', ...textParts) : element('span', 'sf-row-text', ...textParts);
+    if (labelFor) {
+      labelFor.id ||= `${id}-control`;
+      (text as HTMLLabelElement).htmlFor = labelFor.id;
+    }
     return { item: element('li', 'sf-row-item', element(tag, 'sf-row', text, control)), hint };
   };
 
@@ -163,9 +186,12 @@ export function mountPopup(
     restore,
   );
   hostNotice.setAttribute('role', 'alert');
-  // Shown just under the header, and only while the access is off.
+  // Shown just under the header, and only while the access is off. It stands
+  // in for the status line meanwhile: with no content script to answer, that
+  // would say "Not on the Shorts Feed" even over a Short.
   const showHostAccess = (granted: boolean) => {
     if (signal.aborted) return;
+    status.hidden = !granted;
     if (granted) hostNotice.remove();
     else if (!hostNotice.isConnected) header.after(hostNotice);
   };
@@ -178,17 +204,19 @@ export function mountPopup(
   }
 
   // The footer: news and help, each on Shorts Flow's own site.
-  const whatsNewLink = link(element('a', 'sf-link sf-whats-new', getMessage('popupWhatsNew')), siteUrl('welcome', { v3: true }));
-  let whatsNewOpened = false;
-  whatsNewLink.addEventListener(
-    'click',
-    () => {
-      whatsNewOpened = true;
-      unreadDot.remove();
-      void whatsNew.markRead();
-    },
-    { signal },
+  const whatsNewLink = link(
+    element('a', 'sf-link sf-whats-new', getMessage('popupWhatsNew')),
+    siteUrl('welcome', { v3: true, version }),
   );
+  let whatsNewOpened = false;
+  const openWhatsNew = () => {
+    whatsNewOpened = true;
+    unreadDot.remove();
+    void whatsNew.markRead();
+  };
+  whatsNewLink.addEventListener('click', openWhatsNew, { signal });
+  // A middle click opens it too, in a background tab, and fires no click.
+  whatsNewLink.addEventListener('auxclick', (event) => event.button === 1 && openWhatsNew(), { signal });
   void whatsNew.isUnread().then((unread) => {
     if (unread && !whatsNewOpened && !signal.aborted) versionChip.append(unreadDot);
   });
@@ -215,11 +243,12 @@ export function mountPopup(
     document,
     signal,
     getMessage,
+    formatNumber: (value) => numbers.format(value),
     settings: () => current,
     watchSettings,
     changeSettings: (changes) => void settings.set(changes),
     session,
-    row: ({ id, label, control }) => listRow('div', id, label, control, { withHint: true }),
+    row: ({ id, label, control, labelFor }) => listRow('div', id, label, control, { withHint: true, labelFor }),
     switchInput: (labelledBy, describedBy) => switchInput('sf-switch', labelledBy, describedBy),
     switchRow({ setting, label, hint }) {
       const id = `sf-setting-${setting}`;

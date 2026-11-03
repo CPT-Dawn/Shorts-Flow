@@ -14,7 +14,7 @@ export const speedRow: PopupRow = (popup) => {
   picker.className = 'sf-select';
   picker.setAttribute('aria-label', getMessage('popupPreferredSpeed'));
   for (const speed of PREFERRED_SPEEDS) {
-    picker.append(new Option(getMessage('popupSpeedValue', [String(speed)]), String(speed)));
+    picker.append(new Option(getMessage('popupSpeedValue', [popup.formatNumber(speed)]), String(speed)));
   }
   picker.addEventListener('change', () => popup.changeSettings({ preferredSpeed: Number(picker.value) }), { signal });
 
@@ -28,7 +28,8 @@ export const speedRow: PopupRow = (popup) => {
   controls.className = 'sf-row-value';
   controls.append(picker, toggle);
 
-  const { item, hint } = popup.row({ id, label: getMessage('popupSpeed'), control: controls });
+  // The name and hint are the switch's label, as in every other switch row.
+  const { item, hint } = popup.row({ id, label: getMessage('popupSpeed'), control: controls, labelFor: toggle });
   popup.watchSettings(({ speedOn, preferredSpeed }) => {
     toggle.checked = speedOn;
     picker.value = String(preferredSpeed);

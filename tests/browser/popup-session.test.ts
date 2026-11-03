@@ -105,7 +105,7 @@ describe('Session Limit', () => {
     await expect.element(page.getByRole('spinbutton')).not.toBeInTheDocument();
   });
 
-  it('keeps a typed limit between 1 and 999', async () => {
+  it('keeps a typed limit between 1 and 999, and shows the limit it kept', async () => {
     const settings = createTestSettingsStore({ sessionLimit: { kind: 'shorts', value: 30 } });
     openPopup({ settings });
     const value = page.getByRole('spinbutton', { name: 'Shorts before a break' });
@@ -114,10 +114,14 @@ describe('Session Limit', () => {
     await value.fill('5000');
     await userEvent.keyboard('{Enter}');
     await expect.poll(async () => (await settings.get()).sessionLimit).toEqual({ kind: 'shorts', value: 999 });
+    // Still focused, so only the clamp itself can have put 999 there.
+    await expect.element(value).toHaveFocus();
+    await expect.element(value).toHaveValue(999);
+
     await value.fill('0');
     await userEvent.keyboard('{Enter}');
-
     await expect.poll(async () => (await settings.get()).sessionLimit).toEqual({ kind: 'shorts', value: 1 });
+    await expect.element(value).toHaveValue(1);
   });
 
   it('shows how far this Session has come since the last Break Nudge', async () => {

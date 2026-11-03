@@ -11,6 +11,7 @@ afterEach(() => {
   unmount?.();
   unmount = undefined;
   document.body.replaceChildren();
+  document.documentElement.lang = 'en';
 });
 
 /** Opens the Popup with its own settings list, as the toolbar button would. */
@@ -45,6 +46,49 @@ it('switches Speed for every Shorts tab at once', async () => {
 
   await expect.poll(async () => (await settings.get()).speedOn).toBe(true);
   await expect.element(speedSwitch()).toBeChecked();
+});
+
+it('switches Speed from a click on its name, as every switch row does', async () => {
+  const settings = createTestSettingsStore({ speedOn: false, preferredSpeed: 1.5 });
+  openPopup(settings);
+  await expect.element(speedSwitch()).toBeEnabled();
+
+  // The row's name, not the Speed Shortcut further down.
+  await userEvent.click(document.getElementById('sf-setting-speed')!);
+
+  await expect.poll(async () => (await settings.get()).speedOn).toBe(true);
+  await expect.element(speedSwitch()).toBeChecked();
+  expect((await settings.get()).preferredSpeed).toBe(1.5);
+});
+
+it('leaves Speed alone when the viewer picks a Preferred Speed', async () => {
+  const settings = createTestSettingsStore({ speedOn: false, preferredSpeed: 1.5 });
+  openPopup(settings);
+  await expect.element(preferredSpeed()).toBeEnabled();
+
+  await preferredSpeed().click();
+  await userEvent.selectOptions(preferredSpeed(), '2×');
+
+  await expect.poll(async () => (await settings.get()).preferredSpeed).toBe(2);
+  expect((await settings.get()).speedOn).toBe(false);
+  await expect.element(speedSwitch()).not.toBeChecked();
+});
+
+it('writes speeds the way the browser language does', async () => {
+  unmount = mountPopup(document, {
+    settings: createTestSettingsStore(),
+    session: createTestSessionStore(),
+    getMessage: (key, substitutions) => (key === '@@ui_locale' ? 'de' : getMessage(key, substitutions)),
+    version: '3.0.0',
+    whatsNew: { isUnread: async () => false, markUnread: async () => {}, markRead: async () => {} },
+    readBrowser: async () => ({}),
+    isOnShortsFeed: async () => false,
+  });
+
+  await expect.element(preferredSpeed()).toBeEnabled();
+  const options = [...preferredSpeed().element().querySelectorAll('option')].map((option) => option.textContent);
+  expect(options.slice(0, 2)).toEqual(['0,5×', '0,75×']);
+  await expect.element(preferredSpeed()).toHaveValue('1.5');
 });
 
 it('offers every Preferred Speed from 0.5× to 3× in steps of 0.25', async () => {

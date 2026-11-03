@@ -18,6 +18,8 @@ export type PopupContext = {
   /** Aborts when the Popup is unmounted. */
   signal: AbortSignal;
   getMessage: (key: PopupMessage, substitutions?: string[]) => string;
+  /** A number as the browser's UI language writes it (1.5 or 1,5, say), for text the Popup shows. */
+  formatNumber(value: number): string;
   /** The settings as last read, or undefined until the first read arrives: show nothing until then. */
   settings(): Settings | undefined;
   /** Calls `listener` with the settings as soon as they are known, and again on every change from anywhere. */
@@ -31,9 +33,13 @@ export type PopupContext = {
    * and a hint under it on the left, `control` on the right. Returns the row
    * and its hint, empty for the row to fill in and keep up to date. The row
    * gives the label and hint the ids `<id>` and `<id>-hint`, for the
-   * control's aria-labelledby and aria-describedby.
+   * control's aria-labelledby and aria-describedby. With `labelFor`, the
+   * label and hint are that control's label, so clicking them works it.
    */
-  row(parts: { id: string; label: string; control: Node }): { item: HTMLLIElement; hint: HTMLElement };
+  row(parts: { id: string; label: string; control: Node; labelFor?: HTMLInputElement }): {
+    item: HTMLLIElement;
+    hint: HTMLElement;
+  };
   /**
    * A native checkbox drawn as a switch, named by the element `labelledBy`
    * and described by `describedBy` (ids). Disabled until the row enables it
