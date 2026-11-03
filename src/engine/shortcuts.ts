@@ -2,6 +2,7 @@ import type { Settings, ShortcutAction, SwitchSetting } from '@/settings/setting
 import { shortcutKey } from '@/settings/shortcut-key';
 import { toggleSetting, type Feature, type Feed } from './feed';
 import { isTyping } from './holds';
+import { isDialogOpen } from './on-page';
 import { createToast } from './toast';
 
 /** How long a Shortcut's confirmation shows, in ms: about as long as YouTube's own. */
@@ -18,13 +19,19 @@ const CONFIRMATION_MS = 2000;
  * (Shorts Flow's own ArrowDown fallback among them). YouTube's own keys can't
  * be bound (the Popup refuses them), so its navigation is never touched.
  * Off the Shorts Feed this feature isn't mounted at all.
+ *
+ * Nor does a Shortcut act while a dialog of Shorts Flow's own is open (the
+ * Break Nudge): the viewer is answering it, and nothing behind it should
+ * change. Its keys go to the dialog. This listener runs on the window's
+ * capture, before the dialog's host stops keys on their way out, so it has
+ * to ask.
  */
 export const shortcuts: Feature = (feed) => {
   const window = feed.document.defaultView!;
   const confirmation = createToast(feed, 'shortcut-confirmation');
 
   const onKeyDown = (event: KeyboardEvent) => {
-    if (!event.isTrusted || event.isComposing || isTyping(feed.document)) return;
+    if (!event.isTrusted || event.isComposing || isTyping(feed.document) || isDialogOpen(feed.document)) return;
     const settings = feed.settings();
     const key = shortcutKey(event);
     if (!settings || !key) return;

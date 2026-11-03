@@ -106,6 +106,18 @@ describe.each(testPages.filter(hasNextShort))('on $name', (page) => {
     });
   }
 
+  it('lets no Shortcut act behind it', async () => {
+    const shortsFeed = await nudged(await mount(page, { kind: 'shorts', value: 1 }));
+
+    await userEvent.keyboard('a');
+    await userEvent.keyboard('s');
+    await aMomentLater();
+
+    expect(await shortsFeed.settings.get()).toMatchObject({ autoScroll: false, speedOn: false });
+    expect(shortsFeed.notice()).toBeUndefined();
+    expect(shortsFeed.dialog()).toBeDefined();
+  });
+
   it('nudges again only after another full limit in Shorts', async () => {
     const shortsFeed = await nudged(await mount(page, { kind: 'shorts', value: 2 }, { shortsWatched: 1 }));
     shortsFeed.pressDialogAction('Keep watching');

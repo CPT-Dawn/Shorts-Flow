@@ -44,3 +44,15 @@ export function placeOnPage(
   signal.addEventListener('abort', () => host.remove(), { once: true });
   return { host, root };
 }
+
+/**
+ * Whether something Shorts Flow placed on the page has a dialog open (the
+ * Break Nudge). It lives in a shadow root, out of reach of the page's own
+ * queries, so this looks inside each of Shorts Flow's hosts.
+ */
+export function isDialogOpen(document: Document): boolean {
+  for (const host of document.querySelectorAll('[data-shorts-flow]')) {
+    if (host.shadowRoot?.querySelector('dialog[open]')) return true;
+  }
+  return false;
+}
