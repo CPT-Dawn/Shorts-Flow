@@ -22,7 +22,11 @@ export type Feed = {
    * on every change from anywhere, for as long as this visit lasts.
    */
   watchSettings(listener: (settings: Settings) => void): void;
-  /** Saves a settings change; every tab and the Popup hear of it, this one included. */
+  /**
+   * Saves a settings change; every tab and the Popup hear of it. This tab
+   * applies it at once, `settings()` and its watchers included, so a second
+   * change straight after builds on the first.
+   */
   changeSettings(changes: Partial<Settings>): void;
   session: SessionStore;
   getMessage: GetMessage;

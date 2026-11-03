@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { expectTimeline, mountShortsFeed } from './support/shorts-feed';
-import { createTestSessionStore } from './support/stores';
+import { aMomentLater, expectTimeline, mountShortsFeed } from './support/shorts-feed';
+import { createTestSessionStore, createTestSettingsStore } from './support/stores';
 import { feedPages, hasNextShort } from './support/test-pages';
 
 // Longer than Shorts Flow takes to notice YouTube has changed pages.
@@ -23,5 +23,19 @@ describe.each(feedPages.filter(hasNextShort))('on $name', (page) => {
     // Off the Shorts Feed, Auto-Scroll stops with the rest of the visit.
     await expectTimeline(shortsFeed, ['Short 1 started over', 'Short 1 started over']);
     expect(shortsFeed.timeline).not.toContain('Short 2 is current');
+  });
+
+  it('switches a setting back on a second click straight after the first', async () => {
+    const settings = createTestSettingsStore({ autoScroll: true });
+    const shortsFeed = await mountShortsFeed(page, { settings });
+    await expect.poll(() => shortsFeed.railControl('Auto-Scroll')).toBeDefined();
+    const control = shortsFeed.railControl('Auto-Scroll')!;
+
+    // Both before the store reports the first back.
+    control.click();
+    control.click();
+    await aMomentLater();
+
+    expect((await settings.get()).autoScroll).toBe(true);
   });
 });

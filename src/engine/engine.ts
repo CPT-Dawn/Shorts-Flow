@@ -169,6 +169,11 @@ export function mountEngine(
         if (current) listener(current);
       },
       changeSettings(changes) {
+        // Applied here at once, not when the store reports back: a second
+        // switch a moment later (a double click) must flip what the first
+        // left, not what was stored before it. The store's own report
+        // follows, with the same settings.
+        if (current) apply({ ...current, ...changes });
         void settings.set(changes);
       },
       session,
