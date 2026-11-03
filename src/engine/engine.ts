@@ -119,9 +119,14 @@ export function mountEngine(
     apply(changed);
   });
   engine.signal.addEventListener('abort', unwatchSettings, { once: true });
-  void settings.get().then((read) => {
-    if (!changedSinceRead && !engine.signal.aborted) apply(read);
-  });
+  settings
+    .get()
+    .then((read) => {
+      if (!changedSinceRead && !engine.signal.aborted) apply(read);
+    })
+    // Fails only once the extension's context is gone (updated or removed),
+    // when the engine is being torn down anyway: nothing left to tell.
+    .catch(() => {});
 
   whileOnShortsFeed(document.defaultView!, clock, engine.signal, () => {
     const visit = new AbortController();
@@ -174,7 +179,8 @@ export function mountEngine(
         // left, not what was stored before it. The store's own report
         // follows, with the same settings.
         if (current) apply({ ...current, ...changes });
-        void settings.set(changes);
+        // Fails only once the extension's context is gone: see above.
+        settings.set(changes).catch(() => {});
       },
       session,
       getMessage,
