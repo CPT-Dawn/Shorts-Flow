@@ -48,9 +48,16 @@ brings of its own. We don't know which.
   of the Shorts Feed on screen, so either placement is caught.
 - It never reads text ("Sponsored" is localised) and never reads YouTube's data (the content
   script cannot see it, and ADR 0003 rules out anything sneakier).
-- `watchShortsFeed()` re-checks whenever anything inside `ytd-shorts` is added or moved, or
-  `#shorts-container` scrolls, and when the setting changes.
-- Skipping is one `feed.advance()`: YouTube's own Next video control, as Auto-Scroll does.
+- `watchFeedPosition()` re-checks at most once per animation frame after anything inside
+  `ytd-shorts` is added or moved, or `#shorts-container` scrolls, and when the setting changes.
+  It measures the slot on screen only after a scroll or a change of slot.
+- Skipping is one `feed.advance()`: YouTube's own Next video control, as Auto-Scroll does. It
+  never hides or removes the ad's markup.
+- Only on the way down the feed (the slot index grew). A Sponsored Short the viewer goes back
+  up onto is left alone, so the Short before it stays in reach.
+- Advance tells Shorts apart by `FeedPosition` (address, slot holding the renderer, slot on
+  screen), not the address alone, so an ad that keeps the previous Short's address neither
+  swallows the skip nor shows a false Stall.
 
 Unknowns the live check must answer: whether the address changes to `/shorts/<id>` for an ad
 (Advance's Stall check compares Short ids), whether the ad slot has its own `<video>`, and
