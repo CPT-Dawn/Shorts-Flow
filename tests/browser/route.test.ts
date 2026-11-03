@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { whileOnShortsFeed } from '@/engine/route';
+import { createTestClock } from './support/clock';
 import { aMomentLater, expectTimeline, mountShortsFeed } from './support/shorts-feed';
 import { createTestSettingsStore } from './support/stores';
 import { feedPages, hasNextShort, testPages } from './support/test-pages';
@@ -72,5 +74,26 @@ describe.each(testPages)('teardown on $name', (page) => {
 
     expect(shortsFeed.timeline).not.toContain('Short 2 is current');
     expect(shortsFeed.clock.pending).toBe(0);
+  });
+});
+
+describe('the Route watcher', () => {
+  it('keeps watching, and tries again, when a visit throws as it starts', () => {
+    const clock = createTestClock();
+    const page = { location: { pathname: '/shorts/vid00000001' } } as Window;
+    const leave = vi.fn();
+    const visit = vi.fn().mockImplementationOnce(() => {
+      throw new Error('YouTube changed something');
+    });
+    visit.mockReturnValue(leave);
+
+    expect(() => whileOnShortsFeed(page, clock, new AbortController().signal, visit)).toThrow();
+    expect(clock.pending).toBe(1);
+    clock.advance(A_SECOND);
+    expect(visit).toHaveBeenCalledTimes(2);
+
+    page.location.pathname = '/';
+    clock.advance(A_SECOND);
+    expect(leave).toHaveBeenCalledOnce();
   });
 });

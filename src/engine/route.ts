@@ -19,14 +19,19 @@ export function whileOnShortsFeed(window: Window, clock: Clock, signal: AbortSig
   let timer: number | undefined;
 
   const check = () => {
+    // The next check first, so a visit that throws as it starts (or ends)
+    // never stops the watching: the page still leaves the Shorts Feed, and
+    // whatever did start must end with it. A visit that failed to start is
+    // tried again on the next check.
+    timer = clock.setTimeout(check, CHECK_INTERVAL);
     const onShortsFeed = isShortsFeed(window.location.pathname);
     if (onShortsFeed && !leave) {
       leave = visit();
     } else if (!onShortsFeed && leave) {
-      leave();
+      const left = leave;
       leave = undefined;
+      left();
     }
-    timer = clock.setTimeout(check, CHECK_INTERVAL);
   };
 
   signal.addEventListener(

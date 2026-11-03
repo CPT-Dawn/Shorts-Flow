@@ -125,6 +125,19 @@ export function mountEngine(
 
   whileOnShortsFeed(document.defaultView!, clock, engine.signal, () => {
     const visit = new AbortController();
+    try {
+      mountFeatures(visit);
+    } catch (error) {
+      // Whatever did mount goes with the visit, which the Route watcher will
+      // try afresh on its next check.
+      visit.abort();
+      throw error;
+    }
+    return () => visit.abort();
+  });
+
+  /** Builds this visit's Feed and mounts every feature onto it. */
+  function mountFeatures(visit: AbortController) {
     const timers = new Set<number>();
     visit.signal.addEventListener('abort', () => {
       for (const id of timers) clock.clearTimeout(id);
@@ -165,9 +178,16 @@ export function mountEngine(
       clearTimeout,
     };
 
-    for (const feature of FEATURES) feature(feed);
-    return () => visit.abort();
-  });
+    for (const feature of FEATURES) {
+      // One feature failing to mount (YouTube changed something it relies on)
+      // leaves the others running; what it did set up ends with the visit.
+      try {
+        feature(feed);
+      } catch (error) {
+        console.error('Shorts Flow: a feature failed to mount on the Shorts Feed', error);
+      }
+    }
+  }
 
   return teardown;
 }
