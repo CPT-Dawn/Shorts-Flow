@@ -69,4 +69,55 @@ describe('the release workflow', () => {
   it('never publishes to a store', () => {
     expect(workflow).not.toMatch(/web-ext sign|chrome-webstore|chromewebstore|addons\.mozilla|wxt submit|publish-browser-extension/i);
   });
+
+  it('releases only a tag on main, with build provenance for the zips', () => {
+    expect(workflow).toMatch(/fetch-depth: 0/);
+    expect(workflow).toContain('git merge-base --is-ancestor "$GITHUB_SHA" origin/main');
+    expect(workflow).toMatch(/id-token: write/);
+    expect(workflow).toMatch(/attestations: write/);
+    expect(workflow).toMatch(
+      /uses: actions\/attest-build-provenance@[0-9a-f]{40}[^\n]*\n\s+with:\n\s+subject-path: \.output\/\*\.zip/,
+    );
+    // Attested before the zips are published.
+    expect(workflow.indexOf('attest-build-provenance')).toBeLessThan(workflow.indexOf('gh release create'));
+  });
+});
+
+describe('the workflows', () => {
+  const workflows = ['.github/workflows/ci.yml', '.github/workflows/release.yml'].map((path) => ({ path, text: read(path) }));
+  const bun = JSON.parse(read('package.json')).packageManager.replace(/^bun@/, '');
+
+  it('pin every action to a commit, with its version alongside', () => {
+    for (const { path, text } of workflows) {
+      const uses = [...text.matchAll(/uses:\s*(.+)$/gm)].map((match) => match[1]!.trim());
+      expect(uses.length, path).toBeGreaterThan(0);
+      for (const action of uses) expect(action, path).toMatch(/^[\w.-]+\/[\w.-]+@[0-9a-f]{40} # v\d+(\.\d+)*$/);
+    }
+  });
+
+  it('run on the Bun version package.json names', () => {
+    for (const { path, text } of workflows) {
+      expect([...text.matchAll(/bun-version:\s*(\S+)/g)].map((match) => match[1]), path).toEqual([bun]);
+    }
+  });
+});
+
+describe('the build, for Firefox Add-ons reviewers to reproduce', () => {
+  const pkg = JSON.parse(read('package.json'));
+
+  it('pins Bun, Node and every dependency', () => {
+    expect(pkg.packageManager).toMatch(/^bun@\d+\.\d+\.\d+$/);
+    expect(pkg.engines?.node).toMatch(/\S/);
+    for (const [name, version] of Object.entries<string>(pkg.devDependencies)) {
+      expect(version, name).toMatch(/^\d+\.\d+\.\d+$/);
+    }
+  });
+
+  it('tells reviewers how to rebuild, and with which Bun', () => {
+    const instructions = read('SOURCE-BUILD.md');
+    expect(instructions).toContain('bun install --frozen-lockfile');
+    expect(instructions).toContain('bun run build:firefox');
+    expect(instructions).toContain('.output/firefox-mv3');
+    expect(instructions).toContain(pkg.packageManager.replace(/^bun@/, ''));
+  });
 });
