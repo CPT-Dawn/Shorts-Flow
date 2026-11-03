@@ -74,12 +74,14 @@ export function advanceFeed(document: Document): void {
 }
 
 /**
- * What marks a Sponsored Short: YouTube's ad slot inside a slot of the Shorts
- * Feed. UNCONFIRMED: no live capture has met a Sponsored Short yet (see
- * docs/reference/youtube-shorts-sponsored-2026-11). The element name comes
- * from public filter lists, whose rules hide a Shorts slot that holds
- * `.ytd-reel-video-renderer > ytd-ad-slot-renderer`. The test-page tool
- * reads this too, to mark the Sponsored Short in a test page.
+ * What marks a Sponsored Short: an element named `ytd-ad-slot-renderer`
+ * inside a slot of the Shorts Feed, the slot's `.ytd-reel-video-renderer`
+ * child holding it. UNCONFIRMED: no live capture has met a Sponsored Short
+ * yet, so this is the best evidence on record (see
+ * docs/reference/youtube-shorts-sponsored-2026-11). Shorts Flow only reads
+ * it, to know when to Advance through YouTube's own Next video control; it
+ * never hides, removes or changes it. The test-page tool reads this too, to
+ * mark the Sponsored Short in a test page.
  */
 export const SPONSORED_SHORT_MARK = 'ytd-ad-slot-renderer';
 
