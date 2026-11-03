@@ -58,11 +58,11 @@ YouTube changes desktop Shorts often (a redesign rolled out from 2026-06-25), an
 
 ## Store art
 
-Made to the brand's store-art rules in `docs/design/brand/README.md`: Tideline brand only, no text on promo images, no YouTube logo, wordmark, play triangle or red in promo art. Screenshots of the real extension on YouTube are fine.
+Made by `bun run store-art` (see `scripts/store-art/README.md`) from the release build on the anonymised test pages, to the brand's store-art rules in `docs/design/brand/README.md`: Tideline brand only, no copy on promo images other than the Shorts Flow wordmark, no YouTube logo, wordmark, play triangle or red in promo art. Screenshots of the real extension on YouTube are fine; the Shorts in them show original Tideline illustrations and fictional channels, never real creators. Skip Sponsored Shorts never leads the art.
 
-31. [ ] Five 1280×800 screenshots from the finished build: the Shorts Control in the rail (dark), its quick-settings menu, the Popup (light and dark), the Break Nudge, and the Welcome Page or Firefox. No real creators' faces or names that could be read as endorsement; prefer Shorts you can show.
-32. [ ] Small promo tile 440×280: the mark on the night gradient.
-33. [ ] Marquee 1400×560: the mark beside three abstract Short frames, the middle one lifted.
+31. [ ] Re-run `bun run store-art` on the release build and look at every file in `docs/release/store-art/`: the five 1280×800 screenshots (Auto-Scroll in the rail, quick settings, Speed and Shortcuts, Session Limit and the Break Nudge, the Popup and privacy), the 440×280 small promo tile, the 1400×560 marquee and `promo-video.mp4`. The UI in them must match the build being released.
+32. [ ] Check each screenshot at 640×400 (the size the Chrome Web Store shows it at): the headline and the UI it points at stay legible. Check the small tile at 220×140: the wordmark stays crisp.
+33. [ ] Upload `promo-video.mp4` to YouTube (unlisted is enough), titled "Shorts Flow: Auto-Scroll for YouTube Shorts", and paste its URL into the Chrome Web Store listing's video field.
 34. [ ] Store icon 128×128: `public/icon/128.png`, the Tideline tile.
 
 ## Publish
@@ -75,8 +75,21 @@ Store uploads are manual. The tag workflow only builds and attaches the zips; it
 
 ## Featured nomination (Chrome Web Store)
 
-Once v3.0 is live on the Chrome Web Store. There is no published rubric, so stack the levers we control: minimal permissions, an accurate privacy disclosure, complete store art, accessibility, and no policy strikes.
+Once v3.0 is live on the Chrome Web Store. Google publishes no rubric: the badge goes to extensions that "follow our technical best practices and meet a high standard of user experience and design" (https://developer.chrome.com/docs/webstore/discovery, https://developer.chrome.com/docs/webstore/best-practices). Stack the levers we control: minimal permissions, an accurate privacy disclosure, a complete listing with screenshots and a video, accessibility, and no policy strikes. Eligibility: published and public, English supported, no active policy violations, core features work without an account or payment.
 
-38. [ ] Confirm the listing is complete: every image slot filled, the privacy policy linked, the single purpose and justifications filled, the support site set to https://shortsflow.cptdawn.dev, and no open policy warnings in the Developer Dashboard.
-39. [ ] Open the Chrome Web Store developer support form (One Stop Support, from the Developer Dashboard's help menu) and choose the Featured badge nomination option. Give the extension ID, the listing URL, and a short case: one purpose, `storage` only, no data collected, native-looking accessible controls, open source.
-40. [ ] Note the date on the release issue. If declined, record the reason and what to change; renominate after the next release that addresses it.
+38. [ ] Confirm the listing is complete: every image slot and the video filled, the privacy policy linked, the single purpose and justifications filled, the support site set to https://shortsflow.cptdawn.dev, and no open policy warnings in the Developer Dashboard.
+39. [ ] Verify shortsflow.cptdawn.dev in Google Search Console with the publisher's Google account, then set it as the listing's **Official URL** so it shows under the title. Complete the publisher identity verification in the Developer Dashboard if it is not done; the Established Publisher badge follows on its own after a clean track record.
+40. [ ] Open the Chrome Web Store developer support form (One Stop Support, from the Developer Dashboard's help menu) and choose the Featured badge nomination option. Give the extension ID, the listing URL, and a short case: one purpose; `storage` and youtube.com only; no data collected (and Firefox's `data_collection_permissions: none`); native-looking, keyboard- and screen-reader-accessible controls with forced-colors support; no unload handlers, MV3, end-to-end tests in Chromium and Firefox on every push; open source. Do not pitch Skip Sponsored Shorts.
+41. [ ] Note the date on the release issue. If declined, record the reason and what to change; renominate after the next release that addresses it.
+
+## Recommended nomination (Firefox Add-ons)
+
+Mozilla's curators ask whether an extension functions at an exemplary level, is safe, has an exceptional user experience and suits a general, international audience, and pick in six-month rounds (https://extensionworkshop.com/documentation/publish/recommended-extensions/).
+
+42. [ ] Before the Firefox submission, re-read Mozilla's Add-on Policies as updated on 2026-12-01 (preview: https://extensionworkshop.com/documentation/publish/add-on-policies-preview-2026-12/) and confirm nothing in Shorts Flow conflicts.
+43. [ ] Once the AMO listing has a few weeks of track record and reviews, email amo-featured@mozilla.org with the listing link and a short case built on what makes it distinct: Holds that wait for the viewer, never reloading the page, controls that match YouTube's own, zero data, a reproducible source build. Expect to stay responsive to Mozilla's copy and UX feedback for months.
+44. [ ] Localisation strengthens the "international audience" criterion; when translations are added, localise the listing and screenshots too.
+
+## Repository
+
+45. [ ] After the merge to `main`, refresh the GitHub repository's description, website and topics to match v3: description "Watch YouTube Shorts hands-free. Auto-Scroll for YouTube's desktop Shorts feed, for Chrome and Firefox. Zero telemetry.", website https://shortsflow.cptdawn.dev, topics without `user-scripts` and `javascript`, plus `firefox-addon`, `typescript`, `wxt`.

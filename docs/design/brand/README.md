@@ -45,7 +45,9 @@ Neutral surfaces carry almost everything. Only Auto-Scroll gets the night card, 
 
 ## Store art
 
-No text on promo images. Small tile 440×280: the mark on the night gradient. Marquee 1400×560: the mark beside three abstract Short frames, the middle one lifted. No YouTube screenshots, logos or red in promo art (screenshots of the real extension on YouTube are fine).
+No copy on promo images other than the Shorts Flow wordmark: at the 275 px the Chrome Web Store shows the small tile at, a bare mark reads as an abstract glyph, and a name never needs localising. Small tile 440×280: the Pearl mark and the wordmark on the night gradient, over the tideline. Marquee 1400×560: the mark and wordmark beside three abstract Short frames, the middle one lifted. No YouTube screenshots, logos or red in promo art (screenshots of the real extension on YouTube are fine).
+
+Screenshots, 1280×800: the night gradient with its tideline, a Tide Light overline, a Sora 600 headline (66 px, the second half in Pearl), one line of Instrument Sans, and a crop of the real extension floating on the right with the hairline edge. One Pearl ring on the thing being sold. The lockup bottom left; "Not affiliated with YouTube" bottom right. The Shorts in them show the Tideline illustrations in `scripts/store-art/scenes/` and fictional channels.
 
 ## Rules
 
