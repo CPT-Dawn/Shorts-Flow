@@ -2,6 +2,8 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
+import type { Page } from 'playwright';
+import type { BrowserCommand } from 'vitest/node';
 import { WxtVitest } from 'wxt/testing/vitest-plugin';
 
 export default defineConfig({
@@ -44,12 +46,25 @@ export default defineConfig({
             instances: [{ browser: 'chromium' }, { browser: 'firefox' }],
             // Room for a test page at the window size it was captured in.
             viewport: { width: 1920, height: 1080 },
+            commands: { emulateMedia },
           },
         },
       },
     ],
   },
 });
+
+/**
+ * `commands.emulateMedia(...)` in a browser test: Playwright's
+ * `page.emulateMedia`, for the Popup in dark mode or forced colours. Pass
+ * `null` for a feature to stop emulating it.
+ */
+async function emulateMedia(
+  { page }: Parameters<BrowserCommand>[0],
+  media: Parameters<Page['emulateMedia']>[0],
+): Promise<void> {
+  await page.emulateMedia(media);
+}
 
 /**
  * Answers `<any path>?test-page=<name>` with tests/pages/<name>/page.html,

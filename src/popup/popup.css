@@ -50,7 +50,8 @@
   /* Tide: controls on light surfaces. */
   --sf-on: #3b5bd9;
   --sf-off: #d4d8e1;
-  /* The off switch's edge, so its shape holds at 3:1 against the surface. */
+  /* The edge of an off switch, a picker or a number field, so its shape holds
+     at 3:1 against the surface. */
   --sf-off-edge: #878fa0;
   --sf-link: #3150c4;
   --sf-live: #3fae8c;
@@ -82,6 +83,12 @@
     --sf-live: #67cfa9;
     --sf-brick: #e5907f;
   }
+
+  /* White on Tide Light is too faint: the on knob is Abyss, as on the Pearl. */
+  .sf-switch:checked::after {
+    background: var(--sf-abyss);
+    box-shadow: none;
+  }
 }
 
 *,
@@ -108,10 +115,12 @@ body {
   outline-offset: 2px;
 }
 
+/* Firefox cuts a popup off at 600px tall: everything showing at once, the
+   host access notice included, stays well inside that (tests/browser/popup-look). */
 .sf-popup {
   display: grid;
-  gap: 12px;
-  padding: 14px;
+  gap: 10px;
+  padding: 12px;
 }
 
 /* Header ---------------------------------------------------------------- */
@@ -166,7 +175,7 @@ body {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 3px 12px;
-  padding: 16px;
+  padding: 14px 16px;
   border-radius: 14px;
   background: var(--sf-night);
   color: var(--sf-night-ink);
@@ -274,10 +283,13 @@ body {
 
 /* Firefox host access ---------------------------------------------------- */
 
+/* The title across the top; under it the hint, and the button beside it. */
 .sf-notice {
   display: grid;
-  gap: 4px;
-  padding: 12px 14px;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 2px 12px;
+  padding: 10px 14px;
   border-radius: 14px;
   border: 1px solid var(--sf-line);
   border-left: 3px solid var(--sf-brick);
@@ -285,6 +297,7 @@ body {
 }
 
 .sf-notice-title {
+  grid-column: 1 / -1;
   margin: 0;
   font-size: 13.5px;
   font-weight: 600;
@@ -297,9 +310,7 @@ body {
 }
 
 .sf-button {
-  justify-self: start;
-  margin-top: 6px;
-  padding: 5px 12px;
+  padding: 4px 12px;
   border: 0;
   border-radius: 999px;
   background: var(--sf-on);
@@ -335,6 +346,10 @@ body {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--sf-live) 22%, transparent);
 }
 
+.sf-status[hidden] {
+  display: none;
+}
+
 .sf-status:not([data-feed]) .sf-status-dot {
   visibility: hidden;
 }
@@ -359,7 +374,29 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 14px;
+  padding: 9px 14px;
+}
+
+/* A row whose controls take half its width (the Session Limit, the
+   Shortcuts): the hint runs the full width under the name and the controls,
+   rather than wrapping in a narrow column. */
+.sf-row:has(.sf-shortcut, .sf-number) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 12px;
+}
+
+.sf-row:has(.sf-shortcut, .sf-number) .sf-row-text {
+  display: contents;
+}
+
+.sf-row:has(.sf-shortcut, .sf-number) .sf-row-value {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.sf-row:has(.sf-shortcut, .sf-number) .sf-row-hint {
+  grid-column: 1 / -1;
 }
 
 .sf-row-item + .sf-row-item {
@@ -385,7 +422,8 @@ body {
   font-size: 12.5px;
 }
 
-label.sf-row {
+label.sf-row,
+label.sf-row-text {
   cursor: pointer;
 }
 
@@ -464,7 +502,7 @@ label.sf-row {
 /* A native picker, drawn to match the rows (the Preferred Speed). */
 .sf-select {
   padding: 3px 6px;
-  border: 1px solid var(--sf-line-2);
+  border: 1px solid var(--sf-off-edge);
   border-radius: 7px;
   background: var(--sf-canvas);
   color: var(--sf-ink);
@@ -486,4 +524,87 @@ label.sf-row {
 
 .sf-number[hidden] {
   display: none;
+}
+
+/* Forced colours (Windows High Contrast and the like) ---------------------
+   The browser drops backgrounds, gradients and shadows, which is everything
+   the switches, the night card and the dots are drawn with. Redraw them in
+   system colours: an outlined track whose knob is the text colour, and a
+   Highlight track with a HighlightText knob when on. */
+
+@media (forced-colors: active) {
+  .sf-switch,
+  .sf-switch-pearl {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .sf-switch::after,
+  .sf-switch-pearl::after {
+    top: 1.5px;
+    left: 1.5px;
+    background: CanvasText;
+    box-shadow: none;
+  }
+
+  .sf-switch:checked,
+  .sf-switch-pearl:checked {
+    border-color: Highlight;
+    background: Highlight;
+  }
+
+  .sf-switch:checked::after,
+  .sf-switch-pearl:checked::after {
+    left: 16.5px;
+    background: HighlightText;
+  }
+
+  .sf-switch:disabled {
+    border-color: GrayText;
+    opacity: 1;
+  }
+
+  .sf-switch:disabled::after {
+    background: GrayText;
+  }
+
+  /* The night card keeps its shape as an outlined card. */
+  .sf-feature {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .sf-feature-hint {
+    color: CanvasText;
+  }
+
+  :focus-visible,
+  .sf-feature :focus-visible {
+    outline-color: Highlight;
+  }
+
+  .sf-unread {
+    background: Highlight;
+  }
+
+  .sf-status-dot,
+  .sf-status[data-feed='on'] .sf-status-dot {
+    background: CanvasText;
+    box-shadow: none;
+  }
+
+  .sf-button {
+    border: 1px solid ButtonText;
+  }
+
+  .sf-select {
+    border-color: ButtonText;
+  }
+
+  /* The keycap waiting for a new key stands out as the selection does. */
+  .sf-shortcut[aria-pressed='true'] .sf-kbd {
+    border-color: Highlight;
+  }
 }
