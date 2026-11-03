@@ -157,8 +157,8 @@
     "description": "Under the Shortcuts row's name while it waits for the viewer to press a Shortcut's new key."
   },
   "popupShortcutKey": {
-    "message": "$ACTION$ Shortcut: $KEY$",
-    "description": "Accessible name of a Shortcut's key button in the Popup, such as \"Auto-Scroll Shortcut: A\". Pressing it rebinds the key.",
+    "message": "$ACTION$ $KEY$, Shortcut",
+    "description": "Accessible name of a Shortcut's key button in the Popup, such as \"Auto-Scroll A, Shortcut\". It must start with what the button shows (the action's name, then the key in its keycap, or \"Press a key\" while it waits for a new one), so speech-input users can say what they see. Pressing it rebinds the key.",
     "placeholders": {
       "action": { "content": "$1", "example": "Auto-Scroll" },
       "key": { "content": "$2", "example": "A" }
@@ -167,6 +167,14 @@
   "popupPressKey": {
     "message": "Press a key",
     "description": "Shown in place of a Shortcut's key while the Popup waits for its new key. Keep it short: it fits in a small keycap."
+  },
+  "popupShortcutChanged": {
+    "message": "$ACTION$ Shortcut is now $KEY$",
+    "description": "Under the Shortcuts row's name, and announced to screen readers, right after the viewer gives a Shortcut a new key.",
+    "placeholders": {
+      "action": { "content": "$1", "example": "Auto-Scroll" },
+      "key": { "content": "$2", "example": "D" }
+    }
   },
   "popupKeyTaken": {
     "message": "$KEY$ is already the $ACTION$ Shortcut",

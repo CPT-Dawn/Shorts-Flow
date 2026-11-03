@@ -1,8 +1,12 @@
 /**
  * The keys in the locale files (public/_locales) of the text the Popup shows.
- * A row that shows text adds its keys here and to the locale files.
+ * A row that shows text adds its keys here and to the locale files. The two
+ * `@@` keys are the browser's own: the UI language (`en_GB`) and its
+ * direction (`ltr` or `rtl`).
  */
 export type PopupMessage =
+  | '@@ui_locale'
+  | '@@bidi_dir'
   | 'popupTitle'
   | 'popupVersion'
   | 'popupWhatsNewUnread'
@@ -39,6 +43,7 @@ export type PopupMessage =
   | 'popupShortcutsHint'
   | 'popupShortcutsListening'
   | 'popupShortcutKey'
+  | 'popupShortcutChanged'
   | 'popupPressKey'
   | 'popupKeyTaken'
   | 'popupKeyYouTube'

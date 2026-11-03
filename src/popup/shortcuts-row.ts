@@ -17,12 +17,15 @@ const SHORTCUTS: { action: ShortcutAction; name: PopupMessage }[] = [
  * combination or a lone modifier is waited past. A key that clashes is
  * refused with the reason in the hint: the other Shortcut's key, or one of
  * YouTube's own keys (so its navigation and player keys keep working).
+ * A new key is announced in the hint, which is a polite live region.
  */
 export const shortcutsRow: PopupRow = (popup) => {
   const { document, signal, getMessage } = popup;
   const id = 'sf-setting-shortcuts';
   let listening: ShortcutAction | undefined;
   let refusal: string | undefined;
+  /** The Shortcut the viewer just gave a new key, to say so in the hint. */
+  let rebound: ShortcutAction | undefined;
 
   const keys = SHORTCUTS.map(({ action, name }) => {
     const button = document.createElement('button');
@@ -54,19 +57,29 @@ export const shortcutsRow: PopupRow = (popup) => {
     const shortcuts = popup.settings()?.shortcuts;
     if (!shortcuts) return;
     for (const { action, name, button, keycap } of keys) {
-      const keyName = shortcutKeyName(shortcuts[action]);
       const waiting = listening === action;
-      keycap.textContent = waiting ? getMessage('popupPressKey') : keyName;
-      button.setAttribute('aria-label', getMessage('popupShortcutKey', [getMessage(name), keyName]));
+      const keycapText = waiting ? getMessage('popupPressKey') : shortcutKeyName(shortcuts[action]);
+      keycap.textContent = keycapText;
+      // The name starts with what the button shows (WCAG 2.5.3, Label in Name).
+      button.setAttribute('aria-label', getMessage('popupShortcutKey', [getMessage(name), keycapText]));
       button.setAttribute('aria-pressed', String(waiting));
       button.disabled = false;
     }
-    hint.textContent = refusal ?? getMessage(listening ? 'popupShortcutsListening' : 'popupShortcutsHint');
+    hint.textContent =
+      refusal ??
+      (rebound && reboundMessage(shortcuts, rebound)) ??
+      getMessage(listening ? 'popupShortcutsListening' : 'popupShortcutsHint');
+  };
+
+  const reboundMessage = (shortcuts: Shortcuts, action: ShortcutAction) => {
+    const { name } = SHORTCUTS.find((shortcut) => shortcut.action === action)!;
+    return getMessage('popupShortcutChanged', [getMessage(name), shortcutKeyName(shortcuts[action])]);
   };
 
   const listen = (action: ShortcutAction | undefined) => {
     listening = action;
     refusal = undefined;
+    rebound = undefined;
     show();
   };
 
@@ -89,8 +102,10 @@ export const shortcutsRow: PopupRow = (popup) => {
       show();
       return;
     }
-    popup.changeSettings({ shortcuts: { ...shortcuts, [action]: key } });
+    // The hint says so once the new key is saved and shown.
+    rebound = action;
     listening = undefined;
+    popup.changeSettings({ shortcuts: { ...shortcuts, [action]: key } });
   };
 
   /** Why `key` can't be `action`'s Shortcut, if it can't. */

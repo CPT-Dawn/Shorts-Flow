@@ -26,15 +26,15 @@ function openPopup(settings: SettingsStore) {
   });
 }
 
-const autoScrollKey = () => page.getByRole('button', { name: /^Auto-Scroll Shortcut/ });
-const speedKey = () => page.getByRole('button', { name: /^Speed Shortcut/ });
+const autoScrollKey = () => page.getByRole('button', { name: /^Auto-Scroll .+, Shortcut$/ });
+const speedKey = () => page.getByRole('button', { name: /^Speed .+, Shortcut$/ });
 const shortcuts = async (settings: SettingsStore) => (await settings.get()).shortcuts;
 
 it('shows each Shortcut with its key, A and S from the start', async () => {
   openPopup(createTestSettingsStore());
 
-  await expect.element(autoScrollKey()).toHaveAccessibleName('Auto-Scroll Shortcut: A');
-  await expect.element(speedKey()).toHaveAccessibleName('Speed Shortcut: S');
+  await expect.element(autoScrollKey()).toHaveAccessibleName('Auto-Scroll A, Shortcut');
+  await expect.element(speedKey()).toHaveAccessibleName('Speed S, Shortcut');
 });
 
 it('rebinds a Shortcut to the next key the viewer presses, for every Shorts tab', async () => {
@@ -47,7 +47,7 @@ it('rebinds a Shortcut to the next key the viewer presses, for every Shorts tab'
   await userEvent.keyboard('x');
 
   await expect.poll(() => shortcuts(settings)).toEqual({ toggleAutoScroll: 'x', toggleSpeed: 's' });
-  await expect.element(autoScrollKey()).toHaveAccessibleName('Auto-Scroll Shortcut: X');
+  await expect.element(autoScrollKey()).toHaveAccessibleName('Auto-Scroll X, Shortcut');
 });
 
 it('refuses the key of the other Shortcut, and says why', async () => {
@@ -133,7 +133,7 @@ it('keeps the old key when the viewer presses Escape', async () => {
   await speedKey().click();
   await userEvent.keyboard('{Escape}');
 
-  await expect.element(speedKey()).toHaveAccessibleName('Speed Shortcut: S');
+  await expect.element(speedKey()).toHaveAccessibleName('Speed S, Shortcut');
   await expect.element(speedKey().getByText('Press a key')).not.toBeInTheDocument();
   expect(await shortcuts(settings)).toEqual({ toggleAutoScroll: 'a', toggleSpeed: 's' });
 });
@@ -141,9 +141,40 @@ it('keeps the old key when the viewer presses Escape', async () => {
 it('shows Shortcuts as the viewer left them, and follows a change made elsewhere', async () => {
   const settings = createTestSettingsStore({ shortcuts: { toggleAutoScroll: 'g', toggleSpeed: 'h' } });
   openPopup(settings);
-  await expect.element(autoScrollKey()).toHaveAccessibleName('Auto-Scroll Shortcut: G');
+  await expect.element(autoScrollKey()).toHaveAccessibleName('Auto-Scroll G, Shortcut');
 
   await settings.set({ shortcuts: { toggleAutoScroll: 'g', toggleSpeed: 'v' } });
 
-  await expect.element(speedKey()).toHaveAccessibleName('Speed Shortcut: V');
+  await expect.element(speedKey()).toHaveAccessibleName('Speed V, Shortcut');
+});
+
+it('names each key button starting with what it shows, also while it waits', async () => {
+  openPopup(createTestSettingsStore());
+  await expect.element(autoScrollKey()).toBeEnabled();
+
+  await autoScrollKey().click();
+
+  await expect.element(autoScrollKey()).toHaveAccessibleName('Auto-Scroll Press a key, Shortcut');
+  for (const button of document.querySelectorAll('button.sf-shortcut')) {
+    const shown = [...button.children].map((part) => part.textContent).join(' ');
+    expect(button.getAttribute('aria-label')!.startsWith(shown), shown).toBe(true);
+  }
+});
+
+it('announces the new key once it is saved', async () => {
+  const settings = createTestSettingsStore();
+  openPopup(settings);
+  await expect.element(speedKey()).toBeEnabled();
+  const hint = document.getElementById('sf-setting-shortcuts-hint')!;
+  expect(hint.getAttribute('aria-live')).toBe('polite');
+
+  await speedKey().click();
+  await userEvent.keyboard('v');
+
+  await expect.poll(() => hint.textContent).toBe('Speed Shortcut is now V');
+  await expect.element(speedKey()).toHaveAccessibleName('Speed V, Shortcut');
+
+  // Listening again starts from the usual instruction.
+  await speedKey().click();
+  await expect.poll(() => hint.textContent).toBe('Press the new key, or Esc to keep it');
 });
