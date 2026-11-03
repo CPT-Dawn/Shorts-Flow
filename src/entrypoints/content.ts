@@ -26,7 +26,23 @@ export default defineContentScript({
   },
 });
 
-/** The page's clock, with every timer set through WXT's content-script context. */
+/**
+ * The page's clock, with timers that never fire once the content-script
+ * context is invalidated.
+ *
+ * Not `ctx.setTimeout`: it adds an abort listener to the context's signal for
+ * every timer and never removes it, and the Route watcher (every 500 ms) and
+ * the Session (every 250 ms) set timers for as long as a YouTube tab stays
+ * open. Clearing the timers is the engine's job: the context's signal tears
+ * it down, and every timer with it. The check here only covers one already
+ * due as the context goes.
+ */
 function contextClock(ctx: ContentScriptContext): Clock {
-  return { ...windowClock(window), setTimeout: (callback, ms) => ctx.setTimeout(callback, ms) };
+  return {
+    ...windowClock(window),
+    setTimeout: (callback, ms) =>
+      window.setTimeout(() => {
+        if (ctx.isValid) callback();
+      }, ms),
+  };
 }

@@ -62,7 +62,7 @@ export type EngineOptions = {
   /** The current Session, shared with the other tabs and the Popup. */
   session: SessionStore;
   getMessage: GetMessage;
-  /** Defaults to the document's window's clock. The content script passes one on WXT's context. */
+  /** Defaults to the document's window's clock. The content script passes one whose timers check WXT's context. */
   clock?: Clock;
   /** Tears the engine down when it aborts: WXT's content-script context signal in the extension. */
   signal?: AbortSignal;
