@@ -53,6 +53,30 @@ describe.each(withSponsoredShort)('on $name', (page) => {
     await expectTimeline(shortsFeed, arrivals(sponsored + 1));
   });
 
+  it('leaves a Sponsored Short the viewer goes back up onto, so the Short before it stays in reach', async () => {
+    const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll: false }) });
+    pressNextVideoUntil(shortsFeed, sponsored);
+    await expectTimeline(shortsFeed, arrivals(sponsored + 1));
+
+    shortsFeed.pressPreviousVideo();
+
+    const backOnIt = [...arrivals(sponsored + 1), `Short ${sponsored} is current`, `Short ${sponsored} started over`];
+    await expectTimeline(shortsFeed, backOnIt);
+    expect(shortsFeed.timeline.filter((entry) => entry === `Short ${sponsored + 1} is current`)).toHaveLength(1);
+
+    shortsFeed.pressPreviousVideo();
+    await expectTimeline(shortsFeed, [...backOnIt, `Short ${sponsored - 1} is current`]);
+
+    // And on the way down again, it is skipped as ever.
+    shortsFeed.pressNextVideo();
+    await expectTimeline(shortsFeed, [
+      ...backOnIt,
+      `Short ${sponsored - 1} is current`,
+      `Short ${sponsored} is current`,
+      `Short ${sponsored + 1} is current`,
+    ]);
+  });
+
   it('skips a Sponsored Short that keeps the address of the Short before it, with no Stall', async () => {
     // Auto-Scroll Advances onto the Sponsored Short, then the skip Advances
     // again from what is, by the address alone, the same Short.
