@@ -185,9 +185,31 @@ export function watchFeedPosition(document: Document, changed: (position: FeedPo
     last = { short: currentShortId(document), holding, onScreen: measure ? slotOnScreen(document) : last!.onScreen };
     changed(last);
   };
-  const lookSoon = () => {
-    if (!signal.aborted) frame ??= view.requestAnimationFrame(look);
+  // Once a frame while the page shows. A background or hidden tab runs no
+  // frames at all, yet its Shorts still play and Advance (a background tab is
+  // not a Hold), so there the look waits only for the current task to finish.
+  let timer: number | undefined;
+  const lookNow = () => {
+    timer = undefined;
+    look();
   };
+  const lookSoon = () => {
+    if (signal.aborted || frame !== undefined || timer !== undefined) return;
+    if (document.visibilityState === 'visible') frame = view.requestAnimationFrame(look);
+    else timer = view.setTimeout(lookNow, 0);
+  };
+  // A frame asked for just before the tab was hidden would wait until it shows again.
+  document.addEventListener(
+    'visibilitychange',
+    () => {
+      if (document.visibilityState === 'visible' || frame === undefined) return;
+      view.cancelAnimationFrame(frame);
+      frame = undefined;
+      lookSoon();
+    },
+    { signal },
+  );
+  signal.addEventListener('abort', () => timer !== undefined && view.clearTimeout(timer), { once: true });
 
   watchShortsElement(document, lookSoon, signal);
   document.addEventListener(

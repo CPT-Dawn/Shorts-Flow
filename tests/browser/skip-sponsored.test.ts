@@ -31,6 +31,17 @@ describe.each(withSponsoredShort)('on $name', (page) => {
     expect(shortsFeed.timeline).not.toContain(`Short ${sponsored} started over`);
   });
 
+  it('skips a Sponsored Short in a background tab, which runs no animation frames', async () => {
+    const shortsFeed = await mountShortsFeed(page, { settings: createTestSettingsStore({ autoScroll: false, skipSponsoredShorts: true }) });
+    // What a background tab looks like from inside: hidden, and no frames ever run.
+    Object.defineProperty(shortsFeed.document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+    shortsFeed.window.requestAnimationFrame = () => 0;
+
+    pressNextVideoUntil(shortsFeed, sponsored);
+
+    await expectTimeline(shortsFeed, arrivals(sponsored + 1));
+  });
+
   it('lets a Sponsored Short play like any other while the setting is off', async () => {
     const shortsFeed = await mountShortsFeed(page, {
       settings: createTestSettingsStore({ autoScroll: false, skipSponsoredShorts: false }),
