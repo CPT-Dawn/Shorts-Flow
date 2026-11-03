@@ -16,19 +16,43 @@ const TOOLBAR_ICONS = [16, 32].map((size) => ({
   size,
 }));
 
+/**
+ * Everything the Firefox sources zip holds: enough to run
+ * `bun install --frozen-lockfile && bun run build:firefox` and get the same package.
+ */
+export const SOURCES = [
+  'src/**',
+  'public/**',
+  'package.json',
+  'bun.lock',
+  'tsconfig.json',
+  'wxt.config.ts',
+  'SOURCE-BUILD.md',
+  'LICENSE',
+] as const;
+
 // One codebase builds the Chrome Web Store and Firefox Add-ons packages; Edge,
 // Brave, Opera and Vivaldi install the Chrome one (ADR 0004).
 export default defineConfig({
   srcDir: 'src',
   manifestVersion: 3,
   hooks: {
-    // Only Firefox reads the SVG icons.
+    // Each package carries only the icons its browser reads: SVGs for Firefox, PNGs for the rest.
     'build:publicAssets': (wxt, files) => {
-      if (wxt.config.browser === 'firefox') return;
-      for (const svg of files.filter((file) => file.relativeDest.endsWith('.svg'))) {
-        files.splice(files.indexOf(svg), 1);
+      const unused = wxt.config.browser === 'firefox' ? '.png' : '.svg';
+      for (const icon of files.filter((file) => file.relativeDest.endsWith(unused))) {
+        files.splice(files.indexOf(icon), 1);
       }
     },
+  },
+  // Every page is an extension page in a modern browser: no polyfill, so
+  // nothing in the package calls fetch().
+  vite: () => ({ build: { modulePreload: { polyfill: false } } }),
+  zip: {
+    // The Firefox sources zip for Firefox Add-ons review: what it takes to
+    // rebuild the package and nothing else (no tests, no YouTube captures).
+    // SOURCE-BUILD.md tells the reviewer how.
+    includeSources: [...SOURCES],
   },
   manifest: ({ browser }) => ({
     name: '__MSG_extensionName__',

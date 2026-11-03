@@ -17,8 +17,15 @@ async function buildFor(browser: 'chrome' | 'firefox') {
   const manifest: Manifest = JSON.parse(await readFile(join(dir, 'manifest.json'), 'utf8'));
   const messages = JSON.parse(await readFile(join(dir, '_locales/en/messages.json'), 'utf8'));
   const files = await listFiles(dir);
-  return { outDir, manifest, messages, files };
+  const scripts = await Promise.all(
+    files.filter((file) => file.endsWith('.js')).map(async (file) => ({ file, code: await readFile(join(dir, file), 'utf8') })),
+  );
+  return { outDir, manifest, messages, files, scripts };
 }
+
+/** The scripts in a package that could reach the network with fetch(). */
+const fetching = (scripts: { file: string; code: string }[]) =>
+  scripts.filter(({ code }) => /\bfetch\(/.test(code)).map(({ file }) => file);
 
 async function listFiles(dir: string, prefix = ''): Promise<string[]> {
   const entries = await readdir(join(dir, prefix), { withFileTypes: true });
@@ -93,6 +100,11 @@ describe('the Chrome package', () => {
   it('has a Popup', () => {
     expect(chrome.files).toContain(chrome.manifest.action.default_popup);
   });
+
+  it('fetches nothing, not even through a module preload polyfill', () => {
+    expect(chrome.scripts.length).toBeGreaterThan(0);
+    expect(fetching(chrome.scripts)).toEqual([]);
+  });
 });
 
 describe('the Firefox package', () => {
@@ -128,5 +140,22 @@ describe('the Firefox package', () => {
       expect(firefox.files).toContain(icon.dark);
       expect(icon.light).not.toBe(icon.dark);
     }
+  });
+
+  it('has SVG icons only, and no PNGs it would never show', () => {
+    const icons: string[] = [
+      ...Object.values(firefox.manifest.icons as Record<string, string>),
+      ...Object.values(firefox.manifest.action.default_icon as Record<string, string>),
+    ];
+    for (const icon of icons) {
+      expect(icon).toMatch(/\.svg$/);
+      expect(firefox.files).toContain(icon);
+    }
+    expect(firefox.files.filter((file) => file.endsWith('.png'))).toEqual([]);
+  });
+
+  it('fetches nothing, not even through a module preload polyfill', () => {
+    expect(firefox.scripts.length).toBeGreaterThan(0);
+    expect(fetching(firefox.scripts)).toEqual([]);
   });
 });
