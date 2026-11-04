@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b2550"/><stop offset=".38" stop-color="#6a4a8c"/><stop offset=".62" stop-color="#f08a6a"/><stop offset=".72" stop-color="#ffc58f"/></linearGradient>
+<radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff4d8"/><stop offset=".55" stop-color="#ffd59a"/><stop offset="1" stop-color="#ffb37a" stop-opacity="0"/></radialGradient>
+<linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e98f7a"/><stop offset=".25" stop-color="#7a5a8e"/><stop offset="1" stop-color="#141c3c"/></linearGradient>
+<linearGradient id="glint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe2b0" stop-opacity=".9"/><stop offset="1" stop-color="#ffe2b0" stop-opacity="0"/></linearGradient>
+<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .07 0"/></filter>
+<filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="30"/></filter>
+</defs>
+<rect width="1080" height="1920" fill="url(#sky)"/>
+<circle cx="540" cy="1150" r="420" fill="url(#sun)" opacity=".7" filter="url(#blur)"/>
+<circle cx="540" cy="1170" r="130" fill="#fff1d2"/>
+<g fill="#f6b6a0" opacity=".35"><ellipse cx="260" cy="620" rx="260" ry="26"/><ellipse cx="820" cy="760" rx="300" ry="22"/><ellipse cx="420" cy="880" rx="200" ry="14"/></g>
+<rect y="1190" width="1080" height="730" fill="url(#sea)"/>
+<path d="M440 1190h200l90 730H350z" fill="url(#glint)" opacity=".55"/>
+<g stroke="#ffe7c2" stroke-linecap="round" opacity=".55">
+<path d="M470 1215h140M440 1250h200M420 1295h150M600 1300h60M400 1350h120M560 1360h140M380 1430h90M520 1440h190M350 1530h140M560 1545h160" stroke-width="5"/></g>
+<path d="M0 1560c180-40 320 30 540 0s380-50 540 10v350H0z" fill="#1e2a52" opacity=".85"/>
+<path d="M0 1700c220-50 380 40 600 0s320-40 480 0v220H0z" fill="#121a36"/>
+<rect width="1080" height="1920" filter="url(#grain)"/>
+</svg>

@@ -1,3 +1,20 @@
 # Live YouTube captures stay local: third-party content (see docs/reference/youtube-shorts-2026-11/README.md)
-docs/reference/youtube-shorts-2026-11/*.png
-docs/reference/youtube-shorts-2026-11/*.html
+docs/reference/youtube-*/*.png
+docs/reference/youtube-*/*.html
+# YouTube stylesheets the test-page tool fetched for a capture (see tests/pages/README.md)
+docs/reference/youtube-*/stylesheets/
+
+# Tooling output
+node_modules
+.output
+.wxt
+web-ext.config.ts
+*.log
+.vitest-attachments
+.vitest
+__screenshots__
+
+# Store art work files (scripts/store-art/make.mjs)
+.store-art
+# Agent worktrees
+.claude/worktrees/

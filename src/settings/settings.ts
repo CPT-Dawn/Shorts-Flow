@@ -1,0 +1,107 @@
+import { storage } from 'wxt/utils/storage';
+
+/**
+ * Every setting Shorts Flow has, as the viewer last left it. Later features add
+ * their own key here with its default in `DEFAULT_SETTINGS`; the store, the
+ * engine and the Popup pick it up from there.
+ */
+export type Settings = {
+  /** Whether the Shorts Feed Advances on its own when the Current Short ends. */
+  autoScroll: boolean;
+  /** When to show the Break Nudge: off, or after so many Shorts Watched or minutes of Shorts playing. */
+  sessionLimit: SessionLimit;
+  /** Whether the Shorts Control shows in YouTube's action rail beside each Short. */
+  shortsControlShown: boolean;
+  /**
+   * Whether a Sponsored Short (an ad slot in the Shorts Feed) is skipped as
+   * soon as it becomes the Current Short, whether Auto-Scroll is on or off.
+   */
+  skipSponsoredShorts: boolean;
+  /** Whether every new Current Short plays at the Preferred Speed. */
+  speedOn: boolean;
+  /** The Preferred Speed, one of `PREFERRED_SPEEDS`. */
+  preferredSpeed: number;
+  /** The key of each Shortcut on the Shorts Feed. */
+  shortcuts: Shortcuts;
+};
+
+/** The settings that are on or off. */
+export type SwitchSetting = { [K in keyof Settings]: Settings[K] extends boolean ? K : never }[keyof Settings];
+
+/** The Session Limit: off, or a number of Shorts Watched or of minutes, counted from the last Break Nudge. */
+export type SessionLimit = { kind: 'off' } | { kind: 'shorts' | 'minutes'; value: number };
+
+/** What a Shortcut does on the Shorts Feed. */
+export type ShortcutAction = 'toggleAutoScroll' | 'toggleSpeed';
+
+/** Each Shortcut's key: a `KeyboardEvent.key` value, letters in lower case (see `shortcutKey`). */
+export type Shortcuts = Record<ShortcutAction, string>;
+
+export const DEFAULT_SETTINGS: Settings = {
+  autoScroll: true,
+  sessionLimit: { kind: 'off' },
+  shortsControlShown: true,
+  // Off from a fresh install: the viewer opts in.
+  skipSponsoredShorts: false,
+  speedOn: false,
+  preferredSpeed: 1.5,
+  shortcuts: { toggleAutoScroll: 'a', toggleSpeed: 's' },
+};
+
+/** Every Preferred Speed there is to pick: 0.5× to 3× in steps of 0.25. */
+export const PREFERRED_SPEEDS: readonly number[] = Array.from({ length: 11 }, (_, i) => 0.5 + i * 0.25);
+
+export interface SettingsStore {
+  get(): Promise<Settings>;
+  set(changes: Partial<Settings>): Promise<void>;
+  /**
+   * Calls `listener` with the full settings whenever any of them changes,
+   * from this page or any other. Returns a function that stops watching.
+   */
+  watch(listener: (settings: Settings) => void): () => void;
+}
+
+const KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[];
+
+// Each setting is its own key in local storage (ADR 0003: never synced), so
+// two tabs changing different settings at once never overwrite each other.
+const storageKey = (key: keyof Settings) => `local:${key}` as const;
+
+/** The settings in browser storage, shared by every tab, the Popup and the background. */
+export function createSettingsStore(): SettingsStore {
+  const store: SettingsStore = {
+    async get() {
+      const items = await storage.getItems(
+        KEYS.map((key) => ({ key: storageKey(key), options: { fallback: DEFAULT_SETTINGS[key] } })),
+      );
+      return Object.fromEntries(items.map(({ value }, i) => [KEYS[i], value])) as Settings;
+    },
+
+    async set(changes) {
+      await storage.setItems(
+        Object.entries(changes).map(([key, value]) => ({ key: storageKey(key as keyof Settings), value })),
+      );
+    },
+
+    watch(listener) {
+      let watching = true;
+      const unwatchers = KEYS.map((key) =>
+        storage.watch(storageKey(key), () => {
+          store
+            .get()
+            .then((settings) => {
+              if (watching) listener(settings);
+            })
+            // Rejects once the extension context is invalidated (updated or
+            // removed under an open page): nothing left to tell.
+            .catch(() => {});
+        }),
+      );
+      return () => {
+        watching = false;
+        for (const unwatch of unwatchers) unwatch();
+      };
+    },
+  };
+  return store;
+}

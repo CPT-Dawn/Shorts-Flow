@@ -1,0 +1,46 @@
+{
+  "description": "Shorts Feed, dark theme, on the second Short (YouTube shows the up arrow), logged out (2026-11 capture)",
+  "path": "/shorts/vid00000002",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "shorts": [
+    {
+      "id": "vid00000001",
+      "clip": "/tests/pages/clips/clip-a.webm"
+    },
+    {
+      "id": "vid00000002",
+      "clip": "/tests/pages/clips/clip-b.webm"
+    },
+    {
+      "id": "vid00000003",
+      "clip": "/tests/pages/clips/clip-c.webm"
+    },
+    {
+      "id": "vid00000004",
+      "clip": "/tests/pages/clips/clip-a.webm"
+    },
+    {
+      "id": "vid00000005",
+      "clip": "/tests/pages/clips/clip-b.webm"
+    },
+    {
+      "id": "vid00000006",
+      "clip": "/tests/pages/clips/clip-c.webm"
+    },
+    {
+      "id": "vid00000007",
+      "clip": "/tests/pages/clips/clip-a.webm"
+    },
+    {
+      "id": "vid00000008",
+      "clip": "/tests/pages/clips/clip-b.webm"
+    },
+    {
+      "id": "vid00000009",
+      "clip": "/tests/pages/clips/clip-c.webm"
+    }
+  ]
+}

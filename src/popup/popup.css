@@ -1,0 +1,610 @@
+/* The Popup in the Tideline brand (docs/design/brand). Neutral surfaces carry
+   almost everything; only Auto-Scroll gets the night card and the Pearl
+   switch. Every other control is Tide. Fonts are bundled, never fetched. */
+/* Latin only (English at launch), woff2 only (every supported browser reads it). */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url('@fontsource/sora/files/sora-latin-600-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url('@fontsource/instrument-sans/files/instrument-sans-latin-500-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url('@fontsource/instrument-sans/files/instrument-sans-latin-600-normal.woff2') format('woff2');
+}
+
+:root {
+  color-scheme: light dark;
+  --sf-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
+  --sf-ui: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --sf-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --sf-canvas: #f6f7fa;
+  --sf-surface: #ffffff;
+  --sf-sunken: #eceef3;
+  --sf-ink: #111726;
+  --sf-muted: #5d6576;
+  --sf-line: rgba(17, 23, 38, 0.08);
+  --sf-line-2: rgba(17, 23, 38, 0.16);
+  /* Tide: controls on light surfaces. */
+  --sf-on: #3b5bd9;
+  --sf-off: #d4d8e1;
+  /* The edge of an off switch, a picker or a number field, so its shape holds
+     at 3:1 against the surface. */
+  --sf-off-edge: #878fa0;
+  --sf-link: #3150c4;
+  --sf-live: #3fae8c;
+  /* Errors and warnings: a muted brick, never red. */
+  --sf-brick: #a8483e;
+
+  /* The night card and its Pearl, the same in both themes. */
+  --sf-night: radial-gradient(110% 150% at 100% 0%, #233a70 0%, #131f3a 52%, #0b1220 100%);
+  --sf-night-ink: #eef3fb;
+  --sf-night-muted: #b3c0d8;
+  --sf-pearl: linear-gradient(135deg, #e6f4fb, #93cbe8);
+  --sf-abyss: #0b1220;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sf-canvas: #0d111a;
+    --sf-surface: #151b28;
+    --sf-sunken: #1d2534;
+    --sf-ink: #eef1f7;
+    --sf-muted: #99a1b3;
+    --sf-line: rgba(255, 255, 255, 0.07);
+    --sf-line-2: rgba(255, 255, 255, 0.16);
+    /* Tide Light: controls on dark surfaces. */
+    --sf-on: #8fa8f5;
+    --sf-off: #2c3546;
+    --sf-off-edge: #6b7488;
+    --sf-link: #a9bcf7;
+    --sf-live: #67cfa9;
+    --sf-brick: #e5907f;
+  }
+
+  /* White on Tide Light is too faint: the on knob is Abyss, as on the Pearl. */
+  .sf-switch:checked::after {
+    background: var(--sf-abyss);
+    box-shadow: none;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--sf-canvas);
+}
+
+body {
+  width: 340px;
+  color: var(--sf-ink);
+  font: 400 13.5px/1.45 var(--sf-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--sf-on);
+  outline-offset: 2px;
+}
+
+/* Firefox cuts a popup off at 600px tall: everything showing at once, the
+   host access notice included, stays well inside that (tests/browser/popup-look). */
+.sf-popup {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+/* Header ---------------------------------------------------------------- */
+
+.sf-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 2px 0;
+}
+
+.sf-logo {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+
+.sf-name {
+  margin: 0;
+  font: 600 15px/1.2 var(--sf-display);
+  letter-spacing: -0.02em;
+}
+
+.sf-version {
+  position: relative;
+  margin-left: auto;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--sf-sunken);
+  color: var(--sf-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sf-unread {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sf-on);
+  box-shadow: 0 0 0 2px var(--sf-canvas);
+}
+
+/* Auto-Scroll: the night card ------------------------------------------- */
+
+.sf-feature {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 3px 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--sf-night);
+  color: var(--sf-night-ink);
+  cursor: pointer;
+}
+
+.sf-watermark {
+  position: absolute;
+  right: -18px;
+  bottom: -34px;
+  width: 120px;
+  height: 120px;
+  opacity: 0.14;
+  pointer-events: none;
+}
+
+.sf-feature-title {
+  position: relative;
+  font: 600 18px/1.25 var(--sf-display);
+  letter-spacing: -0.02em;
+}
+
+.sf-feature-hint {
+  position: relative;
+  grid-column: 1;
+  min-height: 1.45em;
+  color: var(--sf-night-muted);
+  font-size: 12.5px;
+}
+
+.sf-feature .sf-switch {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+}
+
+.sf-feature :focus-visible {
+  outline-color: #e6f4fb;
+}
+
+/* Switches: native checkboxes, drawn ------------------------------------- */
+
+.sf-switch {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 36px;
+  height: 21px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--sf-off);
+  box-shadow: inset 0 0 0 1px var(--sf-off-edge);
+  cursor: pointer;
+}
+
+.sf-switch::after {
+  content: '';
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+}
+
+.sf-switch:checked {
+  background: var(--sf-on);
+  box-shadow: none;
+}
+
+.sf-switch:checked::after {
+  left: 17.5px;
+}
+
+.sf-switch:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* On the night card the switch is the Pearl line. */
+.sf-switch-pearl {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.sf-switch-pearl:checked {
+  background: var(--sf-pearl);
+}
+
+.sf-switch-pearl:checked::after {
+  background: var(--sf-abyss);
+  box-shadow: none;
+}
+
+/* Only once the settings have arrived, so the Popup doesn't animate open. */
+@media (prefers-reduced-motion: no-preference) {
+  .sf-ready .sf-switch,
+  .sf-ready .sf-switch::after {
+    transition:
+      left 160ms ease,
+      background-color 160ms ease;
+  }
+}
+
+/* Firefox host access ---------------------------------------------------- */
+
+/* The title across the top; under it the hint, and the button beside it. */
+.sf-notice {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 2px 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--sf-line);
+  border-left: 3px solid var(--sf-brick);
+  background: var(--sf-surface);
+}
+
+.sf-notice-title {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.sf-notice-hint {
+  margin: 0;
+  color: var(--sf-muted);
+  font-size: 12px;
+}
+
+.sf-button {
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--sf-on);
+  color: var(--sf-canvas);
+  font: 600 12.5px/1.4 var(--sf-ui);
+  cursor: pointer;
+}
+
+/* Status line ------------------------------------------------------------ */
+
+.sf-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 1.45em;
+  margin: 0;
+  padding: 0 2px;
+  color: var(--sf-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sf-status-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sf-off-edge);
+}
+
+.sf-status[data-feed='on'] .sf-status-dot {
+  background: var(--sf-live);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sf-live) 22%, transparent);
+}
+
+.sf-status[hidden] {
+  display: none;
+}
+
+.sf-status:not([data-feed]) .sf-status-dot {
+  visibility: hidden;
+}
+
+/* Settings list ---------------------------------------------------------- */
+
+.sf-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  border: 1px solid var(--sf-line);
+  border-radius: 14px;
+  background: var(--sf-surface);
+}
+
+.sf-list:empty {
+  display: none;
+}
+
+.sf-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 14px;
+}
+
+/* A row whose controls take half its width (the Session Limit, the
+   Shortcuts): the hint runs the full width under the name and the controls,
+   rather than wrapping in a narrow column. */
+.sf-row:has(.sf-shortcut, .sf-number) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 12px;
+}
+
+.sf-row:has(.sf-shortcut, .sf-number) .sf-row-text {
+  display: contents;
+}
+
+.sf-row:has(.sf-shortcut, .sf-number) .sf-row-value {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.sf-row:has(.sf-shortcut, .sf-number) .sf-row-hint {
+  grid-column: 1 / -1;
+}
+
+.sf-row-item + .sf-row-item {
+  border-top: 1px solid var(--sf-line);
+}
+
+.sf-row-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.sf-row-hint {
+  color: var(--sf-muted);
+  font-size: 11.5px;
+}
+
+.sf-row-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sf-muted);
+  font-size: 12.5px;
+}
+
+label.sf-row,
+label.sf-row-text {
+  cursor: pointer;
+}
+
+/* A key in a keycap, for the Shortcuts. */
+.sf-kbd {
+  padding: 0 5px;
+  border: 1px solid var(--sf-line-2);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--sf-canvas);
+  color: var(--sf-ink);
+  font: 11px/1.5 var(--sf-mono);
+}
+
+/* A Shortcut: what it switches, then its key. Pressed, it waits for a new key. */
+.sf-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 4px 2px 6px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--sf-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sf-shortcut:hover {
+  color: var(--sf-ink);
+}
+
+.sf-shortcut:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.sf-shortcut[aria-pressed='true'] .sf-kbd {
+  border-color: var(--sf-ink);
+  font-family: var(--sf-ui);
+}
+
+/* Footer ----------------------------------------------------------------- */
+
+.sf-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 2px 2px;
+  color: var(--sf-muted);
+  font-size: 12px;
+}
+
+.sf-link {
+  color: var(--sf-muted);
+  text-decoration: none;
+  border-radius: 3px;
+}
+
+.sf-link:hover {
+  color: var(--sf-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sf-whats-new {
+  color: var(--sf-link);
+  font-weight: 600;
+}
+
+.sf-whats-new:hover {
+  color: var(--sf-link);
+}
+
+/* A native picker, drawn to match the rows (the Preferred Speed). */
+.sf-select {
+  padding: 3px 6px;
+  border: 1px solid var(--sf-off-edge);
+  border-radius: 7px;
+  background: var(--sf-canvas);
+  color: var(--sf-ink);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.sf-select:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* A number in the same box (the Session Limit). */
+.sf-number {
+  width: 4.5em;
+  cursor: text;
+}
+
+.sf-number[hidden] {
+  display: none;
+}
+
+/* Forced colours (Windows High Contrast and the like) ---------------------
+   The browser drops backgrounds, gradients and shadows, which is everything
+   the switches, the night card and the dots are drawn with. Redraw them in
+   system colours: an outlined track whose knob is the text colour, and a
+   Highlight track with a HighlightText knob when on. */
+
+@media (forced-colors: active) {
+  .sf-switch,
+  .sf-switch-pearl {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .sf-switch::after,
+  .sf-switch-pearl::after {
+    top: 1.5px;
+    left: 1.5px;
+    background: CanvasText;
+    box-shadow: none;
+  }
+
+  .sf-switch:checked,
+  .sf-switch-pearl:checked {
+    border-color: Highlight;
+    background: Highlight;
+  }
+
+  .sf-switch:checked::after,
+  .sf-switch-pearl:checked::after {
+    left: 16.5px;
+    background: HighlightText;
+  }
+
+  .sf-switch:disabled {
+    border-color: GrayText;
+    opacity: 1;
+  }
+
+  .sf-switch:disabled::after {
+    background: GrayText;
+  }
+
+  /* The night card keeps its shape as an outlined card. */
+  .sf-feature {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .sf-feature-hint {
+    color: CanvasText;
+  }
+
+  :focus-visible,
+  .sf-feature :focus-visible {
+    outline-color: Highlight;
+  }
+
+  .sf-unread {
+    background: Highlight;
+  }
+
+  .sf-status-dot,
+  .sf-status[data-feed='on'] .sf-status-dot {
+    background: CanvasText;
+    box-shadow: none;
+  }
+
+  .sf-button {
+    border: 1px solid ButtonText;
+  }
+
+  .sf-select {
+    border-color: ButtonText;
+  }
+
+  /* The keycap waiting for a new key stands out as the selection does. */
+  .sf-shortcut[aria-pressed='true'] .sf-kbd {
+    border-color: Highlight;
+  }
+}

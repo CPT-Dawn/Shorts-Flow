@@ -1,83 +1,46 @@
-# Shorts Flow: Auto Scroll & Ad Skip
+# Shorts Flow
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-Available-blue?logo=googlechrome)](https://chromewebstore.google.com/detail/shorts-flow-auto-scroll-a/kfkkpgeijmfhmdhlcnoecidgceljccdf)
-[![Version](https://img.shields.io/badge/version-2.2.0-brightgreen.svg)](manifest.json)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+Watch YouTube Shorts hands-free: Shorts Flow moves to the next Short when the current one finishes. A browser extension for Chrome (and every Chromium browser) and Firefox. Not affiliated with YouTube.
 
-Experience YouTube Shorts hands-free. **Shorts Flow** automatically scrolls to the next shorts when the current one ends, instantly skips ads, and adds an intuitive on-screen toggle right into the YouTube player.
+This is the v3 rewrite (see `docs/adr/`). Domain words are in `GLOSSARY.md`.
 
-## 📑 Table of Contents
-- [Installation](#-installation)
-- [Features](#-features)
-- [Usage](#-usage)
-- [Configuration](#-configuration)
-- [Technical Architecture](#-technical-architecture)
-- [Development & Contributing](#-development--contributing)
-- [License](#-license)
+## Development
 
-## 🚀 Installation
+Needs [Bun](https://bun.sh) and Node.js (WXT, Vitest and web-ext run on Node).
 
-### From the Chrome Web Store
-[![Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-Available-blue?logo=googlechrome)](https://chromewebstore.google.com/detail/shorts-flow-auto-scroll-a/kfkkpgeijmfhmdhlcnoecidgceljccdf)
+```sh
+bun install
+bunx playwright install chromium firefox   # once, for the browser tests
+```
 
-### Manual Installation (Developer Mode)
-1. Clone or download this repository.
-   ```bash
-   git clone https://github.com/CPT-Dawn/Shorts-Flow.git
-   ```
-2. Open Google Chrome and navigate to `chrome://extensions/`.
-3. Enable **Developer mode** in the top right corner.
-4. Click **Load unpacked** and select the repository directory.
+| Script | What it does |
+|---|---|
+| `bun run dev` / `bun run dev:firefox` | Development build with live reload in Chrome / Firefox |
+| `bun run build` | Chrome and Firefox builds in `.output/chrome-mv3` and `.output/firefox-mv3` (`build:chrome`, `build:firefox` for one) |
+| `bun run zip` | Store zips for both, plus the Firefox source bundle, in `.output/` |
+| `bun run typecheck` | Strict TypeScript check |
+| `bun run test` | All three Vitest projects; `test:lifecycle` (Node, WXT fake browser), `test:tools` (Node, the test-page tool) or `test:browser` (Playwright, Chromium and Firefox) for one |
+| `bun run test-page` | Makes an anonymised Shorts Feed test page from a local capture (see `tests/pages/README.md`; needs `ffmpeg` the first time) |
+| `bun run lint:firefox` | `web-ext lint` on the Firefox build (run `build:firefox` first) |
+| `bun run icons` | Redraws `public/icon/` from `docs/design/brand` (needs `rsvg-convert`) |
+| `bun run store-art` | Makes the store screenshots, promo tiles and promo video in `docs/release/store-art/` from the Chrome build (see `scripts/store-art/README.md`) |
 
-## ✨ Features
+CI runs typecheck, all test projects, both builds and `web-ext lint` on every push and pull request.
 
-- **Seamless Auto-Scrolling**: Continuously scrolls to the next Short precisely when the current video finishes.
-- **Zero-Delay Ad Skipping**: Detects sponsored content and ads instantly, scrolling past them before they play.
-- **Native UI Integration**: Injects a sleek, non-intrusive toggle button directly above the 'Like' button in the Shorts player.
-- **Smart Comment Handling**: Optionally pauses auto-scrolling when you are reading or typing in the comments section.
-- **Robust Detection**: Built with dual URL and DOM observation to handle YouTube's Single Page Application (SPA) navigation flawlessly.
+## Releasing
 
-## 💻 Usage
+Work through `docs/release/checklist.md`. Pushing a `v*` tag that matches `package.json`'s version runs the same checks, then attaches the Chrome, Firefox and source zips to a GitHub Release. Store uploads stay manual, using the copy in `docs/release/store-listing.md`.
 
-Once installed, Shorts Flow is designed to be unobtrusive. By default:
-- **Auto-Scroll is OFF** when you launch your browser to prevent unexpected behavior.
-- To enable it, simply click the extension icon in your browser toolbar and toggle **Auto-Scroll**, or use the **Quick Toggle** injected directly into the YouTube Shorts player.
-- Navigate to [YouTube Shorts](https://www.youtube.com/shorts) and enjoy a hands-free experience.
+## Layout
 
-## ⚙️ Configuration
+- `src/entrypoints/`: thin WXT entrypoints (background, content script, Popup).
+- `src/popup/`: the Popup, which takes its collaborators (such as the message lookup) as arguments so browser tests can mount it.
+- `public/_locales/en/messages.json`: every user-facing string, including the manifest name and description.
+- `tests/lifecycle/`: Node tests with WXT's fake browser, including checks on both built manifests.
+- `tests/browser/`: tests in real headless Chromium and Firefox, against the test pages.
+- `tests/pages/`: anonymised Shorts Feed test pages and their clips. How to add one is in its README.
+- `scripts/test-pages/` and `scripts/test-page.ts`: the tool that makes a test page from a capture, tested in `tests/tools/`.
 
-Click the extension icon to access the settings panel:
-- **Auto-Scroll**: The master switch for the extension's core functionality.
-- **Quick Toggle**: Shows or hides the on-screen ON/OFF button injected into the YouTube player interface.
-- **Scroll with Comments**: When enabled, the extension will continue to auto-scroll even if the comments panel is open. When disabled, opening comments acts as a temporary pause.
+## License
 
-## 🏗 Technical Architecture
-
-Shorts Flow is a Manifest V3 Chrome Extension engineered for performance and reliability against YouTube's highly dynamic DOM.
-
-- **`manifest.json`**: Configures permissions (`storage`), host matching strictly to `youtube.com/shorts/*`, and registers the Service Worker and Content Scripts.
-- **`script/content.js`**: The core engine.
-  - Utilizes `MutationObserver` and custom event listeners (`yt-navigate-finish`, `ended`, `timeupdate`) to detect video lifecycle changes.
-  - Implements element-based tracking (`currentShortElement`) and race-condition locks (`isChecking`) to maintain state stability without relying solely on DOM IDs.
-  - Incorporates safety polling to catch edge cases where native `<video>` events are swallowed by the browser.
-- **`script/background.js`**: The Service Worker. Manages default installation states and ensures auto-scroll is safely disabled upon browser startup (`chrome.runtime.onStartup`).
-- **`script/script.js` & UI**: A lightweight, accessible, and responsive popup interface that syncs instantly with `chrome.storage.local`.
-
-## 🛠 Development & Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-1. Fork the project.
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
-
-### Code Style
-- Use modern ES6+ JavaScript.
-- Avoid arbitrary `setTimeout` delays for DOM manipulation; prefer `MutationObserver` or specific event listeners.
-- Handle potential `NotFoundError` exceptions during DOM injection using `contains()` validation.
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+[MIT](LICENSE)

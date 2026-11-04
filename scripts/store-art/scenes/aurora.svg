@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050a18"/><stop offset=".6" stop-color="#0d1a36"/><stop offset="1" stop-color="#16284a"/></linearGradient>
+<linearGradient id="a1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fe8c8" stop-opacity="0"/><stop offset=".6" stop-color="#6fe0b8" stop-opacity=".75"/><stop offset="1" stop-color="#93cbe8" stop-opacity="0"/></linearGradient>
+<linearGradient id="a2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a98cf5" stop-opacity="0"/><stop offset=".55" stop-color="#8fa8f5" stop-opacity=".6"/><stop offset="1" stop-color="#8fa8f5" stop-opacity="0"/></linearGradient>
+<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="26"/></filter>
+<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .06 0"/></filter>
+</defs>
+<rect width="1080" height="1920" fill="url(#sky)"/>
+<g filter="url(#soft)">
+<path d="M-100 700C200 420 420 900 700 560S1000 300 1200 420v520C1000 820 860 1080 640 940S240 820-100 1060z" fill="url(#a1)"/>
+<path d="M-100 520C260 300 500 640 760 380S1100 260 1200 300v360C1000 560 820 760 600 680S200 560-100 760z" fill="url(#a2)"/>
+</g>
+<g fill="#fff">
+<circle cx="120" cy="180" r="2.5"/><circle cx="300" cy="90" r="1.8"/><circle cx="520" cy="230" r="2.2"/><circle cx="760" cy="140" r="3"/><circle cx="940" cy="260" r="1.8"/><circle cx="860" cy="60" r="2"/><circle cx="200" cy="360" r="1.6"/><circle cx="660" cy="320" r="1.6"/><circle cx="1010" cy="420" r="2.2"/><circle cx="60" cy="480" r="1.8"/><circle cx="420" cy="140" r="1.4"/><circle cx="980" cy="120" r="1.4"/></g>
+<path d="M0 1500c240-60 500-40 760-90s260-20 320-10v520H0z" fill="#0f1c34"/>
+<rect y="1520" width="1080" height="400" fill="#16284a"/>
+<path d="M0 1560c300 30 600-10 1080 10" stroke="#6fe0b8" stroke-opacity=".25" stroke-width="40" filter="url(#soft)" fill="none"/>
+<g fill="#060c1a">
+<path d="M90 1600l46-190 46 190z"/><path d="M60 1640l70-260 70 260z"/><path d="M190 1620l40-150 40 150z"/>
+<path d="M820 1640l60-240 60 240z"/><path d="M900 1650l80-320 80 320z"/><path d="M760 1660l40-140 40 140z"/>
+<rect y="1630" width="1080" height="290"/></g>
+<rect width="1080" height="1920" filter="url(#grain)"/>
+</svg>

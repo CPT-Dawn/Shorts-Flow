@@ -1,0 +1,89 @@
+name: Release
+
+# Pushing a version tag (v3.0.0) builds the Chrome and Firefox zips and the
+# Firefox source bundle and attaches them to a GitHub Release. Store uploads
+# stay manual: nothing here talks to the Chrome Web Store or Firefox Add-ons.
+# See docs/release/checklist.md.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  # Build provenance for the zips (actions/attest-build-provenance).
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history, to check the tag sits on main.
+          fetch-depth: 0
+
+      # WXT, Vitest and web-ext run on Node; Bun installs and runs the scripts.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          # Keep in step with packageManager in package.json.
+          bun-version: 1.4.4
+
+      - name: Tag matches package.json version
+        run: |
+          version="$(bun -e 'console.log(require("./package.json").version)')"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+
+      - name: Tagged commit is on main
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$GITHUB_REF_NAME points at a commit that is not on main"
+            exit 1
+          fi
+
+      - run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium firefox
+
+      # The same gate as CI, so a release never ships what CI would reject.
+      - run: bun run typecheck
+
+      - name: Test (lifecycle, and browser in Chromium and Firefox)
+        run: bun run test
+
+      - name: Build Chrome and Firefox
+        run: bun run build
+
+      - name: Lint the Firefox build
+        run: bun run lint:firefox
+
+      - name: Zip Chrome, Firefox and the Firefox sources
+        run: bun run zip
+
+      - name: Attest the zips' build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: .output/*.zip
+
+      - name: Attach the zips to a GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -l .output/*.zip
+          gh release create "$GITHUB_REF_NAME" .output/*.zip \
+            --verify-tag \
+            --title "Shorts Flow ${GITHUB_REF_NAME#v}" \
+            --generate-notes \
+            $([[ "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease)

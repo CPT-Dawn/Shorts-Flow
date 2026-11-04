@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shorts Flow store art</title>
+<style>
+@font-face { font-family: Sora; font-weight: 600; src: url(sora-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: Sora; font-weight: 400; src: url(sora-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-weight: 400; src: url(instrument-sans-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-weight: 500; src: url(instrument-sans-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-weight: 600; src: url(instrument-sans-latin-600-normal.woff2) format('woff2'); }
+
+:root {
+  --abyss: #0B1220; --deep: #16233F; --tide: #3B5BD9; --tide-light: #8FA8F5;
+  --pearl-1: #E6F4FB; --pearl-2: #93CBE8; --foam: #F6F7FA; --mist: #AEB7CA; --dim: #7D879C;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--abyss); }
+body { font-family: 'Instrument Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+
+.canvas { position: relative; overflow: hidden; color: var(--foam);
+  background:
+    radial-gradient(1100px 700px at 6% -10%, rgba(143,168,245,.20), transparent 60%),
+    radial-gradient(800px 600px at 105% 110%, rgba(147,203,232,.12), transparent 60%),
+    linear-gradient(135deg, #22386B 0%, #131F3A 50%, #0B1220 100%); }
+.canvas::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .5; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.shot { width: 1280px; height: 800px; }
+
+/* Tideline: a single pearl line drifting across the bottom of every frame. */
+.tideline { position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* Copy */
+.copy { position: absolute; left: 88px; top: 0; bottom: 0; width: 470px; display: flex; flex-direction: column; justify-content: center; z-index: 3; }
+.overline { font: 600 15px/1 'Instrument Sans'; letter-spacing: .16em; text-transform: uppercase; color: var(--tide-light); margin-bottom: 26px; display: flex; align-items: center; gap: 12px; }
+.overline::before { content: ''; width: 28px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--pearl-1), var(--pearl-2)); }
+h1 { font: 600 66px/1.02 Sora; letter-spacing: -.035em; margin: 0; text-wrap: balance; }
+h1 em { font-style: normal; background: linear-gradient(100deg, var(--pearl-1) 10%, var(--pearl-2) 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sub { font: 400 21px/1.5 'Instrument Sans'; color: var(--mist); margin: 26px 0 0; max-width: 420px; text-wrap: pretty; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+.chip { font: 500 15px/1 'Instrument Sans'; color: var(--foam); padding: 10px 14px 10px 12px; border-radius: 999px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10); display: inline-flex; align-items: center; gap: 8px; }
+.chip svg { width: 16px; height: 16px; }
+
+/* Brand lockup + disclaimer */
+.lockup { position: absolute; left: 88px; bottom: 44px; display: flex; align-items: center; gap: 12px; z-index: 3; }
+.lockup img { width: 30px; height: 30px; }
+.lockup span { font: 600 18px/1 Sora; letter-spacing: -.02em; }
+.disclaimer { position: absolute; right: 48px; bottom: 50px; font: 400 13px/1 'Instrument Sans'; color: var(--dim); z-index: 3; }
+
+/* UI crops from the real extension */
+.crop { position: absolute; overflow: hidden; border-radius: 22px; background: #0f0f0f;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.09), 0 50px 100px -30px rgba(0,0,0,.75), 0 24px 48px -24px rgba(0,0,0,.6); }
+.crop > img { position: absolute; display: block; max-width: none; }
+.crop.light { background: #fff; }
+.glass { box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 40px 80px -24px rgba(0,0,0,.7), 0 16px 32px -16px rgba(0,0,0,.5); }
+
+/* The one bright thing: a pearl ring and glow */
+.ring { position: absolute; border-radius: 999px; z-index: 4;
+  box-shadow: 0 0 0 2.5px var(--pearl-1), 0 0 0 7px rgba(147,203,232,.22), 0 0 44px 8px rgba(147,203,232,.35); }
+.loupe { position: absolute; border-radius: 50%; overflow: hidden; z-index: 5; background: #0f0f0f;
+  box-shadow: 0 0 0 2.5px var(--pearl-1), 0 0 0 9px rgba(147,203,232,.18), 0 30px 60px -10px rgba(0,0,0,.7), 0 0 60px 6px rgba(147,203,232,.25); }
+.loupe > img { position: absolute; max-width: none; }
+.connector { position: absolute; z-index: 4; overflow: visible; }
+
+.keycap { position: absolute; z-index: 5; width: 92px; height: 92px; border-radius: 22px; display: grid; place-items: center;
+  font: 600 40px/1 ui-monospace, 'JetBrains Mono', monospace; color: var(--foam);
+  background: linear-gradient(180deg, #2A3B66, #18264A); border: 1px solid rgba(255,255,255,.14);
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.18), 0 24px 40px -12px rgba(0,0,0,.6); }
+.keycap small { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); white-space: nowrap; font: 500 14px/1 'Instrument Sans'; color: var(--mist); }
+
+/* Promo art */
+.tile { width: 440px; height: 280px; }
+.marquee { width: 1400px; height: 560px; }
+.wordmark { font: 600 50px/1 Sora; letter-spacing: -.035em; }
+.frame { position: absolute; border-radius: 26px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 40px 80px -24px rgba(0,0,0,.75); }
+.frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const RAW = 'raw/';
+const SCN = 'scenes/';
+const R = window.RECTS;
+const PAGE_W = 1440;
+
+/** A crop of a 1440-wide (2×) capture: css rect {x,y,w,h} shown at `scale`, placed at left/top. */
+function crop(src, rect, scale, left, top, extra = '', cls = '') {
+  const w = rect.w * scale, h = rect.h * scale;
+  return `<div class="crop ${cls}" style="left:${left}px;top:${top}px;width:${w}px;height:${h}px;${extra}">
+    <img src="${RAW}${src}" style="width:${PAGE_W * scale}px;left:${-rect.x * scale}px;top:${-rect.y * scale}px"></div>`;
+}
+function popupCrop(src, rect, scale, left, top, extra = '', cls = '') {
+  const w = rect.w * scale, h = rect.h * scale;
+  return `<div class="crop ${cls}" style="left:${left}px;top:${top}px;width:${w}px;height:${h}px;${extra}">
+    <img src="${RAW}${src}" style="width:${340 * scale}px;left:${-rect.x * scale}px;top:${-rect.y * scale}px"></div>`;
+}
+const tideline = (w, h, y, amp = 26, op = .38) => `<svg class="tideline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+  <defs><linearGradient id="tl" x1="0" x2="1"><stop offset="0" stop-color="#E6F4FB" stop-opacity="0"/><stop offset=".25" stop-color="#E6F4FB" stop-opacity="${op}"/><stop offset=".8" stop-color="#93CBE8" stop-opacity="${op * .8}"/><stop offset="1" stop-color="#93CBE8" stop-opacity="0"/></linearGradient></defs>
+  <path d="M0 ${y} C ${w * .22} ${y - amp}, ${w * .38} ${y + amp}, ${w * .58} ${y} S ${w * .86} ${y - amp * .8}, ${w} ${y - 4}" fill="none" stroke="url(#tl)" stroke-width="1.5"/>
+  <path d="M0 ${y + 18} C ${w * .2} ${y + 18 - amp * .6}, ${w * .42} ${y + 18 + amp * .7}, ${w * .62} ${y + 18} S ${w * .9} ${y + 18 - amp * .5}, ${w} ${y + 14}" fill="none" stroke="url(#tl)" stroke-width="1" opacity=".45"/></svg>`;
+const lockup = (disclaimer = true) => `<div class="lockup"><img src="icon.svg" alt=""><span>Shorts Flow</span></div>` +
+  (disclaimer ? `<div class="disclaimer">Not affiliated with YouTube</div>` : '');
+const copy = (over, h1, sub, more = '') => `<div class="copy"><div class="overline">${over}</div><h1>${h1}</h1><p class="sub">${sub}</p>${more}</div>`;
+const check = `<svg viewBox="0 0 16 16" fill="none" stroke="#93CBE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>`;
+
+/** The mark alone, in the Pearl gradient. */
+const mark = (size, id = 'pm') => `<svg width="${size}" height="${size}" viewBox="20 20 88 88" fill="none">
+  <defs><linearGradient id="${id}" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#E6F4FB"/><stop offset="1" stop-color="#93CBE8"/></linearGradient></defs>
+  <g stroke="url(#${id})" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"><path d="M84.8 60A22 22 0 1 0 64 72v29"/><path d="M53 90l11 11 11-11"/></g></svg>`;
+
+// Short + rail region on the Shorts Feed: from just left of the video to past the rail.
+const SHORT = { x: 556, y: 56, w: 534, h: 820 };
+
+const shots = {
+  /* 1 ─ The promise */
+  1() {
+    const s = .8, L = 652, T = 52;
+    const c = R['feed-dark'].control;
+    const cx = L + (c.x - SHORT.x) * s, cy = T + (c.y - SHORT.y) * s;
+    const nextL = L + (570 - SHORT.x) * s, nextW = 444 * s;
+    const loupeD = 156, lz = 2.2, lx = 1092, ly = 300;
+    const ccx = c.x + c.w / 2, ccy = c.y + 26;
+    return `<div class="canvas shot">
+      ${tideline(1280, 800, 690)}
+      ${copy('Auto-Scroll for YouTube Shorts', 'Shorts that <em>play themselves.</em>',
+        'When a Short ends, the next one begins. No swiping, no arrow keys. Just watch.')}
+      <div class="crop" style="left:${nextL}px;top:${T + SHORT.h * s + 22}px;width:${nextW}px;height:300px;opacity:.7;border-radius:18px">
+        <img src="${SCN}aurora.png" style="width:${nextW}px;left:0;top:0"></div>
+      ${crop('feed-dark.png', SHORT, s, L, T)}
+      <div class="ring" style="left:${cx - 1}px;top:${cy - 1}px;width:${c.w * s + 2}px;height:${c.w * s + 2}px"></div>
+      <svg class="connector" style="left:0;top:0" width="1280" height="800"><path d="M${cx + c.w * s / 2 + 18} ${cy - 2} C ${cx + 60} ${cy - 70}, ${lx + loupeD / 2 - 10} ${ly + loupeD + 90}, ${lx + loupeD / 2} ${ly + loupeD + 12}" stroke="#E6F4FB" stroke-opacity=".7" stroke-width="1.5" fill="none" stroke-dasharray="2 5" stroke-linecap="round"/></svg>
+      <div class="loupe" style="left:${lx}px;top:${ly}px;width:${loupeD}px;height:${loupeD}px">
+        <img src="${RAW}feed-dark.png" style="width:${PAGE_W * lz}px;left:${-(ccx * lz) + loupeD / 2}px;top:${-(ccy * lz) + loupeD / 2 + 8}px"></div>
+      ${lockup()}
+    </div>`;
+  },
+  /* 2 ─ Quick settings in the rail */
+  2() {
+    const m = R.menu.menu;
+    const rect = { x: 566, y: 500, w: 524, h: 376 };
+    const s = 1.24, L = 596, T = 166;
+    return `<div class="canvas shot">
+      ${tideline(1280, 800, 700)}
+      ${copy('Quick settings', 'Right where <em>your thumb is.</em>',
+        'An Auto-Scroll button in the Shorts rail that looks like it was always there. Speed is one click away.')}
+      ${crop('menu.png', rect, s, L, T)}
+      <div class="ring" style="border-radius:16px;left:${L + (m.x - rect.x) * s - 4}px;top:${T + (m.y - rect.y) * s - 4}px;width:${m.w * s + 8}px;height:${m.h * s + 8}px;box-shadow:0 0 0 2px rgba(230,244,251,.85),0 0 60px 6px rgba(147,203,232,.28)"></div>
+      ${lockup()}
+    </div>`;
+  },
+  /* 3 ─ Speed + Shortcuts */
+  3() {
+    const s = .8, L = 690, T = 52;
+    const t = R.toast.toast;
+    return `<div class="canvas shot">
+      ${tideline(1280, 800, 700)}
+      ${copy('Speed &amp; Shortcuts', 'Every Short at <em>your speed.</em>',
+        'Pick anything from 0.5× to 3× and it sticks across reloads. One key switches it on or off.',
+        `<div style="position:relative;height:130px;margin-top:34px"><div class="keycap" style="left:0;top:0">A<small>Auto-Scroll</small></div><div class="keycap" style="left:124px;top:0;box-shadow:inset 0 -6px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.18),0 0 0 2.5px #E6F4FB,0 0 44px 8px rgba(147,203,232,.35),0 24px 40px -12px rgba(0,0,0,.6)">S<small>Speed</small></div></div>`)}
+      ${crop('toast.png', SHORT, s, L, T)}
+      ${crop('toast.png', t, 1.6, 640, 590, 'border-radius:12px;background:#fff', 'glass')}
+      ${lockup()}
+    </div>`;
+  },
+  /* 4 ─ Session Limit + Break Nudge */
+  4() {
+    const s = 1.12, L = 640, T = 60;
+    const NUDGE = { x: 556, y: 300, w: 534, h: 576 };
+    const row = R['popup-dark'].sessionRow;
+    return `<div class="canvas shot">
+      ${tideline(1280, 800, 700)}
+      ${copy('Session Limit', 'Stop when <em>you mean to.</em>',
+        'Set a limit in Shorts or minutes. A calm nudge pauses the Short, and you can always keep watching.')}
+      ${crop('nudge.png', NUDGE, s, L, T)}
+      ${popupCrop('popup-dark.png', row, 1.45, 560, 590, 'border-radius:18px;background:#151B28', 'glass')}
+      ${lockup()}
+    </div>`;
+  },
+  /* 5 ─ Privacy + Popup */
+  5() {
+    const full = { x: 0, y: 0, w: 340, h: R['popup-dark']?.height ?? 549 };
+    return `<div class="canvas shot">
+      ${tideline(1280, 800, 700)}
+      ${copy('Private by design', 'Nothing leaves <em>your browser.</em>',
+        'No analytics, no account, no servers. Every setting lives in one tidy popup, in light or dark.',
+        `<div class="chips"><span class="chip">${check}No data collected</span><span class="chip">${check}Open source</span><span class="chip">${check}Chrome &amp; Firefox</span></div>`)}
+      ${popupCrop('popup-light.png', full, 1.08, 660, 92, 'border-radius:20px', 'light')}
+      ${popupCrop('popup-dark.png', full, 1.08, 868, 132, 'border-radius:20px;background:#0D111A')}
+      ${lockup()}
+    </div>`;
+  },
+
+  /* Small promo tile 440×280 */
+  tile() {
+    return `<div class="canvas tile">
+      ${tideline(440, 280, 236, 14, .45)}
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:20px;z-index:3">
+        <div style="filter:drop-shadow(0 0 22px rgba(147,203,232,.45))">${mark(92, 'tm')}</div>
+        <div class="wordmark" style="font-size:46px;line-height:.98">Shorts<br>Flow</div>
+      </div></div>`;
+  },
+
+  /* Marquee 1400×560 */
+  marquee() {
+    const fw = 172, fh = 306;
+    const frames = [['ocean', 912, 150, .5], ['aurora', 1102, 92, 1], ['dunes', 1292, 150, .5]];
+    return `<div class="canvas marquee">
+      <svg class="tideline" viewBox="0 0 1400 560" preserveAspectRatio="none">
+        <defs><linearGradient id="trail" x1="0" x2="1"><stop offset="0" stop-color="#E6F4FB" stop-opacity="0"/><stop offset=".3" stop-color="#E6F4FB" stop-opacity=".55"/><stop offset="1" stop-color="#93CBE8" stop-opacity=".2"/></linearGradient></defs>
+        <path d="M0 470 C 260 430, 420 510, 640 470 S 980 420, 1162 476 S 1340 500, 1400 470" fill="none" stroke="url(#trail)" stroke-width="2"/>
+        <path d="M0 492 C 280 462, 440 526, 660 492 S 1000 452, 1180 496 S 1350 516, 1400 494" fill="none" stroke="url(#trail)" stroke-width="1" opacity=".4"/>
+      </svg>
+      <div style="position:absolute;left:112px;top:0;bottom:0;display:flex;align-items:center;gap:30px;z-index:3">
+        <div style="filter:drop-shadow(0 0 30px rgba(147,203,232,.45))">${mark(132, 'mm')}</div>
+        <div class="wordmark" style="font-size:72px">Shorts Flow</div>
+      </div>
+      ${frames.map(([sc, x, y, o]) => `<div class="frame" style="left:${x - fw / 2}px;top:${y}px;width:${fw}px;height:${fh}px;opacity:${o};${o === 1 ? 'box-shadow:0 0 0 1.5px rgba(230,244,251,.7),0 0 70px 6px rgba(147,203,232,.28),0 50px 90px -24px rgba(0,0,0,.8)' : ''}"><img src="${SCN}${sc}.png"></div>`).join('')}
+    </div>`;
+  },
+};
+
+document.getElementById('root').innerHTML = shots[location.hash.slice(1) || '1']();
+</script>
+</body>
+</html>

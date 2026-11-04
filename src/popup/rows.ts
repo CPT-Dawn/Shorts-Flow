@@ -1,0 +1,74 @@
+import type { SessionStore } from '@/settings/session';
+import type { Settings, SwitchSetting } from '@/settings/settings';
+import type { PopupMessage } from './messages';
+import { shortsWatched } from './session';
+import { sessionLimitRow } from './session-limit-row';
+import { shortcutsRow } from './shortcuts-row';
+import { shortsControlRow } from './shorts-control-row';
+import { skipSponsoredRow } from './skip-sponsored-row';
+import { speedRow } from './speed-row';
+
+/**
+ * What a row of the Popup gets to build itself with. The Popup builds one for
+ * as long as it is open: `signal` aborts when it closes, so a row passes it to
+ * every listener it adds.
+ */
+export type PopupContext = {
+  document: Document;
+  /** Aborts when the Popup is unmounted. */
+  signal: AbortSignal;
+  getMessage: (key: PopupMessage, substitutions?: string[]) => string;
+  /** A number as the browser's UI language writes it (1.5 or 1,5, say), for text the Popup shows. */
+  formatNumber(value: number): string;
+  /** The settings as last read, or undefined until the first read arrives: show nothing until then. */
+  settings(): Settings | undefined;
+  /** Calls `listener` with the settings as soon as they are known, and again on every change from anywhere. */
+  watchSettings(listener: (settings: Settings) => void): void;
+  /** Saves a settings change; every Shorts tab hears of it at once, and so does the Popup. */
+  changeSettings(changes: Partial<Settings>): void;
+  /** The current Session, kept by the Shorts tabs. */
+  session: SessionStore;
+  /**
+   * A row of the settings list: `label` (already looked up with `getMessage`)
+   * and a hint under it on the left, `control` on the right. Returns the row
+   * and its hint, empty for the row to fill in and keep up to date. The row
+   * gives the label and hint the ids `<id>` and `<id>-hint`, for the
+   * control's aria-labelledby and aria-describedby. With `labelFor`, the
+   * label and hint are that control's label, so clicking them works it.
+   */
+  row(parts: { id: string; label: string; control: Node; labelFor?: HTMLInputElement }): {
+    item: HTMLLIElement;
+    hint: HTMLElement;
+  };
+  /**
+   * A native checkbox drawn as a switch, named by the element `labelledBy`
+   * and described by `describedBy` (ids). Disabled until the row enables it
+   * once the settings are known.
+   */
+  switchInput(labelledBy: string, describedBy?: string): HTMLInputElement;
+  /**
+   * A row with a switch for a setting that is on or off, kept in step with the
+   * setting both ways. `hint`, if given, is worked out again from the
+   * settings each time they change.
+   */
+  switchRow(parts: { setting: SwitchSetting; label: string; hint?: (settings: Settings) => string }): HTMLLIElement;
+};
+
+/** One row of the Popup's settings list. Called once each time the Popup opens. */
+export type PopupRow = (popup: PopupContext) => HTMLElement;
+
+/**
+ * Something the status line says after whether the tab is on the Shorts Feed,
+ * set off by a middle dot (Shorts Watched, for one). Returns the node to show;
+ * it may keep the node up to date for as long as `popup.signal` lasts.
+ */
+export type StatusPart = (popup: PopupContext) => Node;
+
+/**
+ * The settings list, top to bottom. A setting the Popup shows is a module
+ * exporting a `PopupRow`, added here.
+ */
+export const POPUP_ROWS: PopupRow[] = [skipSponsoredRow, shortsControlRow, speedRow, sessionLimitRow, shortcutsRow];
+
+/** What the status line says after the Shorts Feed, in order. */
+export const STATUS_PARTS: StatusPart[] = [shortsWatched];

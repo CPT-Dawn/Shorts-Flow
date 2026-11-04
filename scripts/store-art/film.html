@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shorts Flow promo</title>
+<style>
+@font-face { font-family: Sora; font-weight: 600; src: url(sora-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-weight: 400; src: url(instrument-sans-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-weight: 500; src: url(instrument-sans-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-weight: 600; src: url(instrument-sans-latin-600-normal.woff2) format('woff2'); }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #0B1220; }
+body { font-family: 'Instrument Sans', sans-serif; -webkit-font-smoothing: antialiased; color: #F6F7FA; }
+#stage { position: relative; width: 1920px; height: 1080px; overflow: hidden;
+  background:
+    radial-gradient(1600px 1000px at 6% -10%, rgba(143,168,245,.20), transparent 60%),
+    radial-gradient(1200px 900px at 105% 110%, rgba(147,203,232,.12), transparent 60%),
+    linear-gradient(135deg, #22386B 0%, #131F3A 50%, #0B1220 100%); }
+.layer { position: absolute; inset: 0; will-change: opacity, transform; }
+.copy { position: absolute; left: 140px; top: 0; bottom: 0; width: 780px; display: flex; flex-direction: column; justify-content: center; }
+.overline { font: 600 21px/1 'Instrument Sans'; letter-spacing: .16em; text-transform: uppercase; color: #8FA8F5; margin-bottom: 36px; display: flex; align-items: center; gap: 16px; }
+.overline::before { content: ''; width: 40px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, #E6F4FB, #93CBE8); }
+h1 { font: 600 100px/1.02 Sora; letter-spacing: -.035em; margin: 0; }
+h1 em { font-style: normal; background: linear-gradient(100deg, #E6F4FB 10%, #93CBE8 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sub { font: 400 31px/1.5 'Instrument Sans'; color: #AEB7CA; margin: 36px 0 0; max-width: 620px; }
+.crop { position: absolute; overflow: hidden; border-radius: 30px; background: #0f0f0f;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.09), 0 70px 140px -40px rgba(0,0,0,.8), 0 30px 60px -30px rgba(0,0,0,.6); }
+.crop img, .strip img { position: absolute; display: block; max-width: none; }
+.ring { position: absolute; border-radius: 999px; box-shadow: 0 0 0 3.5px #E6F4FB, 0 0 0 10px rgba(147,203,232,.22), 0 0 60px 12px rgba(147,203,232,.35); }
+.keycap { position: absolute; width: 130px; height: 130px; border-radius: 30px; display: grid; place-items: center;
+  font: 600 58px/1 ui-monospace, monospace; background: linear-gradient(180deg, #2A3B66, #18264A); border: 1.5px solid rgba(255,255,255,.14);
+  box-shadow: inset 0 -8px 0 rgba(0,0,0,.25), inset 0 1.5px 0 rgba(255,255,255,.18), 0 30px 50px -14px rgba(0,0,0,.6); }
+.chip { font: 500 22px/1 'Instrument Sans'; padding: 15px 22px 15px 18px; border-radius: 999px; background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(255,255,255,.10); display: inline-flex; align-items: center; gap: 12px; }
+.wordmark { font: 600 120px/1 Sora; letter-spacing: -.035em; }
+.tag { font: 500 30px/1 'Instrument Sans'; color: #AEB7CA; letter-spacing: .01em; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const RAW = 'raw/';
+const R = window.RECTS;
+const $ = (html) => { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstElementChild; };
+const stage = document.getElementById('stage');
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const out = (x) => 1 - Math.pow(1 - clamp(x), 3);
+/** 0→1 over [a, a+d]. */
+const span = (t, a, d) => clamp((t - a) / d);
+/** Visibility of a segment [a, b] with fades. */
+const seg = (t, a, b, fi = .5, fo = .45) => Math.min(out(span(t, a, fi)), 1 - ease(span(t, b - fo, fo)));
+
+const crop = (src, rect, s, w = 1440) => `<img src="${RAW}${src}" style="width:${w * s}px;left:${-rect.x * s}px;top:${-rect.y * s}px">`;
+const markSvg = (size, id) => `<svg width="${size}" height="${size}" viewBox="20 20 88 88" fill="none">
+  <defs><linearGradient id="${id}" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#E6F4FB"/><stop offset="1" stop-color="#93CBE8"/></linearGradient></defs>
+  <g stroke="url(#${id})" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"><path class="loop" pathLength="1" d="M84.8 60A22 22 0 1 0 64 72v29"/><path class="head" pathLength="1" d="M53 90l11 11 11-11"/></g></svg>`;
+const check = `<svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#93CBE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>`;
+const copy = (over, h1, sub, more = '') => `<div class="copy"><div class="overline">${over}</div><h1>${h1}</h1><p class="sub">${sub}</p>${more}</div>`;
+
+// Tideline across the whole film.
+stage.append($(`<svg class="layer" viewBox="0 0 1920 1080" preserveAspectRatio="none"><defs><linearGradient id="tl" x1="0" x2="1"><stop offset="0" stop-color="#E6F4FB" stop-opacity="0"/><stop offset=".25" stop-color="#E6F4FB" stop-opacity=".38"/><stop offset=".8" stop-color="#93CBE8" stop-opacity=".3"/><stop offset="1" stop-color="#93CBE8" stop-opacity="0"/></linearGradient></defs><path id="wave1" fill="none" stroke="url(#tl)" stroke-width="2"/><path id="wave2" fill="none" stroke="url(#tl)" stroke-width="1.2" opacity=".45"/></svg>`));
+const wave = (y, amp, ph) => { const w = 1920, p = (k) => Math.sin(ph + k) * amp; return `M0 ${y + p(0)} C ${w * .22} ${y - amp + p(1)}, ${w * .38} ${y + amp + p(2)}, ${w * .58} ${y + p(3)} S ${w * .86} ${y - amp * .8 + p(4)}, ${w} ${y + p(5)}`; };
+
+/* ── A: intro ───────────────────────────────────────── */
+const intro = $(`<div class="layer" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:44px">
+  <div style="display:flex;align-items:center;gap:44px"><div id="imark" style="filter:drop-shadow(0 0 40px rgba(147,203,232,.45))">${markSvg(190, 'im')}</div><div class="wordmark" id="iword">Shorts Flow</div></div>
+  <div class="tag" id="itag">Auto-Scroll for YouTube Shorts</div></div>`);
+stage.append(intro);
+
+/* ── B: auto-scroll ─────────────────────────────────── */
+const SHORT = { x: 556, y: 56, w: 534, h: 820 };
+const bS = 1.12, bW = SHORT.w * bS, bH = SHORT.h * bS, bL = 1010, bT = (1080 - bH) / 2;
+const feeds = ['feed-dark.png', 'feed-aurora.png', 'feed-dunes.png'];
+const ctl = R['feed-dark'].control, vid = R['feed-dark'].video;
+const B = $(`<div class="layer">${copy('Auto-Scroll for YouTube Shorts', 'Shorts<br>that play<br><em>themselves.</em>', 'When a Short ends, the next one begins. No swiping, no arrow keys.')}
+  <div class="crop" style="left:${bL}px;top:${bT}px;width:${bW}px;height:${bH}px">
+    <div class="strip" id="strip" style="position:absolute;left:0;top:0;width:${bW}px;height:${bH * 3}px">
+      ${feeds.map((f, i) => `<div style="position:absolute;left:0;top:${i * bH}px;width:${bW}px;height:${bH}px;overflow:hidden">${crop(f, SHORT, bS)}</div>`).join('')}
+    </div>
+    <div id="prog" style="position:absolute;left:${(vid.x - SHORT.x) * bS + 12}px;bottom:${(SHORT.y + SHORT.h - vid.y - vid.h) * bS + 6}px;height:4px;border-radius:4px;background:linear-gradient(90deg,#E6F4FB,#93CBE8);box-shadow:0 0 14px rgba(147,203,232,.8)"></div>
+  </div>
+  <div class="ring" id="bring" style="left:${bL + (ctl.x - SHORT.x) * bS}px;top:${bT + (ctl.y - SHORT.y) * bS}px;width:${ctl.w * bS}px;height:${ctl.w * bS}px"></div></div>`);
+stage.append(B);
+
+/* ── C: quick settings ──────────────────────────────── */
+const m = R.menu.menu;
+const cRect = { x: 566, y: 500, w: 524, h: 376 }, cS = 1.62, cW = cRect.w * cS, cH = cRect.h * cS, cL = 930, cT = (1080 - cH) / 2;
+const C = $(`<div class="layer">${copy('Quick settings', 'Right where<br><em>your thumb is.</em>', 'An Auto-Scroll button in the Shorts rail, with speed one click away.')}
+  <div class="crop" style="left:${cL}px;top:${cT}px;width:${cW}px;height:${cH}px">${crop('feed-dark.png', cRect, cS)}<div id="cmenu" style="position:absolute;inset:0">${crop('menu.png', cRect, cS)}</div></div></div>`);
+stage.append(C);
+
+/* ── D: speed ───────────────────────────────────────── */
+const tst = R.toast.toast;
+const D = $(`<div class="layer">${copy('Speed &amp; Shortcuts', 'Every Short at<br><em>your speed.</em>', '0.5× to 3×, kept across reloads. Press S to switch it, A for Auto-Scroll.')}
+  <div class="crop" style="left:${bL}px;top:${bT}px;width:${bW}px;height:${bH}px">${crop('toast.png', SHORT, bS)}</div>
+  <div class="keycap" id="kA" style="left:1690px;top:250px">A</div>
+  <div class="keycap" id="kS" style="left:1690px;top:420px">S</div>
+  <div class="crop" id="dtoast" style="left:${bL - 120}px;top:${bT + bH - 200}px;width:${tst.w * 2}px;height:${tst.h * 2}px;border-radius:16px;background:#fff">${crop('toast.png', tst, 2)}</div></div>`);
+stage.append(D);
+
+/* ── E: session limit ───────────────────────────────── */
+const row = R['popup-dark'].sessionRow;
+const NUDGE = { x: 556, y: 300, w: 534, h: 576 }, eS = 1.5, eW = NUDGE.w * eS, eH = NUDGE.h * eS, eL = 980, eT = (1080 - eH) / 2;
+const E = $(`<div class="layer">${copy('Session Limit', 'Stop when<br><em>you mean to.</em>', 'Set a limit in Shorts or minutes. A calm nudge pauses the Short; keep watching anytime.')}
+  <div class="crop" style="left:${eL}px;top:${eT}px;width:${eW}px;height:${eH}px">${crop('feed-dunes.png', NUDGE, eS)}<div id="enudge" style="position:absolute;inset:0">${crop('nudge.png', NUDGE, eS)}</div></div>
+  <div class="crop" id="erow" style="left:830px;top:${eT + eH - 150}px;width:${row.w * 2}px;height:${row.h * 2}px;border-radius:24px;background:#151B28">${crop('popup-dark.png', row, 2, 340)}</div></div>`);
+stage.append(E);
+
+/* ── F: privacy ─────────────────────────────────────── */
+const full = { x: 0, y: 0, w: 340, h: R['popup-dark']?.height ?? 549 }, fS = 1.5;
+const F = $(`<div class="layer">${copy('Private by design', 'Nothing leaves<br><em>your browser.</em>', 'No analytics, no account, no servers. Open source.', `<div id="fchips" style="display:flex;gap:14px;margin-top:44px">
+    <span class="chip">${check}No data collected</span><span class="chip">${check}Open source</span><span class="chip">${check}Chrome &amp; Firefox</span></div>`)}
+  <div class="crop" id="fl" style="left:1000px;top:110px;width:${340 * fS}px;height:${549 * fS}px;background:#fff">${crop('popup-light.png', full, fS, 340)}</div>
+  <div class="crop" id="fd" style="left:1300px;top:170px;width:${340 * fS}px;height:${549 * fS}px;background:#0D111A">${crop('popup-dark.png', full, fS, 340)}</div></div>`);
+stage.append(F);
+
+/* ── G: end card ────────────────────────────────────── */
+const G = $(`<div class="layer" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px">
+  <div style="display:flex;align-items:center;gap:44px"><div style="filter:drop-shadow(0 0 40px rgba(147,203,232,.45))">${markSvg(170, 'gm')}</div><div class="wordmark">Shorts Flow</div></div>
+  <div class="tag" id="gtag" style="color:#E6F4FB">Free for Chrome, Edge, Brave and Firefox</div>
+  <div style="position:absolute;bottom:64px;font:400 20px/1 'Instrument Sans';color:#7D879C">Not affiliated with YouTube</div></div>`);
+stage.append(G);
+
+const T = { A: [0, 3.4], B: [3.4, 12.6], C: [12.6, 18.2], D: [18.2, 23.8], E: [23.8, 29.6], F: [29.6, 35], G: [35, 40] };
+window.DURATION = 40;
+const layerIn = (el, t, [a, b], dx = 0) => {
+  const v = a === 0 ? (1 - ease(span(t, b - .45, .45))) : seg(t, a, b);
+  el.style.opacity = v;
+  el.style.visibility = v <= 0 ? 'hidden' : 'visible';
+  const k = out(span(t, a, .7));
+  el.style.transform = `translateY(${(1 - k) * 26}px)`;
+  return v;
+};
+
+window.render = (t) => {
+  document.getElementById('wave1').setAttribute('d', wave(930, 34, t * .5));
+  document.getElementById('wave2').setAttribute('d', wave(954, 22, t * .5 + 1.3));
+
+  // A
+  layerIn(intro, t, T.A);
+  intro.style.transform = '';
+  const draw = ease(span(t, .15, 1.1));
+  intro.querySelector('.loop').style.strokeDasharray = `${draw} 1`;
+  intro.querySelector('.head').style.strokeDasharray = `${ease(span(t, 1.05, .35))} 1`;
+  document.getElementById('iword').style.opacity = out(span(t, .7, .8));
+  document.getElementById('iword').style.transform = `translateX(${(1 - out(span(t, .7, .8))) * -24}px)`;
+  document.getElementById('itag').style.opacity = out(span(t, 1.4, .8));
+
+  // B: two Advances, each preceded by a Short playing out.
+  if (layerIn(B, t, T.B) > 0) {
+    const a = T.B[0], adv1 = a + 3.6, adv2 = adv1 + 3.4;
+    const slide = ease(span(t, adv1, .7)) + ease(span(t, adv2, .7));
+    document.getElementById('strip').style.transform = `translateY(${-slide * bH}px)`;
+    const start = t < adv1 ? a + .3 : t < adv2 ? adv1 + .7 : adv2 + .7;
+    const end = t < adv1 ? adv1 : t < adv2 ? adv2 : a + 12;
+    const p = clamp((t - start) / (end - start));
+    document.getElementById('prog').style.width = `${p * (vid.w * bS - 24)}px`;
+    document.getElementById('prog').style.opacity = t > adv1 - .02 && t < adv1 + .7 || t > adv2 - .02 && t < adv2 + .7 ? 0 : 1;
+    const pulse = Math.max(Math.exp(-Math.pow((t - adv1) * 3.2, 2)), Math.exp(-Math.pow((t - adv2) * 3.2, 2)));
+    const ring = document.getElementById('bring');
+    ring.style.transform = `scale(${1 + pulse * .22})`;
+    const sliding = Math.max(span(t, adv1, .7) * (1 - span(t, adv1 + .7, .01)), span(t, adv2, .7) * (1 - span(t, adv2 + .7, .01)));
+    ring.style.opacity = (.55 + pulse * .45) * (1 - Math.sin(Math.PI * sliding));
+  }
+
+  // C
+  if (layerIn(C, t, T.C) > 0) {
+    const a = T.C[0];
+    document.getElementById('cmenu').style.opacity = out(span(t, a + 1.4, .35));
+  }
+
+  // D
+  if (layerIn(D, t, T.D) > 0) {
+    const a = T.D[0], press = a + 1.8;
+    const kS = document.getElementById('kS');
+    const down = span(t, press, .12) - span(t, press + .16, .18);
+    kS.style.transform = `translateY(${down * 8}px)`;
+    kS.style.boxShadow = t > press ? 'inset 0 -8px 0 rgba(0,0,0,.25), inset 0 1.5px 0 rgba(255,255,255,.18), 0 0 0 3.5px #E6F4FB, 0 0 60px 12px rgba(147,203,232,.35), 0 30px 50px -14px rgba(0,0,0,.6)' : '';
+    const ti = out(span(t, press + .15, .5));
+    const toast = document.getElementById('dtoast');
+    toast.style.opacity = ti;
+    toast.style.transform = `translateY(${(1 - ti) * 30}px)`;
+  }
+
+  // E
+  if (layerIn(E, t, T.E) > 0) {
+    const a = T.E[0];
+    document.getElementById('enudge').style.opacity = out(span(t, a + 1.6, .5));
+    const ri = out(span(t, a + .5, .6));
+    const r = document.getElementById('erow');
+    r.style.opacity = ri; r.style.transform = `translateX(${(1 - ri) * -40}px)`;
+  }
+
+  // F
+  if (layerIn(F, t, T.F) > 0) {
+    const a = T.F[0];
+    const l = out(span(t, a + .2, .8)), d = out(span(t, a + .5, .8));
+    document.getElementById('fl').style.transform = `translateY(${(1 - l) * 60}px)`;
+    document.getElementById('fd').style.transform = `translateY(${(1 - d) * 80}px)`;
+    document.getElementById('fd').style.opacity = d;
+    [...document.getElementById('fchips').children].forEach((c, i) => { const k = out(span(t, a + 1 + i * .18, .5)); c.style.opacity = k; c.style.transform = `translateY(${(1 - k) * 14}px)`; });
+  }
+
+  // G (holds to the end)
+  const g = out(span(t, T.G[0], .7));
+  G.style.opacity = g; G.style.visibility = g <= 0 ? 'hidden' : 'visible';
+  G.style.transform = `scale(${.97 + .03 * g})`;
+  document.getElementById('gtag').style.opacity = out(span(t, T.G[0] + .6, .7));
+};
+window.render(0);
+</script>
+</body>
+</html>

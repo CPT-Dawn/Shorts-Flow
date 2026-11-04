@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9ec7e4"/><stop offset=".55" stop-color="#f1e1cf"/></linearGradient>
+<linearGradient id="d1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c9a0"/><stop offset="1" stop-color="#d79a6c"/></linearGradient>
+<linearGradient id="d2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3a777"/><stop offset="1" stop-color="#b8704a"/></linearGradient>
+<linearGradient id="d3" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c98458"/><stop offset="1" stop-color="#8a4c34"/></linearGradient>
+<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .07 0"/></filter>
+</defs>
+<rect width="1080" height="1920" fill="url(#sky)"/>
+<circle cx="300" cy="640" r="70" fill="#fffaf0" opacity=".95"/>
+<path d="M0 1100C200 1010 380 1000 560 1060S900 1010 1080 980v940H0z" fill="url(#d1)"/>
+<path d="M0 1300C260 1180 520 1240 700 1180S980 1100 1080 1140v780H0z" fill="url(#d2)"/>
+<path d="M700 1180C640 1300 560 1380 380 1460" stroke="#f6d3ad" stroke-width="5" fill="none" opacity=".6"/>
+<path d="M0 1560C300 1430 620 1520 820 1440S1040 1400 1080 1410v510H0z" fill="url(#d3)"/>
+<path d="M820 1440C760 1560 640 1640 420 1720" stroke="#e8b58a" stroke-width="5" fill="none" opacity=".5"/>
+<path d="M0 1800C320 1720 700 1780 1080 1700v220H0z" fill="#6e3a28"/>
+<rect width="1080" height="1920" filter="url(#grain)"/>
+</svg>
