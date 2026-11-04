@@ -69,27 +69,28 @@ Made by `bun run store-art` (see `scripts/store-art/README.md`) from the release
 
 Store uploads are manual. The tag workflow only builds and attaches the zips; it never publishes to a store.
 
-35. [ ] Merge `v3` into `main` by PR (ADR 0001), then push a signed `v<version>` tag from `main`. `.github/workflows/release.yml` re-runs the gate and creates the GitHub Release with the three zips. Check the release has all three.
-36. [ ] Upload the Chrome zip from the release to the Chrome Web Store, and the Firefox zip plus the sources zip to Firefox Add-ons, on the existing listings. Fill in the listing and disclosures from `docs/release/store-listing.md`.
+35. [ ] Push a signed `v<version>` tag from `main` (for 3.0.0, `v3` was merged into `main` on 2026-11-04 in 10ae104; its histories were unrelated, so there was no PR to open). `.github/workflows/release.yml` re-runs the gate and creates the GitHub Release with the three zips. Check the release has all three.
+36. [ ] Upload the Chrome zip from the release to the existing Chrome Web Store listing. Firefox Add-ons has no listing yet: submit a new add-on (ID `shorts-flow@cptdawn.dev`, listed, Firefox for desktop only) with the Firefox zip and the sources zip. Fill in both listings and their disclosures from `docs/release/store-listing.md`.
 37. [ ] After approval, install from each store on a clean profile and repeat steps 8–12.
+38. [ ] Once the Firefox Add-ons listing is public, put its URL in the website's `apps/shortsflow/public/assets/js/config.js` (`stores.firefox.url` and its reviews link) and deploy, so "Add to Firefox" stops saying "Coming soon". Put it in `STORE_PAGES.firefox` in `src/site/site-links.ts` too, for the next release.
 
 ## Featured nomination (Chrome Web Store)
 
 Once v3.0 is live on the Chrome Web Store. Google publishes no rubric: the badge goes to extensions that "follow our technical best practices and meet a high standard of user experience and design" (https://developer.chrome.com/docs/webstore/discovery, https://developer.chrome.com/docs/webstore/best-practices). Stack the levers we control: minimal permissions, an accurate privacy disclosure, a complete listing with screenshots and a video, accessibility, and no policy strikes. Eligibility: published and public, English supported, no active policy violations, core features work without an account or payment.
 
-38. [ ] Confirm the listing is complete: every image slot and the video filled, the privacy policy linked, the single purpose and justifications filled, the support site set to https://shortsflow.cptdawn.dev, and no open policy warnings in the Developer Dashboard.
-39. [ ] Verify shortsflow.cptdawn.dev in Google Search Console with the publisher's Google account, then set it as the listing's **Official URL** so it shows under the title. Complete the publisher identity verification in the Developer Dashboard if it is not done; the Established Publisher badge follows on its own after a clean track record.
-40. [ ] Open the Chrome Web Store developer support form (One Stop Support, from the Developer Dashboard's help menu) and choose the Featured badge nomination option. Give the extension ID, the listing URL, and a short case: one purpose; `storage` and youtube.com only; no data collected (and Firefox's `data_collection_permissions: none`); native-looking, keyboard- and screen-reader-accessible controls with forced-colors support; no unload handlers, MV3, end-to-end tests in Chromium and Firefox on every push; open source. Do not pitch Skip Sponsored Shorts.
-41. [ ] Note the date on the release issue. If declined, record the reason and what to change; renominate after the next release that addresses it.
+39. [ ] Confirm the listing is complete: every image slot and the video filled, the privacy policy linked, the single purpose and justifications filled, the support site set to https://shortsflow.cptdawn.dev, and no open policy warnings in the Developer Dashboard.
+40. [ ] Verify shortsflow.cptdawn.dev in Google Search Console with the publisher's Google account, then set it as the listing's **Official URL** so it shows under the title. Complete the publisher identity verification in the Developer Dashboard if it is not done; the Established Publisher badge follows on its own after a clean track record.
+41. [ ] Open the Chrome Web Store developer support form (One Stop Support, from the Developer Dashboard's help menu) and choose the Featured badge nomination option. Give the extension ID, the listing URL, and a short case: one purpose; `storage` and youtube.com only; no data collected (and Firefox's `data_collection_permissions: none`); native-looking, keyboard- and screen-reader-accessible controls with forced-colors support; no unload handlers, MV3, end-to-end tests in Chromium and Firefox on every push; open source. Do not pitch Skip Sponsored Shorts.
+42. [ ] Note the date on the release issue. If declined, record the reason and what to change; renominate after the next release that addresses it.
 
 ## Recommended nomination (Firefox Add-ons)
 
 Mozilla's curators ask whether an extension functions at an exemplary level, is safe, has an exceptional user experience and suits a general, international audience, and pick in six-month rounds (https://extensionworkshop.com/documentation/publish/recommended-extensions/).
 
-42. [ ] Before the Firefox submission, re-read Mozilla's Add-on Policies as updated on 2026-12-01 (preview: https://extensionworkshop.com/documentation/publish/add-on-policies-preview-2026-12/) and confirm nothing in Shorts Flow conflicts.
-43. [ ] Once the AMO listing has a few weeks of track record and reviews, email amo-featured@mozilla.org with the listing link and a short case built on what makes it distinct: Holds that wait for the viewer, never reloading the page, controls that match YouTube's own, zero data, a reproducible source build. Expect to stay responsive to Mozilla's copy and UX feedback for months.
-44. [ ] Localisation strengthens the "international audience" criterion; when translations are added, localise the listing and screenshots too.
+43. [ ] Before the Firefox submission, re-read Mozilla's Add-on Policies as updated on 2026-12-01 (preview: https://extensionworkshop.com/documentation/publish/add-on-policies-preview-2026-12/) and confirm nothing in Shorts Flow conflicts.
+44. [ ] Once the AMO listing has a few weeks of track record and reviews, email amo-featured@mozilla.org with the listing link and a short case built on what makes it distinct: Holds that wait for the viewer, never reloading the page, controls that match YouTube's own, zero data, a reproducible source build. Expect to stay responsive to Mozilla's copy and UX feedback for months.
+45. [ ] Localisation strengthens the "international audience" criterion; when translations are added, localise the listing and screenshots too.
 
 ## Repository
 
-45. [ ] After the merge to `main`, refresh the GitHub repository's description, website and topics to match v3: description "Watch YouTube Shorts hands-free. Auto-Scroll for YouTube's desktop Shorts feed, for Chrome and Firefox. Zero telemetry.", website https://shortsflow.cptdawn.dev, topics without `user-scripts` and `javascript`, plus `firefox-addon`, `typescript`, `wxt`.
+46. [ ] After the merge to `main`, refresh the GitHub repository's description, website and topics to match v3: description "Watch YouTube Shorts hands-free. Auto-Scroll for YouTube's desktop Shorts feed, for Chrome and Firefox. Zero telemetry.", website https://shortsflow.cptdawn.dev, topics without `user-scripts` and `javascript`, plus `firefox-addon`, `typescript`, `wxt`.
