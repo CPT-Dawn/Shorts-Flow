@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shorts Flow film</title>
+<!--
+  The Shorts Flow launch film: 57.5 s at 96 BPM (bar 2.5 s), driven by render(t).
+  Rendered by render.mjs at 1920×1080 CSS px, DPR 2 (3840×2160), 60 fps.
+  Every UI shot is a capture of the real extension (.store-art/raw, made by
+  `bun run store-art`); the Shorts show the Tideline scenes, never a creator.
+-->
+<style>
+@font-face { font-family: Sora; font-weight: 400; src: url(sora-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: Sora; font-weight: 600; src: url(sora-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-weight: 400; src: url(instrument-sans-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-weight: 500; src: url(instrument-sans-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-weight: 600; src: url(instrument-sans-latin-600-normal.woff2) format('woff2'); }
+:root { --foam: #F6F7FA; --muted: #9AA5BE; --tide-light: #8FA8F5; --pearl-a: #E6F4FB; --pearl-b: #93CBE8; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #0B1220; }
+body { font-family: 'Instrument Sans', sans-serif; -webkit-font-smoothing: antialiased; color: var(--foam); font-feature-settings: 'tnum' 0; }
+#stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #0B1220; }
+.abs { position: absolute; }
+.layer { position: absolute; inset: 0; }
+.bg { position: absolute; inset: -10%; }
+#bg0 { background: linear-gradient(140deg, #1C2F5C 0%, #111C36 46%, #0A101D 100%); inset: 0; }
+.glow { position: absolute; border-radius: 50%; pointer-events: none; }
+#vig { position: absolute; inset: 0; background: radial-gradient(130% 100% at 50% 45%, transparent 55%, rgba(4,7,14,.55) 100%); }
+
+/* Type */
+.copy { position: absolute; left: 150px; top: 0; bottom: 0; width: 820px; display: flex; flex-direction: column; justify-content: center; }
+.kicker { font: 600 19px/1 'Instrument Sans'; letter-spacing: .24em; text-transform: uppercase; color: var(--tide-light); margin-bottom: 40px; display: flex; align-items: center; gap: 18px; }
+.kicker i { display: block; width: 44px; height: 2.5px; border-radius: 3px; background: linear-gradient(90deg, var(--pearl-a), var(--pearl-b)); transform-origin: left center; }
+h1 { font: 600 108px/1.0 Sora; letter-spacing: -.042em; margin: 0; }
+.ln { display: block; overflow: hidden; padding: 0 .06em .11em 0; margin-bottom: -.11em; }
+.ln > span { display: inline-block; will-change: transform; }
+.pearl { background: linear-gradient(100deg, #EEF8FD 5%, #93CBE8 95%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sub { font: 400 30px/1.5 'Instrument Sans'; color: var(--muted); margin: 38px 0 0; max-width: 640px; letter-spacing: .002em; }
+.chips { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 46px; }
+.chip { font: 500 23px/1 'Instrument Sans'; padding: 16px 24px 16px 20px; border-radius: 999px; background: rgba(255,255,255,.055);
+  border: 1.5px solid rgba(255,255,255,.10); display: inline-flex; align-items: center; gap: 13px; color: #DCE3F0; }
+.chip svg { flex: none; }
+
+/* UI cards */
+.card { position: absolute; overflow: hidden; border-radius: 34px; background: #0f0f0f;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.085), 0 90px 160px -50px rgba(0,0,0,.85), 0 40px 70px -40px rgba(0,0,0,.7); }
+.card img, .crop img { position: absolute; display: block; max-width: none; }
+.crop { position: absolute; overflow: hidden; }
+.sheen { position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(160deg, rgba(255,255,255,.07), transparent 35%); }
+.ring { position: absolute; border-radius: 999px; pointer-events: none;
+  box-shadow: 0 0 0 3.5px #E6F4FB, 0 0 0 11px rgba(147,203,232,.20), 0 0 64px 14px rgba(147,203,232,.34); }
+.ytbar { position: absolute; height: 3px; border-radius: 3px; background: #56585F; overflow: hidden; }
+.ytbar b { position: absolute; left: 0; top: 0; bottom: 0; background: #CDCED1; border-radius: 3px; }
+.cleanbar { position: absolute; left: 18px; right: 18px; bottom: 18px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.26); overflow: hidden; }
+.cleanbar b { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(255,255,255,.92); border-radius: 4px; }
+.keyrow { display: flex; gap: 34px; margin-top: 50px; align-items: center; }
+.key { display: flex; align-items: center; gap: 18px; font: 500 25px/1 'Instrument Sans'; color: #C9D2E3; }
+.keycap { width: 92px; height: 92px; border-radius: 24px; display: grid; place-items: center; position: relative;
+  font: 600 40px/1 ui-monospace, 'JetBrains Mono', monospace; color: #EEF2FA;
+  background: linear-gradient(180deg, #2B3C68, #18264A); border: 1.5px solid rgba(255,255,255,.14);
+  box-shadow: inset 0 -7px 0 rgba(0,0,0,.28), inset 0 1.5px 0 rgba(255,255,255,.2), 0 24px 40px -14px rgba(0,0,0,.6); }
+.wordmark { font: 600 128px/1 Sora; letter-spacing: -.045em; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const RAW = 'raw/', SCN = 'scenes/';
+const R = window.RECTS;
+const stage = document.getElementById('stage');
+const $ = (html) => { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstElementChild; };
+const byId = (id) => document.getElementById(id);
+
+// ── Time helpers ─────────────────────────────────────────────────────────────
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const span = (t, a, d) => clamp((t - a) / d);
+const inOut = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const out3 = (x) => 1 - Math.pow(1 - clamp(x), 3);
+const outExpo = (x) => { x = clamp(x); return x === 1 ? 1 : 1 - Math.pow(2, -10 * x); };
+const inQuad = (x) => clamp(x) ** 2;
+const lerp = (a, b, k) => a + (b - a) * k;
+const BEAT = .625, BAR = 2.5;
+
+// ── Markup helpers ───────────────────────────────────────────────────────────
+/** A capture crop: rect in CSS px of the 1440-wide page, shown at scale s. */
+const crop = (src, rect, s, w = 1440) => `<img src="${RAW}${src}" style="width:${w * s}px;left:${-rect.x * s}px;top:${-rect.y * s}px">`;
+const markPath = `<path class="loop" pathLength="1" d="M84.8 60A22 22 0 1 0 64 72v29"/><path class="head" pathLength="1" d="M53 90l11 11 11-11"/>`;
+const markSvg = (size, id) => `<svg width="${size}" height="${size}" viewBox="20 20 88 88" fill="none" style="overflow:visible">
+  <defs><linearGradient id="${id}" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#EEF8FD"/><stop offset="1" stop-color="#93CBE8"/></linearGradient></defs>
+  <g stroke="url(#${id})" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">${markPath}</g></svg>`;
+const check = `<svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#93CBE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>`;
+const headline = (lines) => `<h1>${lines.map((l) => `<span class="ln"><span>${l}</span></span>`).join('')}</h1>`;
+const copyBlock = (id, kicker, lines, sub = '', more = '') => `<div class="copy" id="${id}">
+  ${kicker ? `<div class="kicker"><i></i><span>${kicker}</span></div>` : ''}${headline(lines)}${sub ? `<p class="sub">${sub}</p>` : ''}${more}</div>`;
+
+/** Reveals a copy block from time a: kicker, headline lines (masked rise), sub, extras. */
+function revealCopy(el, t, a, { lineGap = .085, subAt = .55, extra = [] } = {}) {
+  const k = el.querySelector('.kicker');
+  if (k) {
+    const v = out3(span(t, a, .7));
+    k.style.opacity = v;
+    k.querySelector('i').style.transform = `scaleX(${outExpo(span(t, a, .9))})`;
+    k.querySelector('span').style.transform = `translateX(${(1 - v) * -14}px)`;
+  }
+  [...el.querySelectorAll('.ln > span')].forEach((s, i) => {
+    const v = outExpo(span(t, a + .08 + i * lineGap, 1.1));
+    s.style.transform = `translateY(${(1 - v) * 108}%)`;
+  });
+  const sub = el.querySelector('.sub');
+  if (sub) {
+    const v = out3(span(t, a + subAt, .9));
+    sub.style.opacity = v;
+    sub.style.transform = `translateY(${(1 - v) * 18}px)`;
+  }
+  extra.forEach(([node, at]) => {
+    const v = out3(span(t, at, .7));
+    node.style.opacity = v;
+    node.style.transform = `translateY(${(1 - v) * 16}px)`;
+  });
+}
+
+/** Scene visibility: in at a (fast), out over the last `fo` s before b, with a lift and a soft blur. */
+function sceneVis(el, t, a, b, { fi = .35, fo = .42 } = {}) {
+  const vin = out3(span(t, a - .02, fi));
+  const vout = 1 - inQuad(span(t, b - fo, fo));
+  const v = Math.min(vin, vout);
+  el.style.visibility = v <= 0.001 ? 'hidden' : 'visible';
+  el.style.opacity = v;
+  const lift = inQuad(span(t, b - fo, fo));
+  el.style.transform = lift ? `translateY(${-lift * 16}px)` : '';
+  el.style.filter = lift > .02 ? `blur(${lift * 7}px)` : '';
+  return v > 0.001;
+}
+
+/** A card's entrance: rises and settles, with a long, slow camera drift afterwards. */
+function cardMove(el, t, a, b, { rot0 = -7, rot1 = -2.5, s0 = 1, s1 = 1.04, dy = 70 } = {}) {
+  const e = outExpo(span(t, a, 1.4));
+  const d = span(t, a, b - a);
+  const ry = lerp(rot0, rot1, inOut(d));
+  const s = lerp(s0, s1, d) * lerp(.965, 1, e);
+  el.style.transform = `perspective(2400px) translateY(${(1 - e) * dy}px) rotateY(${ry}deg) rotateX(${lerp(1.2, .4, d)}deg) scale(${s})`;
+  el.style.opacity = out3(span(t, a, .6));
+}
+
+// ── Background: night gradient, two drifting lights, the tideline ────────────
+stage.append($(`<div class="layer" id="bgwrap"><div class="bg" id="bg0"></div>
+  <div class="glow" id="g1" style="width:1500px;height:1100px;background:radial-gradient(closest-side, rgba(110,140,235,.30), rgba(110,140,235,0))"></div>
+  <div class="glow" id="g2" style="width:1300px;height:1000px;background:radial-gradient(closest-side, rgba(147,203,232,.17), rgba(147,203,232,0))"></div>
+  <svg class="layer" viewBox="0 0 1920 1080" preserveAspectRatio="none"><defs><linearGradient id="tl" x1="0" x2="1"><stop offset="0" stop-color="#E6F4FB" stop-opacity="0"/><stop offset=".25" stop-color="#E6F4FB" stop-opacity=".30"/><stop offset=".8" stop-color="#93CBE8" stop-opacity=".22"/><stop offset="1" stop-color="#93CBE8" stop-opacity="0"/></linearGradient></defs>
+  <path id="wave1" fill="none" stroke="url(#tl)" stroke-width="1.6"/><path id="wave2" fill="none" stroke="url(#tl)" stroke-width="1" opacity=".5"/></svg>
+  <div id="vig"></div></div>`));
+const wave = (y, amp, ph) => { const w = 1920, p = (k) => Math.sin(ph + k) * amp; return `M0 ${y + p(0)} C ${w * .22} ${y - amp + p(1)}, ${w * .38} ${y + amp + p(2)}, ${w * .58} ${y + p(3)} S ${w * .86} ${y - amp * .8 + p(4)}, ${w} ${y + p(5)}`; };
+
+// ── Shared geometry ──────────────────────────────────────────────────────────
+const SHORT = { x: 556, y: 56, w: 534, h: 820 };     // one Short and its action rail
+const BAR_X = 578, BAR_Y = 865, BAR_W = 428;         // YouTube's own progress bar, measured on the captures
+const fS = 1.1, fW = SHORT.w * fS, fH = SHORT.h * fS, fL = 1088, fT = (1080 - fH) / 2;
+const ytbar = (id, s, rect) => `<div class="ytbar" id="${id}" style="left:${(BAR_X - rect.x) * s}px;top:${(BAR_Y - rect.y) * s}px;width:${BAR_W * s}px;height:${3 * s}px"><b></b></div>`;
+const setBar = (id, p) => { byId(id).firstElementChild.style.width = `${clamp(p) * 100}%`; };
+const ctl = R['feed-dark'].control;
+
+/* ══ 1 · Hook (0–5): a Short ends, and starts over ═════════════════════════ */
+const hW = 470, hH = hW * 16 / 9, hL = 1150, hT = (1080 - hH) / 2;
+const S1 = $(`<div class="layer" id="s1">
+  ${copyBlock('c1', '', ['A Short ends.'], '')}
+  <div class="abs" id="c1b" style="left:150px;top:558px;font:600 108px/1 Sora;letter-spacing:-.042em;color:#7F8BA6"><span class="ln"><span>Then it starts over.</span></span></div>
+  <div class="card" id="hcard" style="left:${hL}px;top:${hT}px;width:${hW}px;height:${hH}px;border-radius:36px">
+    <img id="himg" src="${SCN}ocean.png" style="width:${hW}px;height:${hH}px;left:0;top:0;transform-origin:50% 60%">
+    <div class="cleanbar" id="hbar"><b></b></div><div class="sheen"></div></div></div>`);
+stage.append(S1);
+// The headline sits a little higher in the hook so the second line can land under it.
+byId('c1').style.justifyContent = 'flex-start'; byId('c1').style.top = '432px';
+
+/* ══ 2 · The mark (5–10) ═══════════════════════════════════════════════════ */
+const MK = 210, mkScale = MK / 88;
+const S2 = $(`<div class="layer" id="s2">
+  <div class="glow" id="mglow" style="left:${960 - 520}px;top:${470 - 520}px;width:1040px;height:1040px;background:radial-gradient(closest-side, rgba(170,215,240,.42), rgba(147,203,232,0))"></div>
+  <div class="abs" id="lock" style="left:0;top:0;display:flex;align-items:center;gap:52px">
+    <div id="mmark" style="filter:drop-shadow(0 0 34px rgba(147,203,232,.55))">${markSvg(MK, 'mk')}</div>
+    <div class="wordmark" id="mword" style="clip-path:inset(0 100% 0 0)">Shorts Flow</div></div>
+  <div class="abs" id="mtag" style="left:0;right:0;top:660px;text-align:center;font:600 50px/1 Sora;letter-spacing:-.03em;color:#DCE3F0">Shorts that play <span class="pearl">themselves.</span></div>
+  <div class="abs" id="bridge" style="height:4px;border-radius:4px;background:linear-gradient(90deg,#EEF8FD,#93CBE8);box-shadow:0 0 18px rgba(147,203,232,.9)"></div></div>`);
+stage.append(S2);
+
+/* ══ 3 · Auto-Scroll (10–20): two Advances ═════════════════════════════════ */
+const feeds = ['feed-dark.png', 'feed-aurora.png', 'feed-dunes.png'];
+const GAP = 26;
+const S3 = $(`<div class="layer" id="s3">
+  ${copyBlock('c3', 'Auto-Scroll', ['When one ends,', '<span class="pearl">the next begins.</span>'], 'No swiping, no arrow keys. Shorts Flow moves you on, right on time.')}
+  <div class="card" id="fcard" style="left:${fL}px;top:${fT}px;width:${fW}px;height:${fH}px">
+    <div class="abs" id="strip" style="left:0;top:0;width:${fW}px">
+      ${feeds.map((f, i) => `<div class="crop" style="left:0;top:${i * (fH + GAP)}px;width:${fW}px;height:${fH}px">${crop(f, SHORT, fS)}${ytbar(`b3${i}`, fS, SHORT)}
+        <div class="ring" id="r3${i}" style="left:${(ctl.x - SHORT.x) * fS}px;top:${(ctl.y - SHORT.y) * fS}px;width:${ctl.w * fS}px;height:${ctl.w * fS}px"></div></div>`).join('')}
+    </div><div class="sheen"></div></div></div>`);
+stage.append(S3);
+
+/* ══ 4 · Hands-free (20–25): Cook. Stretch. Sit back. ══════════════════════ */
+const WORDS = ['Cook.', 'Stretch.', 'Sit back.'];
+const colScenes = ['ridges', 'ocean', 'aurora', 'dunes', 'ridges', 'ocean'];
+const cW = 400, cH = cW * 16 / 9, cG = 44, cL = 1180;
+const S4 = $(`<div class="layer" id="s4">
+  <div class="copy" id="c4"><div class="kicker"><i></i><span>Hands-free</span></div>
+    <div style="position:relative;height:170px;overflow:hidden">${WORDS.map((w, i) => `<div class="abs w4" style="left:0;top:0;font:600 158px/1.04 Sora;letter-spacing:-.05em;white-space:nowrap">${i === 2 ? `<span class="pearl">${w}</span>` : w}</div>`).join('')}</div>
+    <p class="sub" id="c4s">Your hands stay free. The feed moves on.</p></div>
+  <div class="abs" id="col" style="left:${cL}px;top:0;width:${cW}px;height:1080px;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22%,#000 78%,transparent 100%)">
+    <div class="abs" id="colin" style="left:0;top:0;width:${cW}px">
+      ${colScenes.map((s, i) => `<div class="card" style="left:0;top:${i * (cH + cG)}px;width:${cW}px;height:${cH}px;border-radius:32px"><img src="${SCN}${s}.png" style="width:${cW}px;height:${cH}px;left:0;top:0"><div class="cleanbar"><b class="cb4"></b></div><div class="sheen"></div></div>`).join('')}
+    </div></div></div>`);
+stage.append(S4);
+
+/* ══ 5 · In the rail (25–30): the quick-settings menu ══════════════════════ */
+const RAIL = { x: 570, y: 400, w: 530, h: 476 }, rS = 1.62, rW = RAIL.w * rS, rH = RAIL.h * rS, rL = 990, rT = (1080 - rH) / 2;
+const mn = R.menu.menu, MPAD = 40;
+const OPENER = { x: 1069, y: 749 };
+const menuRect = { x: mn.x - MPAD, y: mn.y - MPAD, w: mn.w + MPAD * 2, h: mn.h + MPAD * 2 };
+const openerRect = { x: 1046, y: 726, w: 46, h: 46 };
+const cursor = `<svg width="34" height="34" viewBox="0 0 24 24"><path d="M5 2.5v17.2l4.3-4.1 2.9 6.6 3-1.3-2.9-6.5h6z" fill="#fff" stroke="#111" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
+const S5 = $(`<div class="layer" id="s5">
+  ${copyBlock('c5', 'In the Shorts rail', ['Like it was', '<span class="pearl">always there.</span>'], 'One button beside every Short. Speed and more, a click away.')}
+  <div class="card" id="rcard" style="left:${rL}px;top:${rT}px;width:${rW}px;height:${rH}px">
+    ${crop('feed-dark.png', RAIL, rS)}
+    <div class="crop" id="ropen" style="left:${(openerRect.x - RAIL.x) * rS}px;top:${(openerRect.y - RAIL.y) * rS}px;width:${openerRect.w * rS}px;height:${openerRect.h * rS}px">${crop('menu.png', openerRect, rS)}</div>
+    <div class="crop" id="rmenu" style="left:${(menuRect.x - RAIL.x) * rS}px;top:${(menuRect.y - RAIL.y) * rS}px;width:${menuRect.w * rS}px;height:${menuRect.h * rS}px;transform-origin:85% 85%">${crop('menu.png', menuRect, rS)}</div>
+    <div class="sheen"></div></div>
+  <div class="abs" id="cur" style="left:0;top:0;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))">${cursor}</div></div>`);
+stage.append(S5);
+
+/* ══ 6 · Speed (30–35): press S ════════════════════════════════════════════ */
+const tst = R.toast.toast;
+const S6 = $(`<div class="layer" id="s6">
+  ${copyBlock('c6', 'Speed &amp; Shortcuts', ['Every Short at', '<span class="pearl">your speed.</span>'], 'From 0.5× to 3×, remembered across reloads.',
+    `<div class="keyrow" id="keys"><div class="key"><div class="keycap" id="kA">A</div>Auto-Scroll</div><div class="key"><div class="keycap" id="kS">S</div>Speed</div></div>`)}
+  <div class="card" id="scard" style="left:${fL}px;top:${fT}px;width:${fW}px;height:${fH}px">${crop('feed-aurora.png', SHORT, fS)}${ytbar('b6', fS, SHORT)}<div class="sheen"></div></div>
+  <div class="card" id="stoast" style="left:${fL - 150}px;top:${fT + fH - 190}px;width:${tst.w * 2}px;height:${tst.h * 2}px;border-radius:16px;background:#fff">${crop('toast.png', tst, 2)}</div></div>`);
+stage.append(S6);
+
+/* ══ 7 · It waits (35–40): Holds ═══════════════════════════════════════════ */
+const wW = 470, wH = wW * 16 / 9, wL = 1220, wT = (1080 - wH) / 2;
+const HOLDS = ['Paused', 'Comments open', 'Typing or scrolling'];
+const S7 = $(`<div class="layer" id="s7">
+  ${copyBlock('c7', 'Holds', ['It waits', '<span class="pearl">when you do.</span>'], 'Step in and Shorts Flow steps aside. The Short simply plays again.',
+    `<div class="chips" id="holds">${HOLDS.map((h) => `<span class="chip">${check}${h}</span>`).join('')}</div>`)}
+  <div class="card" id="wcard" style="left:${wL}px;top:${wT}px;width:${wW}px;height:${wH}px;border-radius:36px">
+    <img id="wimg" src="${SCN}ridges.png" style="width:${wW}px;height:${wH}px;left:0;top:0;transform-origin:50% 55%">
+    <div class="cleanbar" id="wbar"><b></b></div><div class="sheen"></div></div></div>`);
+stage.append(S7);
+
+/* ══ 8 · Session Limit (40–45): the Break Nudge ════════════════════════════ */
+const NUDGE = { x: 556, y: 300, w: 534, h: 576 }, nS = 1.5, nW = NUDGE.w * nS, nH = NUDGE.h * nS, nL = 1010, nT = (1080 - nH) / 2;
+const row = R['popup-dark'].sessionRow;
+const S8 = $(`<div class="layer" id="s8">
+  ${copyBlock('c8', 'Session Limit', ['Stop when', '<span class="pearl">you mean to.</span>'], 'Set a limit in Shorts or minutes. A gentle nudge, never a lock.')}
+  <div class="card" id="ncard" style="left:${nL}px;top:${nT}px;width:${nW}px;height:${nH}px">${crop('feed-dunes.png', NUDGE, nS)}
+    <div class="layer" id="nnudge">${crop('nudge.png', NUDGE, nS)}</div><div class="sheen"></div></div>
+  <div class="card" id="nrow" style="left:${nL - 170}px;top:${nT + nH - 120}px;width:${row.w * 2}px;height:${row.h * 2}px;border-radius:24px;background:#151B28">${crop('popup-dark.png', row, 2, 340)}</div></div>`);
+stage.append(S8);
+
+/* ══ 9 · Privacy (45–50): the Popup, light and dark ════════════════════════ */
+const pH = R['popup-dark']?.height ?? 491, pS = 1.52, popup = { x: 0, y: 0, w: 340, h: pH };
+const S9 = $(`<div class="layer" id="s9">
+  ${copyBlock('c9', 'Private by design', ['Nothing leaves', '<span class="pearl">your browser.</span>'], 'No analytics, no account, no servers.',
+    `<div class="chips" id="pchips"><span class="chip">${check}No data collected</span><span class="chip">${check}Open source</span></div>`)}
+  <div class="card" id="plight" style="left:1030px;top:${540 - pH * pS / 2 - 40}px;width:${340 * pS}px;height:${pH * pS}px;background:#F6F7FA;border-radius:28px">${crop('popup-light.png', popup, pS, 340)}</div>
+  <div class="card" id="pdark" style="left:1330px;top:${540 - pH * pS / 2 + 40}px;width:${340 * pS}px;height:${pH * pS}px;background:#0D111A;border-radius:28px">${crop('popup-dark.png', popup, pS, 340)}<div class="sheen"></div></div></div>`);
+stage.append(S9);
+
+/* ══ 10 · End card (50–57.5) ═══════════════════════════════════════════════ */
+const S10 = $(`<div class="layer" id="s10">
+  <div class="glow" id="eglow" style="left:${960 - 620}px;top:${470 - 560}px;width:1240px;height:1120px;background:radial-gradient(closest-side, rgba(170,215,240,.34), rgba(147,203,232,0))"></div>
+  <div class="abs" id="elock" style="left:0;right:0;top:350px;display:flex;align-items:center;justify-content:center;gap:48px">
+    <div style="filter:drop-shadow(0 0 34px rgba(147,203,232,.55))">${markSvg(188, 'em')}</div><div class="wordmark" style="font-size:122px">Shorts Flow</div></div>
+  <div class="abs" id="etag" style="left:0;right:0;top:640px;text-align:center;font:500 34px/1 'Instrument Sans';color:#E3EAF5;letter-spacing:.005em">Free for Chrome, Edge, Brave and Firefox</div>
+  <div class="abs" id="eurl" style="left:0;right:0;top:700px;text-align:center;font:500 26px/1 'Instrument Sans';color:var(--tide-light);letter-spacing:.04em">shortsflow.cptdawn.dev</div>
+  <div class="abs" id="enote" style="left:0;right:0;bottom:70px;text-align:center;font:400 19px/1 'Instrument Sans';color:#6F7990;letter-spacing:.02em">Not affiliated with YouTube</div></div>`);
+stage.append(S10);
+
+window.DURATION = 57.5;
+
+// Lockup geometry for the mark scene, measured once the fonts are in.
+let LOCK = null;
+function measureLock() {
+  const word = byId('mword');
+  const ww = word.getBoundingClientRect().width;
+  const total = MK + 52 + ww;
+  LOCK = { total, left: 960 - total / 2, top: 470 - MK / 2 };
+}
+
+// ── render(t) ────────────────────────────────────────────────────────────────
+window.render = (t) => {
+  if (!LOCK) measureLock();
+  // Background drift
+  byId('g1').style.transform = `translate(${-300 + Math.sin(t * .11) * 160}px, ${-420 + Math.cos(t * .09) * 90}px)`;
+  byId('g2').style.transform = `translate(${980 + Math.cos(t * .08) * 150}px, ${380 + Math.sin(t * .12) * 80}px)`;
+  byId('wave1').setAttribute('d', wave(948, 30, t * .42));
+  byId('wave2').setAttribute('d', wave(972, 20, t * .42 + 1.3));
+  // The lights breathe up at the reveal and the end card.
+  const lift = Math.max(Math.exp(-((t - 7.2) ** 2) / 2.5), span(t, 49.6, 1.2) * .9);
+  byId('g1').style.opacity = .85 + lift * .3;
+
+  /* 1 · Hook */
+  if (sceneVis(S1, t, 0, 5.05, { fi: .6, fo: .55 })) {
+    revealCopy(byId('c1'), t, .35);
+    const s2 = byId('c1b').querySelector('.ln > span');
+    s2.style.transform = `translateY(${(1 - outExpo(span(t, 3.95, 1.1))) * 108}%)`;
+    const card = byId('hcard');
+    const e = outExpo(span(t, 0, 1.6));
+    card.style.transform = `perspective(2400px) translateY(${(1 - e) * 40}px) rotateY(${lerp(-6, -2.5, span(t, 0, 5))}deg) scale(${lerp(.97, 1, e)})`;
+    // The Short plays to its end at 3.75, then loops back to the start.
+    const loopAt = 3.75;
+    const p = t < loopAt ? lerp(.52, 1, span(t, 0, loopAt)) : lerp(0, .12, span(t, loopAt, 1.25));
+    byId('hbar').firstElementChild.style.width = `${p * 100}%`;
+    const play = t < loopAt ? span(t, 0, loopAt) : span(t, loopAt, 6);
+    byId('himg').style.transform = `scale(${lerp(1.0, 1.07, play)})`;
+    // A brief dip as it restarts, so the loop reads.
+    const dip = Math.exp(-((t - loopAt - .06) ** 2) / .006);
+    byId('himg').style.filter = `brightness(${1 - dip * .45})`;
+    // Hand over to the mark: the card sinks away while its bar lifts off as the bridge.
+    const away = inOut(span(t, 4.45, .6));
+    card.style.opacity = 1 - away;
+    card.style.transform += ` translateY(${away * 30}px) scale(${1 - away * .04})`;
+  }
+
+  /* 2 · The mark */
+  if (sceneVis(S2, t, 4.6, 10.05, { fi: .01, fo: .5 })) {
+    const L = LOCK;
+    // Bridge: the Short's bar flies to the mark's starting point and shrinks into it.
+    const br = byId('bridge');
+    const k = inOut(span(t, 4.6, .75));
+    const startX = 960 - MK / 2 + (84.8 - 20) * mkScale, startY = 470 - MK / 2 + (60 - 20) * mkScale;
+    const fromX = hL + 18 + hW * .06, fromY = hT + hH - 18 - 2, fromW = hW * .5;
+    const w = lerp(fromW, 0, inQuad(span(t, 4.75, .65)));
+    br.style.left = `${lerp(fromX, startX - w / 2, k)}px`;
+    br.style.top = `${lerp(fromY, startY - 2, k)}px`;
+    br.style.width = `${w}px`;
+    br.style.opacity = t < 5.45 ? out3(span(t, 4.55, .2)) : 0;
+    // The mark draws itself, then slides left as the wordmark is revealed.
+    const draw = inOut(span(t, 5.15, 1.25));
+    const head = out3(span(t, 6.2, .4));
+    // Round caps would draw a dot for a zero-length dash, so hide a path until it starts.
+    for (const [sel, v] of [['.loop', draw], ['.head', head]]) {
+      const el = S2.querySelector(sel);
+      el.style.strokeDasharray = `${v} 1`;
+      el.style.visibility = v > .002 ? 'visible' : 'hidden';
+    }
+    const slide = inOut(span(t, 6.6, .95));
+    const lock = byId('lock');
+    lock.style.left = `${lerp(960 - MK / 2, L.left, slide)}px`;
+    lock.style.top = `${L.top}px`;
+    const wv = outExpo(span(t, 6.75, 1.1));
+    byId('mword').style.clipPath = `inset(-20px ${(1 - wv) * 100}% -20px 0)`;
+    byId('mword').style.transform = `translateX(${(1 - wv) * -30}px)`;
+    // Glow: a bloom as the mark completes.
+    const bloom = Math.exp(-((t - 6.55) ** 2) / .18);
+    const mg = byId('mglow');
+    mg.style.opacity = clamp(out3(span(t, 5.1, 1.4)) * .55 + bloom * .45);
+    mg.style.transform = `translateX(${lerp(0, L.left + MK / 2 - 960, slide)}px) scale(${.9 + bloom * .12})`;
+    const tg = byId('mtag');
+    const tv = out3(span(t, 7.5, 1.0));
+    tg.style.opacity = tv;
+    tg.style.transform = `translateY(${(1 - tv) * 18}px)`;
+    tg.style.filter = `blur(${(1 - tv) * 6}px)`;
+    // The whole lockup breathes forward slowly.
+    S2.style.transform += ` scale(${1 + span(t, 5, 5) * .025})`;
+  }
+
+  /* 3 · Auto-Scroll */
+  if (sceneVis(S3, t, 10, 20)) {
+    revealCopy(byId('c3'), t, 10.1);
+    cardMove(byId('fcard'), t, 10, 20);
+    const adv = [12.5, 17.5], D = .8;
+    const slide = adv.reduce((s, a) => s + inOut(span(t, a, D)), 0);
+    byId('strip').style.transform = `translateY(${-slide * (fH + GAP)}px)`;
+    setBar('b30', lerp(.46, 1, span(t, 10, 2.5)));
+    setBar('b31', t < adv[0] + D ? 0 : span(t, adv[0] + D, adv[1] - adv[0] - D));
+    setBar('b32', t < adv[1] + D ? 0 : lerp(0, .3, span(t, adv[1] + D, 2.5)));
+    [0, 1, 2].forEach((i) => {
+      // The ring answers each Advance with a pulse.
+      const pulse = Math.max(...adv.map((a) => Math.exp(-((t - (a - .05)) ** 2) / .03)));
+      const r = byId(`r3${i}`);
+      r.style.opacity = (.62 + pulse * .38) * out3(span(t, 11, .8));
+      r.style.transform = `scale(${1 + pulse * .2})`;
+    });
+  }
+
+  /* 4 · Hands-free */
+  if (sceneVis(S4, t, 20, 25)) {
+    const c4 = byId('c4');
+    revealCopy(c4, t, 20, { subAt: 2.9 });
+    const at = [20, 21.25, 22.5];
+    [...c4.querySelectorAll('.w4')].forEach((w, i) => {
+      // The outgoing word always leads the incoming one, so the two never overlap in the mask.
+      const inn = outExpo(span(t, at[i] + .02, .9));
+      const outv = i < 2 ? outExpo(span(t, at[i + 1] - .06, .9)) : 0;
+      w.style.transform = `translateY(${(1 - inn) * 105 - outv * 105}%)`;
+      w.style.filter = outv > .01 ? `blur(${outv * 6}px)` : '';
+    });
+    // The feed advances on every word, and once more on the last beat.
+    const steps = [20, 21.25, 22.5, 23.75];
+    const k = steps.reduce((s, a) => s + inOut(span(t, a - .1, .75)), 0);
+    const y0 = 540 - cH / 2 - (cH + cG) * .0;
+    byId('colin').style.transform = `translateY(${y0 - k * (cH + cG) + (cH + cG) * .0}px)`;
+    const col = byId('col');
+    const e = outExpo(span(t, 20, 1.3));
+    col.style.opacity = out3(span(t, 20, .6));
+    col.style.transform = `translateY(${(1 - e) * 60}px)`;
+    [...S4.querySelectorAll('.cb4')].forEach((b, i) => {
+      const startT = i === 0 ? 19.4 : steps[i - 1] + .65;
+      const endT = steps[i] ?? 26;
+      b.style.width = `${clamp((t - startT) / (endT - startT)) * 100}%`;
+    });
+  }
+
+  /* 5 · In the rail */
+  if (sceneVis(S5, t, 25, 30)) {
+    revealCopy(byId('c5'), t, 25.1);
+    const card = byId('rcard');
+    cardMove(card, t, 25, 30, { rot0: -6, rot1: -2, s1: 1.035 });
+    const open = 27.5;
+    const mv = out3(span(t, open, .28));
+    const m = byId('rmenu');
+    m.style.opacity = mv;
+    m.style.transform = `scale(${lerp(.95, 1, outExpo(span(t, open, .5)))})`;
+    byId('ropen').style.opacity = t >= open - .05 ? 1 : 0;
+    // The pointer drifts in, hovers the opener and clicks just before the menu opens.
+    const cur = byId('cur');
+    const ox = rL + (OPENER.x - RAIL.x) * rS - 4, oy = rT + (OPENER.y - RAIL.y) * rS - 2;
+    const pk = inOut(span(t, 25.7, 1.45));
+    const cx = lerp(rL + rW * .2, ox, pk) + Math.sin(pk * Math.PI) * 40;
+    const cy = lerp(rT + rH * 1.02, oy, pk) - Math.sin(pk * Math.PI) * 30;
+    const press = span(t, open - .2, .1) - span(t, open - .06, .14);
+    cur.style.transform = `translate(${cx}px, ${cy}px) scale(${1 - press * .14})`;
+    cur.style.opacity = out3(span(t, 25.6, .4)) * (1 - out3(span(t, 28.9, .5)));
+  }
+
+  /* 6 · Speed */
+  if (sceneVis(S6, t, 30, 35)) {
+    const c6 = byId('c6');
+    revealCopy(c6, t, 30.1, { extra: [[byId('keys'), 30.75]] });
+    cardMove(byId('scard'), t, 30, 35);
+    const press = 31.25;
+    const kS = byId('kS');
+    const down = span(t, press - .04, .06) - span(t, press + .1, .2);
+    kS.style.transform = `translateY(${down * 6}px)`;
+    const lit = out3(span(t, press, .2));
+    kS.style.boxShadow = `inset 0 -${7 - down * 4}px 0 rgba(0,0,0,.28), inset 0 1.5px 0 rgba(255,255,255,.2), 0 0 0 ${3.5 * lit}px #E6F4FB, 0 0 ${60 * lit}px ${12 * lit}px rgba(147,203,232,${.34 * lit}), 0 24px 40px -14px rgba(0,0,0,.6)`;
+    // Playback runs at 1.5× once Speed is on.
+    const base = lerp(.25, .25 + (press - 30) / 9, span(t, 30, press - 30));
+    const p = t < press ? base : base + (t - press) * 1.5 / 9;
+    setBar('b6', p);
+    const tv = out3(span(t, press + .08, .45));
+    const toast = byId('stoast');
+    toast.style.opacity = tv * (1 - out3(span(t, 34.2, .3)));
+    toast.style.transform = `translateY(${(1 - outExpo(span(t, press + .08, .7))) * 26}px)`;
+  }
+
+  /* 7 · It waits */
+  if (sceneVis(S7, t, 35, 40)) {
+    const holds = [...byId('holds').children];
+    revealCopy(byId('c7'), t, 35.1, { extra: holds.map((h, i) => [h, 36.25 + i * BAR / 2 - .1]) });
+    const card = byId('wcard');
+    cardMove(card, t, 35, 40, { rot0: -6, rot1: -2.5 });
+    const loopAt = 37.5;
+    const p = t < loopAt ? lerp(.6, 1, span(t, 35, loopAt - 35)) : lerp(0, .2, span(t, loopAt, 2.5));
+    byId('wbar').firstElementChild.style.width = `${p * 100}%`;
+    const play = t < loopAt ? span(t, 35, loopAt - 35) : span(t, loopAt, 5);
+    byId('wimg').style.transform = `scale(${lerp(1.0, 1.06, play)})`;
+    const dip = Math.exp(-((t - loopAt - .06) ** 2) / .006);
+    byId('wimg').style.filter = `brightness(${1 - dip * .4})`;
+  }
+
+  /* 8 · Session Limit */
+  if (sceneVis(S8, t, 40, 45)) {
+    revealCopy(byId('c8'), t, 40.1);
+    cardMove(byId('ncard'), t, 40, 45, { rot0: -6, rot1: -2 });
+    byId('nnudge').style.opacity = out3(span(t, 41.25, .7));
+    const r = byId('nrow');
+    const rv = outExpo(span(t, 40.55, 1.1));
+    r.style.opacity = out3(span(t, 40.55, .5));
+    r.style.transform = `translateX(${(1 - rv) * -50}px)`;
+  }
+
+  /* 9 · Privacy */
+  if (sceneVis(S9, t, 45, 50.05, { fo: .5 })) {
+    const chips = [...byId('pchips').children];
+    revealCopy(byId('c9'), t, 45.1, { extra: chips.map((c, i) => [c, 46.1 + i * .22]) });
+    const l = byId('plight'), d = byId('pdark');
+    const el = outExpo(span(t, 45, 1.5)), ed = outExpo(span(t, 45.3, 1.5));
+    const dr = span(t, 45, 5);
+    l.style.transform = `perspective(2400px) translateY(${(1 - el) * 80 - dr * 14}px) rotateY(${lerp(-12, -7, dr)}deg) rotateX(2deg)`;
+    l.style.opacity = out3(span(t, 45, .6));
+    d.style.transform = `perspective(2400px) translateY(${(1 - ed) * 110 - dr * 26}px) rotateY(${lerp(-12, -7, dr)}deg) rotateX(2deg)`;
+    d.style.opacity = out3(span(t, 45.3, .6));
+  }
+
+  /* 10 · End card */
+  const ev = out3(span(t, 50, .9));
+  S10.style.visibility = ev > 0 ? 'visible' : 'hidden';
+  S10.style.opacity = ev;
+  if (ev > 0) {
+    const e = outExpo(span(t, 50, 2.2));
+    byId('elock').style.transform = `scale(${lerp(.955, 1, e) + span(t, 50, 7.5) * .02})`;
+    byId('elock').style.filter = `blur(${(1 - out3(span(t, 50, .8))) * 10}px)`;
+    const bloom = Math.exp(-((t - 50.15) ** 2) / .3);
+    byId('eglow').style.opacity = .5 + bloom * .5;
+    byId('eglow').style.transform = `scale(${.92 + bloom * .14})`;
+    for (const [id, at] of [['etag', 50.9], ['eurl', 51.5], ['enote', 51.9]]) {
+      const v = out3(span(t, at, 1.0));
+      byId(id).style.opacity = v;
+      byId(id).style.transform = `translateY(${(1 - v) * 14}px)`;
+    }
+  }
+};
+document.fonts.ready.then(() => { measureLock(); window.render(0); });
+</script>
+</body>
+</html>

@@ -16,5 +16,7 @@ __screenshots__
 
 # Store art work files (scripts/store-art/make.mjs)
 .store-art
+# The launch film is 35 MB and rendered per release (scripts/store-video/README.md); it lives on YouTube
+docs/release/store-art/launch-film.mp4
 # Agent worktrees
 .claude/worktrees/

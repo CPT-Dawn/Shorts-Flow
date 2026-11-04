@@ -60,9 +60,9 @@ YouTube changes desktop Shorts often (a redesign rolled out from 2026-06-25), an
 
 Made by `bun run store-art` (see `scripts/store-art/README.md`) from the release build on the anonymised test pages, to the brand's store-art rules in `docs/design/brand/README.md`: Tideline brand only, no copy on promo images other than the Shorts Flow wordmark, no YouTube logo, wordmark, play triangle or red in promo art. Screenshots of the real extension on YouTube are fine; the Shorts in them show original Tideline illustrations and fictional channels, never real creators. Skip Sponsored Shorts never leads the art.
 
-31. [ ] Re-run `bun run store-art` on the release build and look at every file in `docs/release/store-art/`: the five 1280×800 screenshots (Auto-Scroll in the rail, quick settings, Speed and Shortcuts, Session Limit and the Break Nudge, the Popup and privacy), the 440×280 small promo tile, the 1400×560 marquee and `promo-video.mp4`. The UI in them must match the build being released.
+31. [ ] Re-run `bun run store-art` on the release build and look at every file in `docs/release/store-art/`: the five 1280×800 screenshots (Auto-Scroll in the rail, quick settings, Speed and Shortcuts, Session Limit and the Break Nudge, the Popup and privacy), the 440×280 small promo tile, the 1400×560 marquee and `promo-video.mp4`. The UI in them must match the build being released. Then render the launch film (`scripts/store-video/README.md`) and watch `launch-film.mp4` with sound.
 32. [ ] Check each screenshot at 640×400 (the size the Chrome Web Store shows it at): the headline and the UI it points at stay legible. Check the small tile at 220×140: the wordmark stays crisp.
-33. [ ] Upload `promo-video.mp4` to YouTube (unlisted is enough), titled "Shorts Flow: Auto-Scroll for YouTube Shorts", and paste its URL into the Chrome Web Store listing's video field.
+33. [ ] Upload `launch-film.mp4` to YouTube (unlisted is enough), titled "Shorts Flow: Auto-Scroll for YouTube Shorts", and paste its URL into the Chrome Web Store listing's video field.
 34. [ ] Store icon 128×128: `public/icon/128.png`, the Tideline tile.
 
 ## Publish

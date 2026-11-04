@@ -78,7 +78,7 @@ All in `docs/release/store-art/`, made by `bun run store-art` from the real exte
 | Small promo tile 440×280 | `promo-small-440x280.png` | ✓ | – |
 | Marquee 1400×560 | `promo-marquee-1400x560.png` | ✓ | – |
 | Store icon 128×128 | `public/icon/128.png` | ✓ | ✓ (AMO takes the manifest icon) |
-| Promo video | `promo-video.mp4`, uploaded to YouTube as unlisted or public | ✓ paste the YouTube URL | – |
+| Promo video | `launch-film.mp4` (4K, 57.5 s, with sound; see `scripts/store-video/README.md`), uploaded to YouTube as unlisted or public | ✓ paste the YouTube URL | – |
 
 ## Uploads
 
