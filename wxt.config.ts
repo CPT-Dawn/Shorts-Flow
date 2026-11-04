@@ -75,9 +75,10 @@ export default defineConfig({
       browser_specific_settings: {
         gecko: {
           id: 'shorts-flow@cptdawn.dev',
-          // 140 is the first desktop Firefox that knows
-          // data_collection_permissions. Zero telemetry: see ADR 0003.
-          strict_min_version: '140.0',
+          // data_collection_permissions is known from desktop 140 but only
+          // from Android 142, so 142 keeps web-ext lint clean. Zero
+          // telemetry: see ADR 0003.
+          strict_min_version: '142.0',
           data_collection_permissions: { required: ['none'] },
         },
       },

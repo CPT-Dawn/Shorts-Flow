@@ -14,7 +14,7 @@ All three, no exceptions:
 
 4. [ ] `bun install && bun run typecheck && bun run test`: all green locally too.
 5. [ ] `package.json` `version` is the version being released; `bun run zip` puts `shorts-flow-<version>-chrome.zip`, `shorts-flow-<version>-firefox.zip` and `shorts-flow-<version>-sources.zip` in `.output/`.
-6. [ ] `bun run build:firefox && bun run lint:firefox`: no errors and no new warnings. **Known warning:** `KEY_FIREFOX_ANDROID_UNSUPPORTED_BY_MIN_VERSION`. `strict_min_version` is 140 (the first desktop Firefox that knows `data_collection_permissions`), but Firefox for Android only supports that key from 142. Shorts Flow is desktop only (ADR 0004), so the warning is harmless today. **Decide at release** whether to bump `strict_min_version` to 142 in `wxt.config.ts` (and its manifest test) to clear it, at the cost of Firefox 140–141 desktop users (140 is an ESR, so that cost may be real). Record the decision on the release issue.
+6. [ ] `bun run build:firefox && bun run lint:firefox`: no errors and no new warnings. `strict_min_version` is 142: `data_collection_permissions` is known from desktop 140 but only from Android 142, and bumping clears `KEY_FIREFOX_ANDROID_UNSUPPORTED_BY_MIN_VERSION` at the cost of Firefox 140–141 desktop users (decided 2026-11-04).
 7. [ ] Unzip the sources zip in an empty folder, run `bun install && bun run build:firefox`, and check that the output matches `.output/firefox-mv3` (Firefox Add-ons reviewers do exactly this).
 
 ## Install
