@@ -207,7 +207,7 @@
   },
   "popupSupport": {
     "message": "Support",
-    "description": "Popup link to the Support Page on the Shorts Flow website, to rate, share or donate."
+    "description": "Popup link to the Support Page on the Shorts Flow website, to rate or share it."
   },
   "stallNotice": {
     "message": "Couldn't find the next Short",

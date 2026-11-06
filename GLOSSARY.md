@@ -101,7 +101,7 @@ The page on the Shorts Flow website opened when the extension is uninstalled; it
 _Avoid_: Uninstall survey
 
 **Support Page**:
-The page on the Shorts Flow website where a viewer can choose to rate, share or donate. The extension never links to a payment provider directly.
+The page on the Shorts Flow website where a viewer can rate or share Shorts Flow. Shorts Flow is free and takes no donations or tips.
 _Avoid_: Donate link, tip jar
 
 ### Brand
