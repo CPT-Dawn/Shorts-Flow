@@ -50,10 +50,10 @@ describe('site links', () => {
     expect(siteUrl('goodbye', smuggled)).toBe('https://shortsflow.cptdawn.dev/goodbye?version=3.0.0');
   });
 
-  it('links each store to its own listing, or to nothing yet', () => {
+  it('links each store to its own listing', () => {
     expect(STORE_PAGES.chrome).toBe(
       'https://chromewebstore.google.com/detail/shorts-flow-auto-scroll-a/kfkkpgeijmfhmdhlcnoecidgceljccdf',
     );
-    expect(STORE_PAGES.firefox === '' || STORE_PAGES.firefox.startsWith('https://addons.mozilla.org/')).toBe(true);
+    expect(STORE_PAGES.firefox).toBe('https://addons.mozilla.org/firefox/addon/shorts-flow/');
   });
 });

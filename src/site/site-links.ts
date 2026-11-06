@@ -56,9 +56,9 @@ export function siteUrl<P extends SitePage>(page: P, params: Params[P]): string 
 
 /**
  * Shorts Flow's store listings. Edge, Brave, Opera and Vivaldi install from
- * the Chrome Web Store (ADR 0004). An empty URL means not listed yet.
+ * the Chrome Web Store (ADR 0004).
  */
 export const STORE_PAGES: Readonly<Record<'chrome' | 'firefox', string>> = {
   chrome: 'https://chromewebstore.google.com/detail/shorts-flow-auto-scroll-a/kfkkpgeijmfhmdhlcnoecidgceljccdf',
-  firefox: '',
+  firefox: 'https://addons.mozilla.org/firefox/addon/shorts-flow/',
 };
